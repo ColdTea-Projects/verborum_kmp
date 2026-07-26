@@ -8,14 +8,16 @@ import androidx.compose.ui.unit.dp
  */
 object ContentWidth {
     /**
-     * A screen's main content column. Deliberately narrow so a list reads as a vertical column on
-     * every window: on a phone it simply fills the screen, and on a desktop it stays a column instead
-     * of stretching rows into wide bands.
+     * A screen's main content column, sized like a phone in portrait.
      *
-     * Narrower than a phone viewport on purpose — the same layout at every size, rather than one that
-     * changes shape with the window.
+     * On a phone this changes nothing — the viewport is narrower, so the content simply fills it. On a
+     * landscape window it is what keeps the content a *vertical* column instead of stretching rows
+     * into wide bands: the same shape on a desktop as on a phone.
+     *
+     * Chosen to match the widest common phone viewport (~430dp), so no layout is ever squeezed
+     * narrower than the device it was designed for.
      */
-    val column = 240.dp
+    val column = 600.dp
 
     /** Buttons, fields and other single-column controls. */
     val form = 400.dp
