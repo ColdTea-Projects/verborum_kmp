@@ -99,7 +99,9 @@ Typical flow for a substantial change: `*-development` to implement → `*-build
   `feature/bibliotheca` is the reference feature.
 - **Report honestly.** Paste real command output. If a check was skipped or a simulator/browser was
   unavailable, say so; never claim verification you did not perform.
-- **No commits, pushes or PRs unless asked.** Staging is manual here — this repo has no auto-staging
-  hook, so nothing is staged until you `git add` it. Verify both platforms before any commit, keep
-  `kotlin-js-store/` lockfiles committed, and keep secrets and a populated `TEAM_ID` out. See
-  `git-workflow`.
+- **`git add` every file you create, in the turn you create it.** There is no auto-staging hook here,
+  so a new file stays untracked — and invisible to `git diff` and to review — until you stage it by
+  path. Edits to already-tracked files can stay unstaged. Never `git add -A`/`.`/`-f`.
+- **No commits, pushes or PRs unless asked.** Tracking new files is not committing them. Verify both
+  platforms before any commit, keep `kotlin-js-store/` lockfiles committed, and keep secrets and a
+  populated `TEAM_ID` out. See `git-workflow`.

@@ -54,8 +54,8 @@ Skip a skill only when it is genuinely irrelevant to the change in front of you.
 - Never hardcode a colour, text style or `.dp` in a feature; use `colorScheme`, `typography`,
   `Spacing`.
 - Never widen a token's exposure (see `webapp-security` on `localStorage`) without flagging it.
-- Do not commit, push, or open a PR unless explicitly asked. Staging is manual in this repo — there
-  is no auto-staging hook; see `git-workflow`.
+- `git add` each file you create, by path, in the turn you create it — there is no auto-staging hook
+  here. Do not commit, push, or open a PR unless explicitly asked; see `git-workflow`.
 
 ## Report back
 
