@@ -1,7 +1,7 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.data
+package de.coldtea.verborum.feature.bibliotheca.common.data
 
 import de.coldtea.verborum.core.common.ApiTimestamp
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

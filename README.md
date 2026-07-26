@@ -23,8 +23,9 @@ verborum_kmp/
 └── feature/
     ├── auth/                    # the login wall (Keycloak, Authorization Code + PKCE)
     ├── bibliotheca/             # the library — one folder per screen slice
-    │   ├── common/              #   shared inside the feature: SyncService, SupportedLanguage
-    │   └── dictionarylist/      #   data / di / domain / ui for the dictionary list
+    │   ├── common/              #   shared inside the feature: dictionary + word layers, SyncService
+    │   ├── dictionarylist/      #   di / ui for the dictionary list
+    │   └── dictionarydetails/   #   di / ui for one dictionary's words
     └── forum/                   # marketplace
 ```
 
@@ -90,15 +91,20 @@ The bibliotheca tab's root screen, and where a user lands after signing in. Port
 app's `bibliotheca/dictionary` package, keeping its structure: search, From/To language filters, sort
 order, pull-to-refresh, an overflow per row with edit/delete, and skeleton rows on first load.
 
-`SyncService` (`bibliotheca/common/domain`) is the download half of the sync: it reads the signed-in
-user from the auth session and pulls `GET dictionaries/{userId}` into `DictionaryStore`, the in-memory
-single source of truth the screen observes. A delete tombstones its row immediately, then asks the
-server, and puts the row back if the server refuses.
+Tapping a row opens **dictionary details**: the two practice modes, the words it holds (each with its
+practice progress, edit and delete), and deleting the dictionary itself. A mode that cannot start says
+why rather than sitting there inert — self practice needs one word, a test needs four distinct ones.
 
-Two deliberate gaps, both visible in the UI: there is **no local database**, so the list is empty
-again after a restart until the first sync completes, and the **word count is omitted** from each card
-because the word endpoint is not wired up yet. Dictionary details and create/edit are the next
-screens; until they exist those taps report themselves on the snackbar.
+`SyncService` (`bibliotheca/common/domain`) is the download half of the sync. It reads the signed-in
+user from the auth session and pulls `GET dictionaries/{userId}` plus, in one further request,
+`GET words/user/{userId}` — which is what puts a word count on every list row. The details screen
+pulls just its own `GET words/dictionary/{id}`. Both land in `DictionaryStore` / `WordStore`, the
+in-memory single sources of truth the screens observe. Deletes tombstone locally first, then ask the
+server, and restore the row if the server refuses.
+
+The deliberate gap: there is **no local database**, so both stores are empty again after a restart
+until the first sync completes. Creating and editing dictionaries and words, and the two practice
+screens, are still to come; until then those taps report themselves on the snackbar.
 
 Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
 it, so no CORS configuration is required on the service.

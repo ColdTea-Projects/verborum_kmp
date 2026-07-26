@@ -1,6 +1,6 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.data
+package de.coldtea.verborum.feature.bibliotheca.common.data
 
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

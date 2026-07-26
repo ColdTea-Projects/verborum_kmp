@@ -1,7 +1,7 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.usecase
+package de.coldtea.verborum.feature.bibliotheca.common.domain.usecase
 
 import de.coldtea.verborum.core.common.Outcome
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.data.DictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryRepository
 
 /**
  * Deletes a dictionary, local view first: the row is tombstoned so it disappears immediately, then

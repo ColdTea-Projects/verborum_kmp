@@ -1,0 +1,32 @@
+package de.coldtea.verborum.feature.bibliotheca.common.data
+
+import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.network.plainApiCall
+import de.coldtea.verborum.core.network.statusApiCall
+import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
+import io.ktor.client.request.get
+
+/** The `words` endpoints of the dictionary service. Like dictionaries, they answer unenveloped. */
+internal class WordApi(private val client: HttpClient) {
+
+    suspend fun wordsOfDictionary(dictionaryId: String): Outcome<List<WordDto>> = plainApiCall {
+        client.get("words/dictionary/$dictionaryId")
+    }
+
+    /**
+     * Every word the user owns, in one request. That is what makes the dictionary list's word counts
+     * affordable — the alternative is one request per dictionary on every list open.
+     */
+    suspend fun wordsOfUser(userId: String): Outcome<List<WordDto>> = plainApiCall {
+        client.get("words/user/$userId")
+    }
+
+    suspend fun delete(wordId: String): Outcome<Unit> = statusApiCall {
+        client.delete("words/$wordId")
+    }
+
+    suspend fun deleteByDictionary(dictionaryId: String): Outcome<Unit> = statusApiCall {
+        client.delete("words/dictionary/$dictionaryId")
+    }
+}

@@ -1,10 +1,10 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain
+package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.FakeDictionaryRepository
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.dictionary
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.usecase.DeleteDictionaryUseCase
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.unauthorized
+import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

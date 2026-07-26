@@ -193,9 +193,9 @@ internal fun DictionaryListContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // Reading measure capped and centred so the list does not stretch across a desktop
-                // browser window.
-                .widthIn(max = ContentWidth.reading)
+                // A narrow centred column, so the list reads the same vertically on a phone and
+                // on a desktop window instead of stretching rows into wide bands.
+                .widthIn(max = ContentWidth.column)
                 .align(Alignment.TopCenter)
                 .padding(horizontal = Spacing.large),
         ) {

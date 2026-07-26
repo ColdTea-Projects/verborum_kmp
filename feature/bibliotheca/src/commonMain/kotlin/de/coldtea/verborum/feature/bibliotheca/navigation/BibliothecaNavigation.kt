@@ -3,10 +3,13 @@ package de.coldtea.verborum.feature.bibliotheca.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.toRoute
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
+import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.DictionaryDetailsScreen
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.DictionaryListScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
@@ -20,18 +23,37 @@ data object BibliothecaGraph
 @Serializable
 private data object DictionaryListRoute
 
-fun NavGraphBuilder.bibliothecaGraph() {
+/** One dictionary: its words and how to practise them. */
+@Serializable
+private data class DictionaryDetailsRoute(val dictionaryId: String)
+
+fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
     navigation<BibliothecaGraph>(startDestination = DictionaryListRoute) {
         composable<DictionaryListRoute> {
-            // Dictionary details and create/edit are the next screens to build, as in the Android
-            // app. Until they exist the intent is acknowledged on the shared snackbar rather than
-            // silently dropped.
+            // Creating and editing a dictionary are still to come, as in the Android app; until then
+            // the intent is acknowledged rather than silently dropped.
             val notice = rememberPendingScreenNotice()
 
             DictionaryListScreen(
-                onDictionaryClick = { notice("Opening a dictionary arrives with the next screen.") },
+                onDictionaryClick = { dictionaryId ->
+                    navController.navigate(DictionaryDetailsRoute(dictionaryId))
+                },
                 onCreateDictionaryClick = { notice("Creating a dictionary arrives with the next screen.") },
                 onEditDictionaryClick = { notice("Editing a dictionary arrives with the next screen.") },
+            )
+        }
+
+        composable<DictionaryDetailsRoute> { entry ->
+            val notice = rememberPendingScreenNotice()
+
+            DictionaryDetailsScreen(
+                dictionaryId = entry.toRoute<DictionaryDetailsRoute>().dictionaryId,
+                onTestClick = { notice("The multiple-choice test arrives with a later screen.") },
+                onSelfPracticeClick = { notice("Self practice arrives with a later screen.") },
+                onCreateWordClick = { notice("Adding a word arrives with the next screen.") },
+                onEditWordClick = { notice("Editing a word arrives with the next screen.") },
+                // The dictionary is gone, so there is nothing left to show here.
+                onDictionaryDeleted = { navController.popBackStack() },
             )
         }
     }
@@ -39,7 +61,7 @@ fun NavGraphBuilder.bibliothecaGraph() {
 
 /**
  * Reports a not-yet-built destination on the shared snackbar. Deliberately local to the graph: the
- * screen keeps taking plain navigation lambdas, so nothing about it changes when the real
+ * screens keep taking plain navigation lambdas, so nothing about them changes when the real
  * destinations land — only these lambdas do.
  */
 @Composable

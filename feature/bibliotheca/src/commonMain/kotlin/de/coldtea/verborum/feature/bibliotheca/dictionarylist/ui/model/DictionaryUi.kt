@@ -1,6 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model
 
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 
 /**
  * One row of the dictionary list. Only what the row draws — the domain model's sync bookkeeping
@@ -15,14 +15,14 @@ internal data class DictionaryUi(
     val createdAt: Long,
     val updatedAt: Long,
     /**
-     * Live word count. Null while unknown, which is the case for every row today: the word endpoint
-     * is not wired up yet, and a hard-coded "0 words" on every card would be a wrong answer rather
-     * than a missing one. The card omits the count until this is populated.
+     * Live word count, from the word store. Null means *not known yet* — before the first sync
+     * lands — and the card then omits the count rather than claiming "0 words", which would be a
+     * wrong answer instead of a missing one.
      */
     val wordCount: Int? = null,
 )
 
-internal fun Dictionary.toUi() = DictionaryUi(
+internal fun Dictionary.toUi(wordCount: Int? = null) = DictionaryUi(
     dictionaryId = dictionaryId,
     userId = userId,
     name = name,
@@ -30,4 +30,5 @@ internal fun Dictionary.toUi() = DictionaryUi(
     toLang = toLang,
     createdAt = createdAt,
     updatedAt = updatedAt,
+    wordCount = wordCount,
 )

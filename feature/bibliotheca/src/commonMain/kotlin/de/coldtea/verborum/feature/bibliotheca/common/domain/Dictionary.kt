@@ -1,4 +1,4 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain
+package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 /**
  * A dictionary as the app reasons about it: the API's shape mapped onto app types, with timestamps

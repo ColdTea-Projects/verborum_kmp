@@ -5,15 +5,19 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.FakeDictionaryRepository
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.dictionary
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.Dictionary
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.DictionaryService
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.usecase.DeleteDictionaryUseCase
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.usecase.ObserveDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
+import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.word
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.unauthorized
+import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -48,6 +52,7 @@ class DictionaryListViewModelTest {
         rows: List<Dictionary> = dictionaries,
         syncFails: Boolean = false,
         deleteResult: Outcome<Unit> = Outcome.Success(Unit),
+        words: List<de.coldtea.verborum.feature.bibliotheca.common.domain.Word> = emptyList(),
     ): DictionaryListViewModel {
         // The same repository backs the list and the sync, as in production: a failing pull is how
         // a failed sync actually reaches the screen.
@@ -57,14 +62,19 @@ class DictionaryListViewModelTest {
             deleteResult = deleteResult,
         )
 
+        val wordRepository = FakeWordRepository(initial = words)
+
         return DictionaryListViewModel(
             dictionaryService = DictionaryService(
                 observeDictionariesUseCase = ObserveDictionariesUseCase(repository),
+                observeDictionaryUseCase = ObserveDictionaryUseCase(repository),
                 deleteDictionaryUseCase = DeleteDictionaryUseCase(repository),
             ),
+            wordService = WordService(repository = wordRepository),
             syncService = SyncService(
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
+                wordRepository = wordRepository,
             ),
         )
     }
@@ -221,4 +231,18 @@ class DictionaryListViewModelTest {
             )
             job.cancel()
         }
+
+    @Test
+    fun `a row shows how many words its dictionary holds`() = runTest(mainDispatcher) {
+        val viewModel = viewModel(
+            words = listOf(word("w1", dictionaryId = "1"), word("w2", dictionaryId = "1")),
+        )
+
+        advanceUntilIdle()
+
+        val rows = (viewModel.state.value.listState as DictionaryListState.Success).dictionaries
+        assertEquals(2, rows.first { it.dictionaryId == "1" }.wordCount)
+        // Zero is a real count once words are known; only "never synced" is null.
+        assertEquals(0, rows.first { it.dictionaryId == "2" }.wordCount)
+    }
 }

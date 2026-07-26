@@ -24,7 +24,7 @@ composeApp  ──▶ feature/*  ──▶ core/*
 | `core:auth`          | `AuthSession`, `TokenStorage` (expect/actual), PKCE, SHA-256            |
 | `core:database`      | `LocalCache` — real on iOS, no-op on web                                |
 | `feature:auth`        | the login wall (Keycloak, Authorization Code + PKCE)                    |
-| `feature:bibliotheca`| the library — slice per screen, starting with `dictionarylist`           |
+| `feature:bibliotheca`| the library — slice per screen (`dictionarylist`, `dictionarydetails`)   |
 | `feature:forum`      | marketplace listings                                                    |
 
 ### Non-negotiable rules
@@ -54,9 +54,9 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
 │   ├── domain/                   SyncService, cross-slice use cases
 │   └── ui/model/                 shared UI enums/models (SupportedLanguage)
 ├── <slice>/                    one screen, e.g. dictionarylist/
-│   ├── data/                     DTOs, Api, Store, Repository (interface + impl)
+│   ├── data/                     DTOs, Api, Store, Repository — while only this screen reads them
 │   ├── di/                       <Slice>Module.kt — the slice's Koin module
-│   ├── domain/                   domain model, <Slice>Service, usecase/
+│   ├── domain/                   domain model, <Slice>Service, usecase/ — same condition
 │   └── ui/                       <Screen>.kt, <Screen>ViewModel.kt
 │       ├── composables/          pieces of that screen only
 │       └── model/                State, UI model, sort/filter enums
@@ -69,7 +69,10 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
 - **A slice owns its whole vertical.** Its repository, use cases and view model are `internal` to the
   module and never referenced from another slice.
 - **Sharing goes up, never sideways.** Slice A does not import from slice B; the shared piece moves
-  to `common/`. Needed by a second *feature*, it moves to a `core:*` module instead.
+  to `common/`. Needed by a second *feature*, it moves to a `core:*` module instead. This is not
+  theoretical: the dictionary and word data/domain layers live in `common/` precisely because the list
+  and the details screen both read them, so `dictionarylist/` and `dictionarydetails/` are `di` + `ui`
+  only. A slice keeps its own `data`/`domain` only until a second screen needs them.
 - **One Koin module per slice**, aggregated by the feature's module with `includes(...)` — the shell
   still sees exactly one module per feature.
 - **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add

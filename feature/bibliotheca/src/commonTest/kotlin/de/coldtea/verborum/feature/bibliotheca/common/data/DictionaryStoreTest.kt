@@ -1,6 +1,6 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.data
+package de.coldtea.verborum.feature.bibliotheca.common.data
 
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.dictionary
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

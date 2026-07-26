@@ -25,7 +25,7 @@ fun VerborumNavHost(
         startDestination = BibliothecaGraph,
         modifier = modifier,
     ) {
-        bibliothecaGraph()
+        bibliothecaGraph(navController)
         forumGraph()
     }
 }

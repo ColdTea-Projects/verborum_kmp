@@ -1,4 +1,4 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.data
+package de.coldtea.verborum.feature.bibliotheca.common.data
 
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.network.plainApiCall

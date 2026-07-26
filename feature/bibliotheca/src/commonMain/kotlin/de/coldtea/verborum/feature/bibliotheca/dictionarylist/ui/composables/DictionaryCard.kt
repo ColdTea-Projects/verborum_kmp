@@ -29,7 +29,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
 
 /** One dictionary: badge, name, its language direction, age, and an overflow for edit/delete. */
@@ -111,13 +111,9 @@ internal fun DictionaryCard(
     }
 }
 
-/** The dictionary's direction spelled out, e.g. "English to German". */
-internal fun languagePairLabel(fromLang: String, toLang: String): String =
-    "${SupportedLanguage.displayNameOf(fromLang)} to ${SupportedLanguage.displayNameOf(toLang)}"
-
 /**
- * "12 words • 3 days ago", or just the age while the word count is unknown — which it is until the
- * word endpoint is wired up.
+ * "12 words • 3 days ago", or just the age until the first sync has told us how many words there
+ * are — a count of zero is a real answer, "not counted yet" is not.
  */
 @Composable
 private fun metaLabel(dictionary: DictionaryUi): String {

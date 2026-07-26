@@ -2,7 +2,7 @@ package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.map
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.data.DictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryRepository
 
 /**
  * The download half of the sync: fetches the user's dictionaries and merges them into the store,

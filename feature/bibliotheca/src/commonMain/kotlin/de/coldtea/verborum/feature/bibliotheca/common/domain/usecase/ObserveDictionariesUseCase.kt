@@ -1,7 +1,7 @@
-package de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.usecase
+package de.coldtea.verborum.feature.bibliotheca.common.domain.usecase
 
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.data.DictionaryRepository
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 

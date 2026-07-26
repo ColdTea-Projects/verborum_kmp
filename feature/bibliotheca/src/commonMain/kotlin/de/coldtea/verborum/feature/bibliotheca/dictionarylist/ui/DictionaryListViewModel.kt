@@ -3,13 +3,16 @@ package de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.common.BaseViewModel
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.dictionarylist.domain.DictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryFilterState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.toUi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -31,6 +34,7 @@ internal sealed interface DictionaryListEffect {
 
 internal class DictionaryListViewModel(
     private val dictionaryService: DictionaryService,
+    private val wordService: WordService,
     private val syncService: SyncService,
 ) : BaseViewModel<DictionaryListUiState, DictionaryListEffect>(DictionaryListUiState()) {
 
@@ -57,10 +61,17 @@ internal class DictionaryListViewModel(
         viewModelScope.launch {
             combine(
                 dictionaryService.observeDictionaries(),
+                wordService.observeWordCounts(),
                 filters,
                 syncFailed,
-            ) { dictionaries, filters, hasFailed ->
-                val rows = dictionaries.filterAndSort(filters)
+            ) { dictionaries, wordCounts, filters, hasFailed ->
+                val rows = dictionaries
+                    .map { dictionary ->
+                        // Null counts mean "not synced yet"; once known, a dictionary missing from
+                        // the map genuinely has no words, and 0 is the right thing to show.
+                        dictionary.toUi(wordCounts?.let { it[dictionary.dictionaryId] ?: 0 })
+                    }
+                    .filterAndSort(filters)
 
                 when {
                     // Nothing to show and the server could not be reached: the error surface is the
