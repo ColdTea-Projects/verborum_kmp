@@ -11,6 +11,9 @@ import de.coldtea.verborum.feature.forum.navigation.forumGraph
 /**
  * The whole app's route table. The shell knows only each feature's graph entry
  * point — never its individual screens.
+ *
+ * `BibliothecaGraph` starts on the dictionary list, so that is the screen a user lands on after
+ * signing in — the login wall is replaced by this host with the library already in front of them.
  */
 @Composable
 fun VerborumNavHost(
@@ -22,7 +25,7 @@ fun VerborumNavHost(
         startDestination = BibliothecaGraph,
         modifier = modifier,
     ) {
-        bibliothecaGraph(navController)
+        bibliothecaGraph()
         forumGraph()
     }
 }

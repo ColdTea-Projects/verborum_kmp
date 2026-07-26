@@ -23,7 +23,8 @@ composeApp  ──▶ feature/*  ──▶ core/*
 | `core:network`       | Ktor client factory, `ApiConfig` per target, `apiCall`, error mapping   |
 | `core:auth`          | `AuthSession`, `TokenStorage` (expect/actual), PKCE, SHA-256            |
 | `core:database`      | `LocalCache` — real on iOS, no-op on web                                |
-| `feature:bibliotheca`| dictionary + word detail                                                |
+| `feature:auth`        | the login wall (Keycloak, Authorization Code + PKCE)                    |
+| `feature:bibliotheca`| the library — slice per screen, starting with `dictionarylist`           |
 | `feature:forum`      | marketplace listings                                                    |
 
 ### Non-negotiable rules
@@ -41,15 +42,40 @@ composeApp  ──▶ feature/*  ──▶ core/*
 
 ## Feature module anatomy
 
-Mirror this layout exactly when adding a feature:
+A feature is a set of **screen slices**. Each slice is one screen (plus the pieces only it needs) and
+carries its own `data` / `domain` / `di` / `ui` folders; anything two slices share moves up into the
+feature's `common/`. This mirrors the Android app package-for-package, so a screen ported from there
+lands in the same place here.
 
 ```
 feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
-├── data/          Model + repository interface + implementation(s)
-├── di/            <Name>Module.kt — the single Koin module for the feature
-├── navigation/    <Name>Navigation.kt — @Serializable routes + NavGraphBuilder extension
-└── ui/            <Screen>.kt + <Screen>ViewModel.kt (state + effect types alongside the VM)
+├── common/                     shared *inside* this feature only
+│   ├── data/                     DTO/API pieces more than one slice uses
+│   ├── domain/                   SyncService, cross-slice use cases
+│   └── ui/model/                 shared UI enums/models (SupportedLanguage)
+├── <slice>/                    one screen, e.g. dictionarylist/
+│   ├── data/                     DTOs, Api, Store, Repository (interface + impl)
+│   ├── di/                       <Slice>Module.kt — the slice's Koin module
+│   ├── domain/                   domain model, <Slice>Service, usecase/
+│   └── ui/                       <Screen>.kt, <Screen>ViewModel.kt
+│       ├── composables/          pieces of that screen only
+│       └── model/                State, UI model, sort/filter enums
+├── di/<Name>Module.kt          the feature's single Koin module: `includes(<slice>Module)`
+└── navigation/<Name>Navigation.kt   @Serializable routes + NavGraphBuilder extension
 ```
+
+`feature/bibliotheca/dictionarylist` is the reference slice. Rules that follow from this shape:
+
+- **A slice owns its whole vertical.** Its repository, use cases and view model are `internal` to the
+  module and never referenced from another slice.
+- **Sharing goes up, never sideways.** Slice A does not import from slice B; the shared piece moves
+  to `common/`. Needed by a second *feature*, it moves to a `core:*` module instead.
+- **One Koin module per slice**, aggregated by the feature's module with `includes(...)` — the shell
+  still sees exactly one module per feature.
+- **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add
+  no new public API.
+- A single-screen feature (`feature/forum`, `feature/auth`) keeps the flat `data`/`di`/`ui` layout
+  until a second screen arrives; the slice folders are what a second screen introduces.
 
 Then: `include(":feature:<name>")` in `settings.gradle.kts`, a build file with
 `id("verborum.kmp.feature")`, and add the module + its Koin module to `composeApp`
@@ -75,15 +101,15 @@ Every screen is two composables:
 
 ```kotlin
 @Composable
-fun DictionaryScreen(                      // stateful: injects the VM, collects state
-    onWordClicked: (String) -> Unit,
+internal fun DictionaryListScreen(         // stateful: injects the VM, collects state
+    onDictionaryClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: DictionaryViewModel = koinViewModel(),
+    viewModel: DictionaryListViewModel = koinViewModel(),
 ) { ... }
 
 @Composable
-internal fun DictionaryContent(            // stateless: pure state -> UI, previewable, testable
-    state: DictionaryState,
+internal fun DictionaryListContent(        // stateless: pure state -> UI, previewable, testable
+    state: DictionaryListUiState,
     onQueryChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) { ... }
@@ -93,14 +119,20 @@ Navigation is passed **in** as lambdas from the nav graph; a screen never holds 
 
 ## Data layer
 
-- Repository interface + model live in the feature's `data/` package; the interface is what the
-  view model depends on.
-- Every repository method is `suspend` and returns `Outcome<T>` — never throws, never returns
-  `null` to mean failure.
-- Fakes (`InMemoryWordRepository`) are legitimate production stand-ins while an endpoint is
-  pending; swap the Koin binding, not the call sites.
-- DTOs (`@Serializable`, matching the backend `Envelope`) stay in the data layer and are mapped to
-  domain models before crossing into `ui/`. Do not let a DTO reach a composable.
+- Repository interface + implementation live in the slice's `data/` package; the interface is what
+  the domain layer depends on. The domain model lives in `domain/`, the row the screen renders in
+  `ui/model/` — three shapes, mapped at each boundary, none of them shared.
+- Every repository method returns `Outcome<T>` — never throws, never returns `null` to mean failure.
+- Fakes are legitimate production stand-ins while an endpoint is pending; swap the Koin binding, not
+  the call sites.
+- DTOs (`@Serializable`) stay in the data layer and are mapped to domain models before crossing into
+  `ui/`. Do not let a DTO reach a composable.
+- **Not every endpoint uses `Envelope`.** The dictionary service answers with the payload directly,
+  so those calls go through `plainApiCall` / `statusApiCall`; `apiCall` is for enveloped endpoints.
+- There is **no local database yet**. A slice that needs an observable local copy holds an in-memory
+  store (`DictionaryStore`) as its single source of truth, populated by `SyncService`. `LocalCache` is
+  not a substitute: it is plaintext `NSUserDefaults` on iOS and a no-op on web, so putting user
+  content in it is a data-at-rest decision, not a detail.
 
 ## Dependency injection boundaries
 

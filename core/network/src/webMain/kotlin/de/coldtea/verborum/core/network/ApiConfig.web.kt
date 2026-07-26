@@ -1,13 +1,20 @@
 package de.coldtea.verborum.core.network
 
+import de.coldtea.verborum.core.common.browserOrigin
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.js.Js
 
-// The web build is served next to the API, so requests stay same-origin and
-// avoid a CORS preflight on every call.
+/**
+ * The API answers on the app's own origin under `/api`, both deployed and in development — the dev
+ * server proxies it to the local `ms_dictionary` (see
+ * `composeApp/webpack.config.d/devServerProxy.js`).
+ *
+ * Same-origin by design: no CORS preflight on every call, and no service-side origin allowlist to
+ * keep in step with the dev port.
+ */
 actual fun defaultApiConfig(): ApiConfig = ApiConfig(
-    baseUrl = "/api",
+    baseUrl = "${browserOrigin()}/api",
     enableLogging = false,
 )
 

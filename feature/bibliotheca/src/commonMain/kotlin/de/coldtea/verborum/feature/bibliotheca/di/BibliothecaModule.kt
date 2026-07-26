@@ -1,14 +1,20 @@
 package de.coldtea.verborum.feature.bibliotheca.di
 
-import de.coldtea.verborum.feature.bibliotheca.data.InMemoryWordRepository
-import de.coldtea.verborum.feature.bibliotheca.data.WordRepository
-import de.coldtea.verborum.feature.bibliotheca.ui.DictionaryViewModel
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.activeUserUseCase
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.di.dictionaryListModule
 import org.koin.core.module.Module
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
+/**
+ * The feature's single Koin module, which is all the shell knows about: it wires what the slices
+ * share and includes each slice's own module.
+ */
 val bibliothecaModule: Module = module {
-    // Swap for the HTTP-backed repository once the dictionary endpoint lands.
-    single<WordRepository> { InMemoryWordRepository() }
-    viewModelOf(::DictionaryViewModel)
+    factory { activeUserUseCase(authService = get()) }
+    factory { SyncUserDictionariesUseCase(repository = get()) }
+    single { SyncService(activeUser = get(), syncDictionariesUseCase = get()) }
+
+    includes(dictionaryListModule)
 }

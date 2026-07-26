@@ -121,9 +121,9 @@ internal fun LoginContent(
                     Text("Create account")
                 }
 
-                if (state.hasFailed) {
+                state.failureMessage?.let { message ->
                     Text(
-                        text = "Signing in did not complete. Please try again.",
+                        text = message,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,

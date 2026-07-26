@@ -12,22 +12,27 @@ and to not *widen* the attack surface.
 
 ## Token storage — where it stands
 
-`core/auth/src/webMain/.../TokenStorage.web.kt` uses **`sessionStorage`** (key
-`de.coldtea.verborum.auth.tokens`), not `localStorage`. Any script on the origin can still read it —
-that is inherent to browser storage — so the defence here is lifetime: the tokens die with the tab
-instead of persisting across every session on the machine. `PendingAuthorizationStore` uses the same
-storage for the PKCE verifier, which has to survive the redirect, and removes it as soon as the
-redirect is consumed.
+`core/auth/src/webMain/.../TokenStorage.web.kt` uses **`localStorage`** (key
+`de.coldtea.verborum.auth.tokens`). This is a **deliberate product decision**, taken knowingly: the app
+requires a session that lasts until the user signs out, not one that dies with the tab.
 
-**This is step 3 of 3, not the destination.** The remaining work needs the backend:
-1. Refresh token in an **`HttpOnly; Secure; SameSite=Strict` cookie** set by the API; the client never
-   sees it. Access token in memory only.
-2. Access token in memory + short TTL, refreshed via that cookie.
-3. *(current)* `sessionStorage`, short token TTL.
+What it costs, so nobody has to rediscover it: any script on the origin can read `localStorage`, so a
+single XSS or compromised dependency exfiltrates the access **and** refresh token, and they persist
+indefinitely. `sessionStorage`, `IndexedDB` and non-`HttpOnly` cookies are all equally readable — the
+lifetime was the only lever, and it was spent on purpose.
 
-`TokenStorage` is the seam, so moving up that list is a `webMain`-only change and no feature is
-touched. Note the user-visible cost of the current step: a new tab is a new session, so signing in
-again is expected there.
+**Do not "fix" this by switching back to `sessionStorage`** — that reintroduces the logout-on-tab-close
+the change was made to remove. The one upgrade that actually helps:
+
+1. Refresh token in an **`HttpOnly; Secure; SameSite=Strict` cookie** set by a backend endpoint; the
+   client never sees it. Access token in memory only.
+2. Failing that, access token in memory + short TTL, refresh via that cookie.
+
+`TokenStorage` is the seam, so either is a `webMain`-only change and no feature is touched.
+
+Because the tokens now outlive the tab, the surrounding defences carry more weight: the `js(...)`
+bridges stay data-only, the CSP keeps third-party script out, and `PendingAuthorizationStore` keeps the
+PKCE verifier in `sessionStorage` (per-attempt, short-lived — do not move that one).
 
 **`TokenRefresher` is wired to the real endpoint** (`KeycloakAuthClient.refresh`, bound in
 `composeApp/di/AppModule.kt`). Keep it that way: never log the request or response, keep treating any
@@ -66,8 +71,13 @@ Content-Security-Policy:
   form-action 'none'
 ```
 
-`connect-src 'self'` works because `defaultApiConfig()` on web uses `baseUrl = "/api"` — same-origin
-by design. **If the base URL ever becomes cross-origin**, that is a security change, not a config
+`connect-src 'self'` works because every web request is same-origin by design: `defaultApiConfig()`
+uses `<origin>/api` and `defaultAuthConfig()` uses `<origin>/auth`, served by a reverse proxy
+deployed and by the dev server locally (`composeApp/webpack.config.d/devServerProxy.js`). Keep it that
+way — pointing either at another origin in dev is what reintroduces CORS, and it hides the failure
+behind a browser-only error the Node tests cannot catch.
+
+**If the base URL ever becomes cross-origin**, that is a security change, not a config
 tweak: it needs `connect-src` widened, a CORS policy on the API with an explicit origin allowlist
 (never `Access-Control-Allow-Origin: *` together with credentials), and it re-exposes preflight and
 cookie-scoping concerns.
@@ -111,7 +121,7 @@ use `LogLevel.INFO` and never commit an increase. Never log tokens, PII, or full
 
 ## Review checklist
 
-- [ ] No new token/credential written to `localStorage`; storage change confined to `TokenStorage`
+- [ ] No credential written outside `TokenStorage`; the PKCE verifier stays in `sessionStorage`
 - [ ] No `innerHTML`/`eval`/dynamic script in any `js(...)` bridge; bridges data-only
 - [ ] Redirect/`window.open` targets validated against an allowlist
 - [ ] CSP still valid for what the change adds; `connect-src` unchanged or deliberately widened

@@ -1,5 +1,6 @@
 package de.coldtea.verborum.core.auth
 
+import de.coldtea.verborum.core.common.browserOrigin
 import io.ktor.http.parseQueryString
 import kotlinx.coroutines.awaitCancellation
 

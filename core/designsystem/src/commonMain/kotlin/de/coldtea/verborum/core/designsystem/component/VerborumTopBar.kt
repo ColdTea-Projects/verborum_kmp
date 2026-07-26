@@ -18,7 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,19 +49,34 @@ data class VerborumTopBarState(
     val action: VerborumTopBarAction? = null,
 )
 
-/** Holds the top bar content the currently visible screen has registered. */
+/**
+ * Holds the top bar content the currently visible screen has registered.
+ *
+ * Registrations are token-based because screens overlap: during a navigation transition the incoming
+ * screen registers while the outgoing one is still on its way out. A token means the departing screen
+ * can only ever clear *its own* registration, never the one that replaced it.
+ */
 class VerborumTopBarController {
 
     var state: VerborumTopBarState by mutableStateOf(VerborumTopBarState())
         private set
 
-    fun update(state: VerborumTopBarState) {
+    private var liveRegistration: Long = 0
+
+    /** Registers [state] as the current header and returns the token identifying it. */
+    fun register(state: VerborumTopBarState): Long {
         this.state = state
+        liveRegistration += 1
+
+        return liveRegistration
     }
 
-    /** Called by the shell when the destination changes, so no screen inherits another's header. */
-    fun clear() {
-        state = VerborumTopBarState()
+    /**
+     * Clears the header, but only if [token] is still the live registration — so a screen leaving
+     * the composition cannot blank the header of the screen that has already replaced it.
+     */
+    fun unregister(token: Long) {
+        if (token == liveRegistration) state = VerborumTopBarState()
     }
 }
 
@@ -74,6 +89,11 @@ val LocalVerborumTopBarController = staticCompositionLocalOf { VerborumTopBarCon
 /**
  * Declares the top bar for the enclosing screen. Tab roots pass [showBackButton] `false`; screens
  * navigated into pass `true`.
+ *
+ * The registration lives exactly as long as the screen does: a `DisposableEffect`, so the header
+ * appears with the screen and goes with it. The shell deliberately does **not** clear the header on
+ * destination changes — the destination arrives a frame after the screen has already registered, so
+ * clearing there wiped a registration that nothing would re-run.
  */
 @Composable
 fun RegisterTopBar(
@@ -83,10 +103,15 @@ fun RegisterTopBar(
     action: VerborumTopBarAction? = null,
 ) {
     val controller = LocalVerborumTopBarController.current
+
     // Keyed on the action's identity rather than the object, since its onClick is a fresh lambda
     // each recomposition; that lambda closes over remembered state, so a "stale" one still works.
-    LaunchedEffect(title, subtitle, showBackButton, action?.contentDescription) {
-        controller.update(VerborumTopBarState(title, subtitle, showBackButton, action))
+    DisposableEffect(controller, title, subtitle, showBackButton, action?.contentDescription) {
+        val token = controller.register(
+            VerborumTopBarState(title, subtitle, showBackButton, action),
+        )
+
+        onDispose { controller.unregister(token) }
     }
 }
 

@@ -103,6 +103,46 @@ class AuthServiceTest {
     }
 
     @Test
+    fun `a redirect that cannot be verified is reported, not silently dropped`() = runTest {
+        // On web this is the case that would otherwise just show the login screen again with no
+        // explanation: the code came back but the pending authorization was gone.
+        val (service, _) = service(echoesState, retainPending = false)
+
+        service.signIn(AuthEntry.SignIn)
+
+        assertEquals(SignInFailure.UnverifiedRedirect, service.lastFailure.value)
+    }
+
+    @Test
+    fun `a failed exchange reports the underlying error so the cause is visible`() = runTest {
+        val (service, _) = service(echoesState, responseStatus = HttpStatusCode.BadRequest)
+
+        service.signIn(AuthEntry.SignIn)
+
+        assertEquals(
+            SignInFailure.ExchangeFailed(VerborumError.Unauthorized),
+            service.lastFailure.value,
+        )
+    }
+
+    @Test
+    fun `a refusal carries the reason the server gave`() = runTest {
+        val (service, _) = service({ AuthorizationResult.Failed("access_denied") })
+
+        service.signIn(AuthEntry.SignIn)
+
+        assertEquals(SignInFailure.Refused("access_denied"), service.lastFailure.value)
+    }
+
+    @Test
+    fun `a new attempt clears the previous failure`() = runTest {
+        val (service, _) = service({ AuthorizationResult.Cancelled })
+        service.signIn(AuthEntry.SignIn)
+
+        assertNull(service.lastFailure.value)
+    }
+
+    @Test
     fun `initialize publishes the persisted session`() = runTest {
         val stored = AuthTokens(
             accessToken = jwtWithClaims("""{"sub":"user-42"}"""),

@@ -32,6 +32,50 @@ suspend inline fun <reified T> apiCall(
     Outcome.Failure(throwable.toVerborumError())
 }
 
+/**
+ * The same folding as [apiCall] for endpoints that answer with the payload directly instead of an
+ * [Envelope]. The dictionary service does exactly that — `GET dictionaries/{userId}` returns a bare
+ * JSON array — and the Android client reads it the same way.
+ */
+suspend inline fun <reified T> plainApiCall(
+    crossinline request: suspend () -> HttpResponse,
+): Outcome<T> = try {
+    val response = request()
+    val status = response.status.value
+
+    when {
+        status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
+        status in 200..299 -> Outcome.Success(response.body<T>())
+        else -> Outcome.Failure(VerborumError.Http(status))
+    }
+} catch (cancellation: CancellationException) {
+    throw cancellation
+} catch (serialization: SerializationException) {
+    Outcome.Failure(VerborumError.Serialization(serialization.message))
+} catch (throwable: Throwable) {
+    Outcome.Failure(throwable.toVerborumError())
+}
+
+/**
+ * For endpoints whose answer is the status code — a create, update or delete that returns no body.
+ * Nothing is decoded, so an empty 204 is a success rather than a deserialisation failure.
+ */
+suspend inline fun statusApiCall(
+    crossinline request: suspend () -> HttpResponse,
+): Outcome<Unit> = try {
+    val status = request().status.value
+
+    when {
+        status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
+        status in 200..299 -> Outcome.Success(Unit)
+        else -> Outcome.Failure(VerborumError.Http(status))
+    }
+} catch (cancellation: CancellationException) {
+    throw cancellation
+} catch (throwable: Throwable) {
+    Outcome.Failure(throwable.toVerborumError())
+}
+
 /** Maps a transport-level throwable onto the shared error model. */
 fun Throwable.toVerborumError(): VerborumError = when (this) {
     is SerializationException -> VerborumError.Serialization(message)

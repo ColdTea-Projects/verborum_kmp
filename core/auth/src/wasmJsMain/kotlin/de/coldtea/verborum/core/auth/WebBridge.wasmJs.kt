@@ -13,7 +13,16 @@ internal actual fun sessionStorageRemove(key: String) {
     js("sessionStorage.removeItem(key)")
 }
 
-internal actual fun browserOrigin(): String = js("location.origin")
+internal actual fun localStorageGet(key: String): String =
+    js("localStorage.getItem(key) || ''")
+
+internal actual fun localStorageSet(key: String, value: String) {
+    js("localStorage.setItem(key, value)")
+}
+
+internal actual fun localStorageRemove(key: String) {
+    js("localStorage.removeItem(key)")
+}
 
 internal actual fun browserSearch(): String = js("location.search")
 

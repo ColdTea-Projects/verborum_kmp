@@ -22,7 +22,9 @@ verborum_kmp/
 │
 └── feature/
     ├── auth/                    # the login wall (Keycloak, Authorization Code + PKCE)
-    ├── bibliotheca/             # dictionary + word slices
+    ├── bibliotheca/             # the library — one folder per screen slice
+    │   ├── common/              #   shared inside the feature: SyncService, SupportedLanguage
+    │   └── dictionarylist/      #   data / di / domain / ui for the dictionary list
     └── forum/                   # marketplace
 ```
 
@@ -59,27 +61,47 @@ there is no password field in the app.
 | Browser leg | `ASWebAuthenticationSession` | top-level redirect; code stripped from the URL |
 | Redirect | `de.coldtea.verborum://oauth2redirect/cb` (`Info.plist`) | the app's own origin |
 | PKCE verifier | in memory | `sessionStorage` (must survive the reload) |
-| Tokens | Keychain, `…AfterFirstUnlockThisDeviceOnly` | `sessionStorage` |
-| Endpoints | `https://auth.verborum.coldtea.de/realms/verborum` | same-origin `/auth/realms/verborum`, or `http://localhost:8180/realms/verborum` on a localhost origin |
+| Tokens | Keychain, `…AfterFirstUnlockThisDeviceOnly` | `localStorage` — the session lasts until sign-out |
+| Endpoints | `https://auth.verborum.coldtea.de/realms/verborum` | same-origin `/auth/realms/verborum` |
 
-Local Keycloak (`http://localhost:8180`, realm `verborum`, client `verborum-app`) needs, for the web
-dev server:
+**Web is same-origin everywhere.** Deployed, a reverse proxy serves `/auth` and `/api` next to the
+app; in development the dev server does the same (`composeApp/webpack.config.d/devServerProxy.js`
+→ Keycloak on `:8180`, `ms_dictionary` on `:8085`). So the token exchange and every API call are
+same-origin: no CORS at any point, no **Web origins** entry to keep in step with the dev port, and
+`connect-src 'self'` stays valid.
 
-- **Valid redirect URIs**: `http://localhost:8280/*`
-- **Web origins**: `http://localhost:8280` — without it the token exchange fails CORS, even though
-  the login page itself loads fine
+Local Keycloak (realm `verborum`, client `verborum-app`) still needs its **Valid redirect URIs** to
+include `http://localhost:8280/*` — that is a browser navigation, not an XHR, so no proxy can cover
+it. The dev port (**8280**) is set once in `composeApp/build.gradle.kts`.
 
-The dev server port (**8280**) is set once in `composeApp/build.gradle.kts` and applies to both web
-targets; changing it means updating both Keycloak entries above.
-
-The web app detects a localhost origin and talks to Keycloak directly there, because the dev server
-proxies nothing at `/auth`. iOS keeps its `https` issuer: pointing it at local Keycloak over plain
-http would need an ATS exception, which this repo does not ship.
+iOS talks to the services directly and keeps its `https` issuer: pointing it at a local Keycloak over
+plain http would need an ATS exception, which this repo does not ship.
 
 `AuthService` is the only entry point the UI touches, `AuthSession.sessionState` is the gate the shell
 watches (`Unknown` → neither wall nor app, so no login flash for a signed-in user), and a failed
-refresh clears the session. Both `*-security` skills describe the storage trade-offs; the web target
-is deliberately not the final design — a `HttpOnly` refresh-token cookie is, and it needs backend work.
+refresh clears the session — so a signed-in user stays signed in across restarts for as long as the
+`offline_access` refresh token lives. Both `*-security` skills describe the storage trade-offs: on web
+the tokens are readable by any script on the origin, which is the price of not logging out when the tab
+closes. The end state is a `HttpOnly` refresh-token cookie, and it needs backend work.
+
+### The dictionary list
+
+The bibliotheca tab's root screen, and where a user lands after signing in. Ported from the Android
+app's `bibliotheca/dictionary` package, keeping its structure: search, From/To language filters, sort
+order, pull-to-refresh, an overflow per row with edit/delete, and skeleton rows on first load.
+
+`SyncService` (`bibliotheca/common/domain`) is the download half of the sync: it reads the signed-in
+user from the auth session and pulls `GET dictionaries/{userId}` into `DictionaryStore`, the in-memory
+single source of truth the screen observes. A delete tombstones its row immediately, then asks the
+server, and puts the row back if the server refuses.
+
+Two deliberate gaps, both visible in the UI: there is **no local database**, so the list is empty
+again after a restart until the first sync completes, and the **word count is omitted** from each card
+because the word endpoint is not wired up yet. Dictionary details and create/edit are the next
+screens; until they exist those taps report themselves on the snackbar.
+
+Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
+it, so no CORS configuration is required on the service.
 
 ### Convention plugins
 

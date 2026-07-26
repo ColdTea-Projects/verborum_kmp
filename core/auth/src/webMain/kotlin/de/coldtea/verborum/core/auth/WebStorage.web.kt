@@ -11,8 +11,12 @@ internal expect fun sessionStorageSet(key: String, value: String)
 
 internal expect fun sessionStorageRemove(key: String)
 
-/** `window.location.origin`, e.g. `https://verborum.coldtea.de`. */
-internal expect fun browserOrigin(): String
+/** `localStorage` — survives closing the tab, unlike `sessionStorage`. */
+internal expect fun localStorageGet(key: String): String
+
+internal expect fun localStorageSet(key: String, value: String)
+
+internal expect fun localStorageRemove(key: String)
 
 /** `window.location.search`, including the leading `?` when non-empty. */
 internal expect fun browserSearch(): String

@@ -25,6 +25,8 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class LoginViewModelTest {
@@ -47,7 +49,9 @@ class LoginViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isAuthenticating)
-        assertTrue(viewModel.state.value.hasFailed)
+        // The reason is named, not swallowed: a silent return to this screen looks like a no-op.
+        assertNotNull(viewModel.state.value.failureMessage)
+        assertTrue(viewModel.state.value.failureMessage!!.contains("access_denied"))
     }
 
     @Test
@@ -58,7 +62,7 @@ class LoginViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isAuthenticating)
-        assertFalse(viewModel.state.value.hasFailed)
+        assertNull(viewModel.state.value.failureMessage)
     }
 
     @Test
@@ -71,7 +75,7 @@ class LoginViewModelTest {
         viewModel.signIn()
 
         assertTrue(viewModel.state.value.isAuthenticating)
-        assertFalse(viewModel.state.value.hasFailed)
+        assertNull(viewModel.state.value.failureMessage)
     }
 }
 

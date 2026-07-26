@@ -17,7 +17,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -56,10 +55,9 @@ fun NavigationCentral(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
-    // A screen that registers no header gets none instead of inheriting the previous screen's.
-    // Screens register from their own LaunchedEffect, which runs after this one in the same frame.
-    LaunchedEffect(currentDestination?.id) { topBarController.clear() }
-
+    // The header is owned by whichever screen registered it (see RegisterTopBar), which is why the
+    // shell does not clear it on destination changes: `currentDestination` resolves a frame *after*
+    // the first screen has registered, so clearing here blanked a header nothing would restore.
     val topBarState = topBarController.state
     // An empty title is how a destination opts out of the app chrome entirely (onboarding).
     val showChrome = topBarState.title.isNotEmpty()

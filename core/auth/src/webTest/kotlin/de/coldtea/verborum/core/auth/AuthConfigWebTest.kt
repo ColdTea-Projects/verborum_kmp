@@ -2,20 +2,12 @@ package de.coldtea.verborum.core.auth
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class AuthConfigWebTest {
 
     @Test
-    fun `a localhost origin talks to the local Keycloak, which the dev server does not proxy`() {
-        assertEquals(
-            "http://localhost:8180/realms/verborum",
-            issuerFor("http://localhost:8080"),
-        )
-        assertEquals("http://localhost:8180/realms/verborum", issuerFor("http://127.0.0.1:8080"))
-    }
-
-    @Test
-    fun `a deployed origin stays same-origin behind the proxy`() {
+    fun `keycloak is addressed on the app's own origin, so the exchange stays same-origin`() {
         assertEquals(
             "https://verborum.coldtea.de/auth/realms/verborum",
             issuerFor("https://verborum.coldtea.de"),
@@ -23,11 +15,19 @@ class AuthConfigWebTest {
     }
 
     @Test
-    fun `a host that merely looks local is treated as remote`() {
-        // A substring check would point this origin's users at a developer's machine.
+    fun `development uses the same path, which the dev server proxies`() {
+        // No localhost special case: the proxy is what makes dev match production, so a changed dev
+        // port cannot reintroduce a cross-origin token call.
         assertEquals(
-            "https://localhost.example.com/auth/realms/verborum",
-            issuerFor("https://localhost.example.com"),
+            "http://localhost:8280/auth/realms/verborum",
+            issuerFor("http://localhost:8280"),
         )
+    }
+
+    @Test
+    fun `the issuer never points at another origin`() {
+        val origin = "http://localhost:8280"
+
+        assertTrue(issuerFor(origin).startsWith("$origin/"))
     }
 }
