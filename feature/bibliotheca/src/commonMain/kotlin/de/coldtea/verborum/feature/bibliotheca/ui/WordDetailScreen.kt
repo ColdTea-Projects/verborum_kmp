@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
+import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.data.Word
 import de.coldtea.verborum.feature.bibliotheca.data.WordRepository
@@ -32,23 +33,24 @@ fun WordDetailScreen(
         outcome = repository.word(wordId)
     }
 
+    val word = (outcome as? Outcome.Success)?.data
+
+    // The lemma is the header, so the content does not repeat it. A placeholder stands in while the
+    // entry loads, because a title-less header would take the back button with it.
+    RegisterTopBar(
+        title = word?.lemma ?: "Entry",
+        subtitle = word?.translation,
+    )
+
     when (val current = outcome) {
         Outcome.Loading -> LoadingState(modifier)
         is Outcome.Failure -> ErrorState("That entry could not be found.", modifier)
         is Outcome.Success -> Column(
             modifier = modifier.fillMaxSize().padding(Spacing.large),
         ) {
-            Text(current.data.lemma, style = MaterialTheme.typography.headlineMedium)
-            Text(
-                text = current.data.translation,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.padding(top = Spacing.extraSmall),
-            )
             Text(
                 text = current.data.definition,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = Spacing.medium),
             )
         }
     }

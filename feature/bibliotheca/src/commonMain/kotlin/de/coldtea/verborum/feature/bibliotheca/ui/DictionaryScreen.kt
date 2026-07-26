@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.EmptyState
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
+import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.data.Word
 import org.koin.compose.viewmodel.koinViewModel
@@ -29,6 +30,13 @@ fun DictionaryScreen(
     viewModel: DictionaryViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // A tab root: title and subtitle only, no back button.
+    RegisterTopBar(
+        title = "Bibliotheca",
+        subtitle = if (state.isLoading) null else "${state.words.size} entries",
+        showBackButton = false,
+    )
 
     DictionaryContent(
         state = state,

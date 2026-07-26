@@ -58,8 +58,8 @@ Skip a skill only when it is genuinely irrelevant to the change in front of you.
 - Never expose Kotlin `object`s, sealed hierarchies or default arguments across the ObjC bridge.
 - Never hardcode a colour, text style, `.dp`, or an inset height in a feature.
 - Never commit a populated `TEAM_ID` in `Config.xcconfig` — it stays empty in the repo.
-- Do not commit, push, or open a PR unless explicitly asked. Staging is manual in this repo — there
-  is no auto-staging hook; see `git-workflow`.
+- `git add` each file you create, by path, in the turn you create it — there is no auto-staging hook
+  here. Do not commit, push, or open a PR unless explicitly asked; see `git-workflow`.
 
 ## Report back
 

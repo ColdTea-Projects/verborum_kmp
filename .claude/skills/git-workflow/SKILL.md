@@ -8,22 +8,33 @@ description: Git workflow for the Verborum KMP project — staging and commit co
 Work lands on **`main`** (solo/small-team project). Branch first only when preparing a PR or when
 asked.
 
-## Staging is manual here
+## Track every new file as you create it
 
-There is **no auto-staging hook** in this repo — `.claude/` contains `skills/` and `agents/` only.
-(The Android project auto-stages Write-created files via a `PostToolUse` hook in
-`.claude/settings.json`; do not assume that behaviour here.)
-
-So **nothing is staged until you stage it.** New files created with Write show as `??`, edits made
-with Edit show as ` M`, and both need an explicit `git add`.
+**A file you create is `git add`-ed in the same turn you create it.** An untracked file is invisible
+to `git diff`, to review, and to anyone else who clones — so a new source file, test, build file or
+skill left as `??` is a half-finished change.
 
 ```bash
 git status --short              # ?? = untracked, ' M' = modified, 'A '/'M ' = staged
 git add -- <paths>              # stage deliberately, by path
 ```
 
-Stage everything you created or edited when the user asks for a commit. When they have **not** asked
-for one, leaving the working tree dirty and unstaged is the correct end state — see below.
+Rules:
+
+- **New files** (created with Write): `git add -- <path>` right after creating them, by path.
+  Do the same for a whole new source set directory you introduced.
+- **Edits to already-tracked files**: leave unstaged. They are already in the VCS and visible in
+  `git diff`; staging them is only needed when the user asks for a commit.
+- **Never** blanket-add: no `git add -A`, no `git add .`, no `git add -f` past `.gitignore`. Check
+  the "Never commit" list below before adding — a scratchpad file or a build artifact must not be
+  tracked, and staging is where that mistake gets caught.
+- Staging is not committing. Tracking new files as you go changes nothing about the rule below.
+
+There is no auto-staging hook here — `.claude/` holds `skills/` and `agents/` only, so this is on
+you, every time. (The Android project automates the same intent with a `PostToolUse` hook in
+`.claude/settings.json`.)
+
+When the user asks for a commit, stage everything you created **or** edited at that point.
 
 ## Never commit unless asked
 

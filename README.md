@@ -7,15 +7,15 @@ verborum_kmp/
 ├── build-logic/                 # Gradle convention plugins (KMP / Compose / feature)
 ├── gradle/libs.versions.toml    # the single version catalog
 │
-├── composeApp/                  # the shell: theme, bottom bar, nav graph, Koin bootstrap
-│   ├── commonMain/              #   App(), VerborumNavHost, TopLevelDestination, di/AppModule
+├── composeApp/                  # the shell: theme, app chrome, nav graph, Koin bootstrap
+│   ├── commonMain/              #   App(), NavigationCentral, VerborumNavHost, TopLevelDestination, di/AppModule
 │   ├── iosMain/                 #   MainViewController()
 │   └── webMain/                 #   main() + index.html (compiles for both js and wasmJs)
 ├── iosApp/                      # Xcode wrapper (Swift @main → composeApp)
 │
 ├── core/
-│   ├── designsystem/            #   VerborumTheme, M3 colours, shared composables, icons
-│   ├── common/                  #   BaseViewModel, Outcome, VerborumError, Envelope DTOs
+│   ├── designsystem/            #   VerborumTheme, M3 colours, shared composables, chrome, icons
+│   ├── common/                  #   BaseViewModel, Outcome, VerborumError, Envelope DTOs, connectivity
 │   ├── network/                 #   Ktor client, base URL per target, error mapping
 │   ├── auth/                    #   token storage (expect/actual), PKCE, refresh
 │   └── database/                #   optional local cache — real on iOS, no-op on web
@@ -27,6 +27,25 @@ verborum_kmp/
 
 Dependencies point one way only: `composeApp → feature/* → core/*`. The shell knows each
 feature's nav graph entry point and nothing else; features never depend on each other.
+
+### The navigation centre
+
+`NavigationCentral` (in `composeApp/navigation/`) is the single place that knows the app's shape —
+modelled on `NavigationCentral` in the Android app, with type-safe `@Serializable` routes instead of
+string routes:
+
+- **One nav host.** Each feature contributes a nested graph (`bibliothecaGraph()`); the shell never
+  names a screen.
+- **One header.** A screen declares its own with `RegisterTopBar(title, subtitle, showBackButton,
+  action)` from `core:designsystem`; the shell renders it and owns the back button. Registering
+  nothing means no chrome at all, which is what a full-screen destination such as onboarding wants.
+- **One snackbar.** `LocalSnackbarHostState` is provided here; `ShowSnackbarMessages(flow)` pipes a
+  view model's messages onto it.
+- **One offline banner**, pinned under the header, driven by `observeConnectivity()` in `core:common`
+  (`NWPathMonitor` on iOS, `online`/`offline` window events on web).
+- **Tabs from `TopLevelDestination`**: a `NavigationBar` on phone widths, a `NavigationRail` at
+  ≥ 840dp (desktop browser, iPad), and only on a tab root — deeper screens are left via the header's
+  back button, so the tabs cannot swallow the back stack.
 
 ### Convention plugins
 

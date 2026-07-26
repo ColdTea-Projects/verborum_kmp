@@ -11,13 +11,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.EmptyState
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
+import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
+import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.forum.data.Listing
+import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -26,6 +30,21 @@ fun ForumScreen(
     viewModel: ForumViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // A tab root: title and subtitle only, no back button.
+    RegisterTopBar(title = "Forum", subtitle = "Coming soon", showBackButton = false)
+
+    // There is no listing detail yet, so a tap is acknowledged on the shared snackbar rather than
+    // silently dropped.
+    ShowSnackbarMessages(
+        remember(viewModel) {
+            viewModel.effects.map { effect ->
+                when (effect) {
+                    is ForumEffect.OpenListing -> "Listings open in a later release."
+                }
+            }
+        },
+    )
 
     when {
         state.isLoading -> LoadingState(modifier)

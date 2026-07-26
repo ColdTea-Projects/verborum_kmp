@@ -33,6 +33,24 @@ object VerborumIcons {
         }
     }
 
+    val ArrowBack: ImageVector by lazy {
+        materialIcon {
+            // A leftwards arrow: shaft plus chevron head, for the shared top bar's back button.
+            path {
+                moveTo(20f, 11f)
+                horizontalLineTo(7.8f)
+                lineTo(13.4f, 5.4f)
+                lineTo(12f, 4f)
+                lineTo(4f, 12f)
+                lineTo(12f, 20f)
+                lineTo(13.4f, 18.6f)
+                lineTo(7.8f, 13f)
+                horizontalLineTo(20f)
+                close()
+            }
+        }
+    }
+
     val Storefront: ImageVector by lazy {
         materialIcon {
             // An awning over a shopfront.
