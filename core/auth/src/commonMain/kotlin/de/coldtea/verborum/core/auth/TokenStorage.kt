@@ -8,6 +8,11 @@ data class AuthTokens(
     val refreshToken: String,
     /** Absolute expiry as epoch seconds. */
     val expiresAtEpochSeconds: Long,
+    /**
+     * The OIDC id token, kept only to read profile claims for the signed-in user. Optional so a
+     * payload written before it existed still decodes.
+     */
+    val idToken: String? = null,
 )
 
 /** Persists the token pair across app launches. Implemented per target. */
@@ -17,7 +22,7 @@ interface TokenStorage {
     suspend fun clear()
 }
 
-/** The platform-backed storage: Keychain-backed defaults on iOS, `localStorage` on web. */
+/** The platform-backed storage: the Keychain on iOS, `sessionStorage` on web. */
 expect fun createTokenStorage(): TokenStorage
 
 /** Non-persistent storage, useful in tests. */

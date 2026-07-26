@@ -34,6 +34,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             }
             sourceSets.getByName("commonTest").dependencies {
                 implementation(libs.library("kotlin-test"))
+                implementation(libs.library("kotlinx-coroutines-test"))
             }
         }
     }

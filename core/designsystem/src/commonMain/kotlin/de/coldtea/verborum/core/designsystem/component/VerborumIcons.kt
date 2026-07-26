@@ -51,6 +51,33 @@ object VerborumIcons {
         }
     }
 
+    val Logout: ImageVector by lazy {
+        materialIcon {
+            // An arrow leaving through a doorway.
+            path {
+                moveTo(11f, 7f)
+                lineTo(9.6f, 8.4f)
+                lineTo(12.2f, 11f)
+                horizontalLineTo(4f)
+                verticalLineTo(13f)
+                horizontalLineTo(12.2f)
+                lineTo(9.6f, 15.6f)
+                lineTo(11f, 17f)
+                lineTo(16f, 12f)
+                close()
+                moveTo(14f, 3f)
+                horizontalLineTo(20f)
+                verticalLineTo(21f)
+                horizontalLineTo(14f)
+                verticalLineTo(19f)
+                horizontalLineTo(18f)
+                verticalLineTo(5f)
+                horizontalLineTo(14f)
+                close()
+            }
+        }
+    }
+
     val Storefront: ImageVector by lazy {
         materialIcon {
             // An awning over a shopfront.

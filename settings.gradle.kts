@@ -37,5 +37,6 @@ include(":core:network")
 include(":core:auth")
 include(":core:database")
 
+include(":feature:auth")
 include(":feature:bibliotheca")
 include(":feature:forum")

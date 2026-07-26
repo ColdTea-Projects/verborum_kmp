@@ -4,5 +4,19 @@
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
+        <!-- The OAuth redirect scheme ASWebAuthenticationSession matches on; it must stay in sync
+             with redirectUri in core/auth AuthConfig.ios.kt. No ATS exception is declared here:
+             every endpoint the app talks to is https. -->
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleURLName</key>
+                <string>de.coldtea.verborum.oauth</string>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>de.coldtea.verborum</string>
+                </array>
+            </dict>
+        </array>
     </dict>
 </plist>

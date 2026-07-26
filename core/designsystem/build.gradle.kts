@@ -12,10 +12,6 @@ kotlin {
     }
 }
 
-// A Compose UI module links skiko, which Node cannot load ("both async and sync fetching of the
-// wasm failed"), so this module's commonTest runs on js and iOS — the same code, one runtime fewer.
-tasks.named("wasmJsNodeTest") { enabled = false }
-
 compose.resources {
     // Consumed by feature modules, so the generated `Res` class must be public.
     publicResClass = true

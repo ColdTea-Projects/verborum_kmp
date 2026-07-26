@@ -14,6 +14,11 @@ class KmpComposeConventionPlugin : Plugin<Project> {
         pluginManager.apply("org.jetbrains.compose")
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
 
+        // A Compose UI module links skiko, which Node cannot load ("both async and sync fetching of
+        // the wasm failed"), so a commonTest here runs on js and iOS — the same code, one runtime
+        // fewer. Compose tests that must run on wasm need a browser test runner instead.
+        tasks.matching { it.name == "wasmJsNodeTest" }.configureEach { enabled = false }
+
         extensions.configure<KotlinMultiplatformExtension> {
             sourceSets.getByName("commonMain").dependencies {
                 implementation(libs.library("compose-runtime"))

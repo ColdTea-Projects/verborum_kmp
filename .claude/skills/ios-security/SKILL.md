@@ -8,29 +8,24 @@ description: Security review and hardening for the iOS target — credential sto
 Threat model: an attacker with the device (lost/stolen, or jailbroken), an attacker on the network,
 and anyone who can read the app bundle — the IPA is decompilable and every string in it is public.
 
-## Known issue in this repo — fix before shipping auth
+## Token storage — done, keep it that way
 
-**Tokens are stored in `NSUserDefaults`** (`core/auth/src/iosMain/.../TokenStorage.ios.kt`, key
-`de.coldtea.verborum.auth.tokens`), even though the KDoc in `TokenStorage.kt` claims
-"Keychain-backed defaults on iOS". `NSUserDefaults` is a **plaintext plist in the app container**:
+`core/auth/src/iosMain/.../TokenStorage.ios.kt` is `KeychainTokenStorage`:
+`SecItemAdd`/`SecItemCopyMatching`/`SecItemDelete` on a `kSecClassGenericPassword` item with a stable
+`kSecAttrService`/`kSecAttrAccount` pair, protected by
+**`kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`** — `…ThisDeviceOnly` keeps it out of backups
+and off the user's other devices, `AfterFirstUnlock` still permits a background refresh. It also
+migrates and deletes any payload left by the previous `NSUserDefaults` implementation.
 
-- readable from a filesystem dump or a jailbroken device,
-- included in unencrypted iTunes/Finder backups and in iCloud backup,
-- not protected by device-lock class attributes.
+Do not regress this: never `kSecAttrAccessibleAlways`, never move a token back into
+`NSUserDefaults`, and keep `SecItemDelete` on sign-out. `TokenStorage` is the seam, so any change
+stays `iosMain`-only. The access token is held behind `AuthSession`'s `Mutex`; keeping it in memory
+only (Keychain for the refresh token alone) is the remaining hardening step.
 
-Refresh tokens must go in the **Keychain**, via `SecItemAdd`/`SecItemCopyMatching`/`SecItemUpdate`
-with:
-
-- `kSecClass = kSecClassGenericPassword`
-- `kSecAttrAccessible = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` — `…ThisDeviceOnly`
-  keeps it out of backups and off other devices; `AfterFirstUnlock` is the right trade-off for a
-  token refreshed in the background. Never `kSecAttrAccessibleAlways`.
-- a stable `kSecAttrService`/`kSecAttrAccount` pair, and `SecItemDelete` on sign-out.
-
-`TokenStorage` is the seam, so this is an `iosMain`-only change: implement
-`KeychainTokenStorage : TokenStorage`, return it from `createTokenStorage()`, migrate-and-delete any
-existing `NSUserDefaults` value on first run, and correct the KDoc. Keep the access token in memory
-where practical; `AuthSession` already holds it behind a `Mutex`.
+**Not yet verified on a device or simulator**: the Keychain path and the
+`ASWebAuthenticationSession` flow compile, but this machine cannot link or run iOS binaries (no Xcode
+command line tools). First run on a simulator should confirm read/write/delete and the
+upgrade-from-`NSUserDefaults` path.
 
 **`core:database`'s `LocalCache` is real on iOS** — audit what it caches. Anything user-identifying
 or authorization-bearing needs the same protection as a token, or must not be cached at all.
@@ -47,9 +42,13 @@ or authorization-bearing needs the same protection as a token, or must not be ca
 
 ## OAuth on iOS
 
-- Use **`ASWebAuthenticationSession`** for the authorization step. Never an embedded `WKWebView` or
+- The flow is implemented: `core/auth/.../AuthorizationLauncher.ios.kt` wraps
+  **`ASWebAuthenticationSession`**, `AuthService` verifies `state` and exchanges the code, and
+  `AuthConfig.ios.kt` holds the endpoints. Never replace it with an embedded `WKWebView` or
   `UIWebView`: an in-app web view can read the user's credentials, breaks federated sign-in, and is
   an App Store review risk.
+- The redirect scheme `de.coldtea.verborum` is registered in `iosApp/iosApp/Info.plist`
+  (`CFBundleURLTypes`) and must stay in sync with `redirectUri` in `AuthConfig.ios.kt`.
 - PKCE `S256` from `core:auth` is already correct and its iOS RNG is properly seeded —
   `secureRandomBytes` uses `SecRandomCopyBytes(kSecRandomDefault, …)`. Keep it; never substitute
   `arc4random`/`Random.Default` for cryptographic material.

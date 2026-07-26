@@ -21,6 +21,7 @@ verborum_kmp/
 │   └── database/                #   optional local cache — real on iOS, no-op on web
 │
 └── feature/
+    ├── auth/                    # the login wall (Keycloak, Authorization Code + PKCE)
     ├── bibliotheca/             # dictionary + word slices
     └── forum/                   # marketplace
 ```
@@ -46,6 +47,39 @@ string routes:
 - **Tabs from `TopLevelDestination`**: a `NavigationBar` on phone widths, a `NavigationRail` at
   ≥ 840dp (desktop browser, iPad), and only on a tab root — deeper screens are left via the header's
   back button, so the tabs cannot swallow the back stack.
+
+### Login
+
+Authorization Code + PKCE against the Keycloak `verborum` realm, in `core:auth`, with the screen in
+`feature:auth`. Signing in and creating an account are the same flow pointed at different endpoints —
+there is no password field in the app.
+
+| | iOS | Web |
+|---|---|---|
+| Browser leg | `ASWebAuthenticationSession` | top-level redirect; code stripped from the URL |
+| Redirect | `de.coldtea.verborum://oauth2redirect/cb` (`Info.plist`) | the app's own origin |
+| PKCE verifier | in memory | `sessionStorage` (must survive the reload) |
+| Tokens | Keychain, `…AfterFirstUnlockThisDeviceOnly` | `sessionStorage` |
+| Endpoints | `https://auth.verborum.coldtea.de/realms/verborum` | same-origin `/auth/realms/verborum`, or `http://localhost:8180/realms/verborum` on a localhost origin |
+
+Local Keycloak (`http://localhost:8180`, realm `verborum`, client `verborum-app`) needs, for the web
+dev server:
+
+- **Valid redirect URIs**: `http://localhost:8280/*`
+- **Web origins**: `http://localhost:8280` — without it the token exchange fails CORS, even though
+  the login page itself loads fine
+
+The dev server port (**8280**) is set once in `composeApp/build.gradle.kts` and applies to both web
+targets; changing it means updating both Keycloak entries above.
+
+The web app detects a localhost origin and talks to Keycloak directly there, because the dev server
+proxies nothing at `/auth`. iOS keeps its `https` issuer: pointing it at local Keycloak over plain
+http would need an ATS exception, which this repo does not ship.
+
+`AuthService` is the only entry point the UI touches, `AuthSession.sessionState` is the gate the shell
+watches (`Unknown` → neither wall nor app, so no login flash for a signed-in user), and a failed
+refresh clears the session. Both `*-security` skills describe the storage trade-offs; the web target
+is deliberately not the final design — a `HttpOnly` refresh-token cookie is, and it needs backend work.
 
 ### Convention plugins
 

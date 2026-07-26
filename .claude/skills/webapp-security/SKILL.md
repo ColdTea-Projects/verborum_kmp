@@ -10,30 +10,29 @@ hostile browser**. Nothing shipped to the client is a secret, and every request 
 be forged. Security decisions therefore live at the API boundary; the client's job is to not *leak*
 and to not *widen* the attack surface.
 
-## Known issues in this repo — check before adding to them
+## Token storage — where it stands
 
-**1. Tokens live in `localStorage`** (`core/auth/src/webMain/.../TokenStorage.web.kt`,
-key `de.coldtea.verborum.auth.tokens`). `localStorage` is readable by any JavaScript on the origin,
-so a single XSS or a compromised dependency exfiltrates both the access **and** the refresh token,
-and they persist indefinitely across tabs and sessions.
+`core/auth/src/webMain/.../TokenStorage.web.kt` uses **`sessionStorage`** (key
+`de.coldtea.verborum.auth.tokens`), not `localStorage`. Any script on the origin can still read it —
+that is inherent to browser storage — so the defence here is lifetime: the tokens die with the tab
+instead of persisting across every session on the machine. `PendingAuthorizationStore` uses the same
+storage for the PKCE verifier, which has to survive the redirect, and removes it as soon as the
+redirect is consumed.
 
-Preference order:
-1. Refresh token in an **`HttpOnly; Secure; SameSite=Strict` cookie** set by the backend; the client
-   never sees it. Access token held in memory only.
-2. Access token in memory + short TTL, refresh via the cookie above.
-3. If persistence is unavoidable, `sessionStorage` over `localStorage` (dies with the tab) and keep
-   the token TTL short.
+**This is step 3 of 3, not the destination.** The remaining work needs the backend:
+1. Refresh token in an **`HttpOnly; Secure; SameSite=Strict` cookie** set by the API; the client never
+   sees it. Access token in memory only.
+2. Access token in memory + short TTL, refreshed via that cookie.
+3. *(current)* `sessionStorage`, short token TTL.
 
-Whatever is chosen, `TokenStorage` is the seam — the change is confined to `webMain` and does not
-touch features.
+`TokenStorage` is the seam, so moving up that list is a `webMain`-only change and no feature is
+touched. Note the user-visible cost of the current step: a new tab is a new session, so signing in
+again is expected there.
 
-**2. `TokenStorage.kt`'s KDoc claims "Keychain-backed defaults on iOS"** — it is `NSUserDefaults`
-(see `ios-security`). Do not trust that comment.
-
-**3. `TokenRefresher` is a stub** returning `Outcome.Failure(Unauthorized)`. When the real
-`/oauth/token` call lands: never log the request or response, treat any failure as sign-out
-(`storage.clear()`, which `AuthSession` already does), and keep the single-flight `Mutex` so a burst
-of 401s cannot fan out into parallel refreshes.
+**`TokenRefresher` is wired to the real endpoint** (`KeycloakAuthClient.refresh`, bound in
+`composeApp/di/AppModule.kt`). Keep it that way: never log the request or response, keep treating any
+failure as sign-out (`AuthSession` clears storage and publishes `SignedOut`), and keep the
+single-flight `Mutex` so a burst of 401s cannot fan out into parallel refreshes.
 
 ## XSS is the whole game
 
@@ -79,8 +78,11 @@ Also send: `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`,
 
 ## OAuth / PKCE
 
-`Pkce` (RFC 7636, S256, 32 random bytes → 43-char verifier) is correct and test-covered — keep using
-it and do not weaken to `plain`. When wiring the flow:
+The flow is implemented: `AuthorizationLauncher.web.kt` (top-level redirect, code stripped from the
+URL with `history.replaceState` as soon as it is consumed), `AuthService` (verifies `state`, exchanges
+the code), `AuthConfig.web.kt` (Keycloak expected at same-origin `/auth`, so `connect-src 'self'`
+still holds). `Pkce` (RFC 7636, S256, 32 random bytes → 43-char verifier) is correct and
+test-covered — keep using it and do not weaken to `plain`. When changing the flow:
 
 - Generate the verifier per attempt; never reuse, never log it.
 - Send an unguessable `state` and verify it on the callback — this is the CSRF defence and PKCE does

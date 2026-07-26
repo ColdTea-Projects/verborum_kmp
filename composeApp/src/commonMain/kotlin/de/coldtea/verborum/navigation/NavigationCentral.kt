@@ -32,7 +32,9 @@ import androidx.navigation.compose.rememberNavController
 import de.coldtea.verborum.core.designsystem.component.LocalSnackbarHostState
 import de.coldtea.verborum.core.designsystem.component.LocalVerborumTopBarController
 import de.coldtea.verborum.core.designsystem.component.OfflineBanner
+import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBar
+import de.coldtea.verborum.core.designsystem.component.VerborumTopBarAction
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarController
 import de.coldtea.verborum.core.designsystem.component.rememberIsOnline
 
@@ -44,7 +46,10 @@ import de.coldtea.verborum.core.designsystem.component.rememberIsOnline
  * stays the only place that knows the app's shape.
  */
 @Composable
-fun NavigationCentral(navController: NavHostController = rememberNavController()) {
+fun NavigationCentral(
+    onSignOut: () -> Unit,
+    navController: NavHostController = rememberNavController(),
+) {
     val topBarController = remember { VerborumTopBarController() }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -59,6 +64,15 @@ fun NavigationCentral(navController: NavHostController = rememberNavController()
     // An empty title is how a destination opts out of the app chrome entirely (onboarding).
     val showChrome = topBarState.title.isNotEmpty()
     val isOnline = rememberIsOnline()
+    val isTabRoot = currentDestination.isTabRoot()
+
+    // Signing out is the app's business, not a screen's, so the shell owns this action — and offers
+    // it only on a tab root, where leaving the app is a sensible thing to do.
+    val signOutAction = VerborumTopBarAction(
+        icon = VerborumIcons.Logout,
+        contentDescription = "Sign out",
+        onClick = onSignOut,
+    ).takeIf { isTabRoot }
 
     CompositionLocalProvider(
         LocalVerborumTopBarController provides topBarController,
@@ -76,6 +90,7 @@ fun NavigationCentral(navController: NavHostController = rememberNavController()
                             VerborumTopBar(
                                 state = topBarState,
                                 onBackClick = { navController.popBackStack() },
+                                appAction = signOutAction,
                             )
                         }
                         AnimatedVisibility(visible = showChrome && !isOnline) {
@@ -86,7 +101,7 @@ fun NavigationCentral(navController: NavHostController = rememberNavController()
                 bottomBar = {
                     // Only tab roots get the bottom bar; deeper screens are left via the header's
                     // back button, so the tabs cannot swallow the back stack.
-                    if (!useRail && currentDestination.isTabRoot()) {
+                    if (!useRail && isTabRoot) {
                         VerborumNavigationBar(navController, currentDestination)
                     }
                 },
