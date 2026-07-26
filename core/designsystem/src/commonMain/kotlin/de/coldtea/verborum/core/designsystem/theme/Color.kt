@@ -1,42 +1,28 @@
 package de.coldtea.verborum.core.designsystem.theme
 
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-private val Ink = Color(0xFF1B1B1F)
-private val Parchment = Color(0xFFFDF7EE)
-private val Sepia = Color(0xFF6D5644)
-private val SepiaLight = Color(0xFFE8D8C6)
-private val Verdigris = Color(0xFF3F7D6E)
-private val VerdigrisLight = Color(0xFFB9E4D8)
+// Color Scheme
+object VerborumColors {
+    // Light Theme
+    val LightBackground = Color(0xFFFFFFFF)
+    val LightSurface = Color(0xFFF5F5F5)
+    val LightSurfaceAlt = Color(0xFFECECEC)
+    val LightText = Color(0xFF1A1A1A)
+    val LightTextSecondary = Color(0xFF666666)
+    val LightTextTertiary = Color(0xFF999999)
+    val LightAccent = Color(0xFFC41E3A)
+    val LightGold = Color(0xFFD4AF37)
+    val LightBorder = Color(0xFFE0E0E0)
 
-internal val VerborumLightColors = lightColorScheme(
-    primary = Sepia,
-    onPrimary = Color.White,
-    primaryContainer = SepiaLight,
-    onPrimaryContainer = Ink,
-    secondary = Verdigris,
-    onSecondary = Color.White,
-    secondaryContainer = VerdigrisLight,
-    onSecondaryContainer = Ink,
-    background = Parchment,
-    onBackground = Ink,
-    surface = Parchment,
-    onSurface = Ink,
-)
-
-internal val VerborumDarkColors = darkColorScheme(
-    primary = SepiaLight,
-    onPrimary = Ink,
-    primaryContainer = Sepia,
-    onPrimaryContainer = Color.White,
-    secondary = VerdigrisLight,
-    onSecondary = Ink,
-    secondaryContainer = Verdigris,
-    onSecondaryContainer = Color.White,
-    background = Ink,
-    onBackground = Parchment,
-    surface = Ink,
-    onSurface = Parchment,
-)
+    // Dark Theme
+    val DarkBackground = Color(0xFF0F0F0F)
+    val DarkSurface = Color(0xFF1A1A1A)
+    val DarkSurfaceAlt = Color(0xFF252525)
+    val DarkText = Color(0xFFE8E8E8)
+    val DarkTextSecondary = Color(0xFFA0A0A0)
+    val DarkTextTertiary = Color(0xFF707070)
+    val DarkAccent = Color(0xFFE63946)
+    val DarkGold = Color(0xFFE6C547)
+    val DarkBorder = Color(0xFF333333)
+}
