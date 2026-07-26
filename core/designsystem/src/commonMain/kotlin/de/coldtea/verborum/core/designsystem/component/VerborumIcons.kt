@@ -152,6 +152,48 @@ object VerborumIcons {
         }
     }
 
+    val Settings: ImageVector by lazy {
+        materialIcon {
+            // Sliders rather than a gear: a gear's centre hole needs opposite path winding to punch
+            // out, and two adjustable rows read as "settings" just as clearly.
+            path {
+                // Upper slider: track, then its knob.
+                moveTo(3f, 7f)
+                horizontalLineTo(13f)
+                verticalLineTo(9f)
+                horizontalLineTo(3f)
+                close()
+                moveTo(19f, 7f)
+                horizontalLineTo(21f)
+                verticalLineTo(9f)
+                horizontalLineTo(19f)
+                close()
+                moveTo(16f, 4.5f)
+                horizontalLineTo(18f)
+                verticalLineTo(11.5f)
+                horizontalLineTo(16f)
+                close()
+
+                // Lower slider.
+                moveTo(3f, 15f)
+                horizontalLineTo(7f)
+                verticalLineTo(17f)
+                horizontalLineTo(3f)
+                close()
+                moveTo(13f, 15f)
+                horizontalLineTo(21f)
+                verticalLineTo(17f)
+                horizontalLineTo(13f)
+                close()
+                moveTo(10f, 12.5f)
+                horizontalLineTo(12f)
+                verticalLineTo(19.5f)
+                horizontalLineTo(10f)
+                close()
+            }
+        }
+    }
+
     val Sort: ImageVector by lazy {
         materialIcon {
             // Three lines of decreasing width.

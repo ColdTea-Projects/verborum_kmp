@@ -3,7 +3,6 @@ package de.coldtea.verborum
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -13,7 +12,6 @@ import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.theme.VerborumTheme
 import de.coldtea.verborum.feature.auth.ui.LoginScreen
 import de.coldtea.verborum.navigation.NavigationCentral
-import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
@@ -37,7 +35,6 @@ private fun AuthGate(
     authService: AuthService = koinInject(),
 ) {
     val sessionState by authService.sessionState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     // Reads persisted tokens and finishes an OAuth redirect the web app was started with. Keyed on
     // the service so it runs once per app launch, not once per recomposition.
@@ -50,9 +47,7 @@ private fun AuthGate(
         // user never sees a flash of the login screen.
         SessionState.Unknown -> LoadingState()
         SessionState.SignedOut -> LoginScreen()
-        is SessionState.SignedIn -> NavigationCentral(
-            onSignOut = { scope.launch { authService.signOut() } },
-            navController = navController,
-        )
+        // Signing out lives in the Options tab, so the shell only decides wall-or-app.
+        is SessionState.SignedIn -> NavigationCentral(navController)
     }
 }

@@ -26,7 +26,8 @@ verborum_kmp/
     │   ├── common/              #   shared inside the feature: dictionary + word layers, SyncService
     │   ├── dictionarylist/      #   di / ui for the dictionary list
     │   └── dictionarydetails/   #   di / ui for one dictionary's words
-    └── forum/                   # marketplace
+    ├── forum/                   # marketplace
+    └── options/                 # the Options tab — signing out lives here
 ```
 
 Dependencies point one way only: `composeApp → feature/* → core/*`. The shell knows each
@@ -78,7 +79,8 @@ it. The dev port (**8280**) is set once in `composeApp/build.gradle.kts`.
 iOS talks to the services directly and keeps its `https` issuer: pointing it at a local Keycloak over
 plain http would need an ATS exception, which this repo does not ship.
 
-`AuthService` is the only entry point the UI touches, `AuthSession.sessionState` is the gate the shell
+Signing out is the Options tab's only action today; it ends the session, and the shell swaps the app
+for the login wall on its own. `AuthService` is the only entry point the UI touches, `AuthSession.sessionState` is the gate the shell
 watches (`Unknown` → neither wall nor app, so no login flash for a signed-in user), and a failed
 refresh clears the session — so a signed-in user stays signed in across restarts for as long as the
 `offline_access` refresh token lives. Both `*-security` skills describe the storage trade-offs: on web

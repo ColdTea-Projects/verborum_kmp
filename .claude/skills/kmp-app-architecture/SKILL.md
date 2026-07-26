@@ -26,6 +26,7 @@ composeApp  ──▶ feature/*  ──▶ core/*
 | `feature:auth`        | the login wall (Keycloak, Authorization Code + PKCE)                    |
 | `feature:bibliotheca`| the library — slice per screen (`dictionarylist`, `dictionarydetails`)   |
 | `feature:forum`      | marketplace listings                                                    |
+| `feature:options`     | the Options tab; owns sign-out                                          |
 
 ### Non-negotiable rules
 
@@ -77,8 +78,11 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   still sees exactly one module per feature.
 - **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add
   no new public API.
-- A single-screen feature (`feature/forum`, `feature/auth`) keeps the flat `data`/`di`/`ui` layout
-  until a second screen arrives; the slice folders are what a second screen introduces.
+- A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat
+  `data`/`di`/`ui` layout until a second screen arrives; the slice folders are what a second screen
+  introduces.
+- **One bottom-bar tab = one feature graph.** `TopLevelDestination` maps each tab onto a feature's
+  `*Graph`, so a new tab is a new feature module rather than an entry in an existing one.
 
 Then: `include(":feature:<name>")` in `settings.gradle.kts`, a build file with
 `id("verborum.kmp.feature")`, and add the module + its Koin module to `composeApp`

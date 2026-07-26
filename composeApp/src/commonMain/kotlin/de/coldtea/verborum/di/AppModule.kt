@@ -22,6 +22,7 @@ import de.coldtea.verborum.core.network.defaultApiConfig
 import de.coldtea.verborum.feature.auth.di.authFeatureModule
 import de.coldtea.verborum.feature.bibliotheca.di.bibliothecaModule
 import de.coldtea.verborum.feature.forum.di.forumModule
+import de.coldtea.verborum.feature.options.di.optionsModule
 import io.ktor.client.HttpClient
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
@@ -67,7 +68,7 @@ val coreModule: Module = module {
 }
 
 val appModules: List<Module> =
-    listOf(coreModule, authFeatureModule, bibliothecaModule, forumModule)
+    listOf(coreModule, authFeatureModule, bibliothecaModule, forumModule, optionsModule)
 
 /**
  * Single Koin entry point. Every platform launcher calls this exactly once

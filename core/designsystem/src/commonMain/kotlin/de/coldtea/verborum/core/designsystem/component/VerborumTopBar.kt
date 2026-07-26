@@ -124,8 +124,6 @@ fun VerborumTopBar(
     state: VerborumTopBarState,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    /** An app-level action supplied by the shell (sign out), shown after the screen's own. */
-    appAction: VerborumTopBarAction? = null,
 ) {
     Row(
         modifier = modifier
@@ -172,7 +170,7 @@ fun VerborumTopBar(
             }
         }
 
-        listOfNotNull(state.action, appAction).forEach { action ->
+        state.action?.let { action ->
             IconButton(onClick = action.onClick) {
                 Icon(
                     imageVector = action.icon,

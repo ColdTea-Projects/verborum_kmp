@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import de.coldtea.verborum.feature.bibliotheca.navigation.BibliothecaGraph
 import de.coldtea.verborum.feature.bibliotheca.navigation.bibliothecaGraph
 import de.coldtea.verborum.feature.forum.navigation.forumGraph
+import de.coldtea.verborum.feature.options.navigation.optionsGraph
 
 /**
  * The whole app's route table. The shell knows only each feature's graph entry
@@ -27,5 +28,6 @@ fun VerborumNavHost(
     ) {
         bibliothecaGraph(navController)
         forumGraph()
+        optionsGraph()
     }
 }
