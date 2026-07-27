@@ -52,3 +52,36 @@ internal data class WordDto(
         isSynced = validLevel != null,
     )
 }
+
+/** The update payload: the service takes words grouped by dictionary. */
+@Serializable
+internal data class WordBundleRequest(
+    @SerialName("dictionaryId") val dictionaryId: String,
+    @SerialName("words") val words: List<WordRequest>,
+)
+
+@Serializable
+internal data class WordRequest(
+    @SerialName("wordId") val wordId: String,
+    @SerialName("dictionaryId") val dictionaryId: String,
+    @SerialName("word") val word: String,
+    @SerialName("wordMeta") val wordMeta: String,
+    @SerialName("translation") val translation: String,
+    @SerialName("translationMeta") val translationMeta: String,
+    /** Practice progress, 0..7 — synced so it survives a reinstall and follows the user. */
+    @SerialName("level") val level: Int,
+    @SerialName("createdAt") val createdAt: String? = null,
+    @SerialName("updatedAt") val updatedAt: String? = null,
+)
+
+internal fun Word.toRequest() = WordRequest(
+    wordId = wordId,
+    dictionaryId = dictionaryId,
+    word = word,
+    wordMeta = wordMeta,
+    translation = translation,
+    translationMeta = translationMeta,
+    level = level.coerceIn(0, Word.MAX_LEVEL),
+    createdAt = ApiTimestamp.format(createdAt),
+    updatedAt = ApiTimestamp.format(updatedAt),
+)

@@ -104,6 +104,7 @@ internal class FakeWordRepository(
     initial: List<Word> = emptyList(),
     private val pullResult: Outcome<Unit>? = null,
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
+    private val updateResult: Outcome<Unit> = Outcome.Success(Unit),
 ) : WordRepository {
 
     private val rows = MutableStateFlow(initial)
@@ -132,6 +133,20 @@ internal class FakeWordRepository(
         pulledUserId = userId
 
         return pullResult ?: Outcome.Success(Unit)
+    }
+
+    override fun findWord(wordId: String): Word? = rows.value.firstOrNull { it.wordId == wordId }
+
+    override suspend fun updateWord(word: Word): Outcome<Unit> {
+        // Mirrors the real repository: written locally first, put back on refusal.
+        val previous = findWord(word.wordId)
+        rows.value = rows.value.map { if (it.wordId == word.wordId) word else it }
+
+        if (updateResult is Outcome.Failure && previous != null) {
+            rows.value = rows.value.map { if (it.wordId == word.wordId) previous else it }
+        }
+
+        return updateResult
     }
 
     override suspend fun markDeleted(wordId: String) {

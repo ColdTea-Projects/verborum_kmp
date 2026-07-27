@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.feature.bibliotheca.common.data.WordRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -19,6 +20,16 @@ internal class WordService(
 
     fun observeWordCounts(): Flow<Map<String, Int>?> =
         repository.observeWordCounts().distinctUntilChanged()
+
+    /**
+     * Records practice progress. Clamped to the ladder here so no caller can push a level the rest of
+     * the app would have to defend against.
+     */
+    suspend fun updateLevel(wordId: String, level: Int): Outcome<Unit> {
+        val word = repository.findWord(wordId) ?: return Outcome.Failure(VerborumError.Unknown("no such word"))
+
+        return repository.updateWord(word.copy(level = level.coerceIn(0, Word.MAX_LEVEL)))
+    }
 
     /**
      * Deletes a word, local view first: it disappears at once, and comes back if the server refuses,

@@ -78,6 +78,9 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   still sees exactly one module per feature.
 - **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add
   no new public API.
+- **A slice may fork its UI per platform** when the design genuinely differs — `expect`/`actual` on the
+  content composable, with `iosMain`/`webMain` actuals. The view model stays shared, so the fork is
+  presentation only (`selfpractice` is the reference). Adapt by layout first; fork only on a decision.
 - A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat
   `data`/`di`/`ui` layout until a second screen arrives; the slice folders are what a second screen
   introduces.

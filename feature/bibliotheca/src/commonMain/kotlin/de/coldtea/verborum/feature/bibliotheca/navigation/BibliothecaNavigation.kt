@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.DictionaryDetailsScreen
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.DictionaryListScreen
+import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.SelfPracticeScreen
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -26,6 +27,10 @@ private data object DictionaryListRoute
 /** One dictionary: its words and how to practise them. */
 @Serializable
 private data class DictionaryDetailsRoute(val dictionaryId: String)
+
+/** A practice session over one dictionary's words. */
+@Serializable
+private data class SelfPracticeRoute(val dictionaryId: String)
 
 fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
     navigation<BibliothecaGraph>(startDestination = DictionaryListRoute) {
@@ -45,16 +50,23 @@ fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
 
         composable<DictionaryDetailsRoute> { entry ->
             val notice = rememberPendingScreenNotice()
+            val dictionaryId = entry.toRoute<DictionaryDetailsRoute>().dictionaryId
 
             DictionaryDetailsScreen(
-                dictionaryId = entry.toRoute<DictionaryDetailsRoute>().dictionaryId,
+                dictionaryId = dictionaryId,
                 onTestClick = { notice("The multiple-choice test arrives with a later screen.") },
-                onSelfPracticeClick = { notice("Self practice arrives with a later screen.") },
+                onSelfPracticeClick = {
+                    navController.navigate(SelfPracticeRoute(dictionaryId))
+                },
                 onCreateWordClick = { notice("Adding a word arrives with the next screen.") },
                 onEditWordClick = { notice("Editing a word arrives with the next screen.") },
                 // The dictionary is gone, so there is nothing left to show here.
                 onDictionaryDeleted = { navController.popBackStack() },
             )
+        }
+
+        composable<SelfPracticeRoute> { entry ->
+            SelfPracticeScreen(dictionaryId = entry.toRoute<SelfPracticeRoute>().dictionaryId)
         }
     }
 }

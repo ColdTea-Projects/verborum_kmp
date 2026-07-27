@@ -25,7 +25,8 @@ verborum_kmp/
     ├── bibliotheca/             # the library — one folder per screen slice
     │   ├── common/              #   shared inside the feature: dictionary + word layers, SyncService
     │   ├── dictionarylist/      #   di / ui for the dictionary list
-    │   └── dictionarydetails/   #   di / ui for one dictionary's words
+    │   ├── dictionarydetails/   #   di / ui for one dictionary's words
+    │   └── selfpractice/        #   shared session logic; the UI forks per platform
     ├── forum/                   # marketplace
     └── options/                 # the Options tab — signing out lives here
 ```
@@ -110,6 +111,24 @@ screens, are still to come; until then those taps report themselves on the snack
 
 Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
 it, so no CORS configuration is required on the service.
+
+### Self practice — the one forked screen
+
+`selfpractice` shares everything about a *session* — deck order, direction, which cards are open, how
+an answer moves the level — in `SelfPracticeViewModel`. Only the presentation forks, through an
+`expect`/`actual` `SelfPracticeContent`:
+
+| | iOS (`iosMain`) | Web (`webMain`) |
+|---|---|---|
+| Layout | one column, full width | grid, `Adaptive(220.dp)`, **no width cap** |
+| Card | expandable — tap reveals the answer | flip — click turns the card over |
+| Grading | swipe right/left | Wrong / Correct buttons on the back |
+| Forms | side by side: `go · went · gone` | stacked and centred: `go` / `went` / `gone` |
+| Shape | full-width row | square, or spanning two grid cells when a form is too long for one |
+
+iOS deliberately reproduces the Android screen. Everywhere else in the app a screen adapts by layout
+instead of forking — this is the exception, and the fork stops at `SelfPracticeContent`: both actuals
+render the same state and call the same callbacks.
 
 ### Convention plugins
 

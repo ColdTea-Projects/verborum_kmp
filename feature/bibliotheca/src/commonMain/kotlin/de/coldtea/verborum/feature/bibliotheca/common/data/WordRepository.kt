@@ -19,6 +19,11 @@ internal interface WordRepository {
     /** Every word the user owns, in one request — what the list's counts are built from. */
     suspend fun pullAllWords(userId: String): Outcome<Unit>
 
+    /** Saves a word, local view first; the previous value comes back if the server refuses. */
+    fun findWord(wordId: String): Word?
+
+    suspend fun updateWord(word: Word): Outcome<Unit>
+
     suspend fun markDeleted(wordId: String)
 
     suspend fun deleteRemotely(wordId: String): Outcome<Unit>
@@ -56,6 +61,28 @@ internal class NetworkWordRepository(
             // omits it, which would otherwise land under an empty key.
             .map { dtos -> dtos.toWords(dictionaryId = "") }
             .alsoMerge { words -> store.mergeAll(words) }
+
+    override fun findWord(wordId: String): Word? = store.find(wordId)
+
+    override suspend fun updateWord(word: Word): Outcome<Unit> {
+        val previous = store.find(word.wordId)
+
+        // Optimistic: practice is a rapid loop, and waiting for a round trip per answer would make
+        // every card feel stuck.
+        store.upsert(word.copy(isSynced = false))
+
+        val outcome = api.update(
+            listOf(WordBundleRequest(dictionaryId = word.dictionaryId, words = listOf(word.toRequest()))),
+        )
+
+        when {
+            outcome is Outcome.Success -> store.upsert(word.copy(isSynced = true))
+            // Put back exactly what was there, so a failed save cannot look like a successful one.
+            previous != null -> store.upsert(previous)
+        }
+
+        return outcome.map { }
+    }
 
     override suspend fun markDeleted(wordId: String) = store.markDeleted(wordId)
 

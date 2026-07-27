@@ -18,6 +18,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDict
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.di.dictionaryDetailsModule
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.di.dictionaryListModule
+import de.coldtea.verborum.feature.bibliotheca.selfpractice.di.selfPracticeModule
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -59,5 +60,5 @@ val bibliothecaModule: Module = module {
         )
     }
 
-    includes(dictionaryListModule, dictionaryDetailsModule)
+    includes(dictionaryListModule, dictionaryDetailsModule, selfPracticeModule)
 }

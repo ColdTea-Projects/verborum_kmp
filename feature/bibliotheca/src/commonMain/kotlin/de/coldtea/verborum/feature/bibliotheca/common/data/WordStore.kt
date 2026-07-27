@@ -88,6 +88,19 @@ internal class WordStore {
         }
     }
 
+    fun find(wordId: String): Word? = rows().firstOrNull { it.wordId == wordId }
+
+    /** Replaces one word in place, leaving its position — and every other row — alone. */
+    suspend fun upsert(word: Word) = mutex.withLock {
+        val existing = rows().any { it.wordId == word.wordId }
+
+        _rows.value = if (existing) {
+            rows().map { row -> if (row.wordId == word.wordId) word else row }
+        } else {
+            rows() + word
+        }
+    }
+
     fun knownTimestamps(wordId: String): Pair<Long, Long>? =
         rows().firstOrNull { it.wordId == wordId }?.let { it.createdAt to it.updatedAt }
 

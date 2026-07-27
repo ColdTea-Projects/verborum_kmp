@@ -100,4 +100,5 @@ Check the browser console for Kotlin exceptions — on web they surface there, n
 - [ ] Hover cursors on clickable elements; keyboard Esc/Enter/focus handled
 - [ ] Fonts bundled, not fetched
 - [ ] Runs on both `wasmJs` and `js`; console free of exceptions
-- [ ] No web-only fork of a shared screen
+- [ ] No web-only fork of a shared screen, unless the *design itself* differs per platform by
+      decision — `selfpractice` is the one such case: shared view model, `expect`/`actual` content
