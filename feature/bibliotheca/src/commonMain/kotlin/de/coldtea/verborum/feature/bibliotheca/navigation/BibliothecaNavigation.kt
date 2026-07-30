@@ -1,19 +1,16 @@
 package de.coldtea.verborum.feature.bibliotheca.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.DictionaryDetailsScreen
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.CreateDictionaryScreen
+import de.coldtea.verborum.feature.bibliotheca.createword.ui.CreateWordScreen
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.DictionaryListScreen
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.MultipleChoiceScreen
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.SelfPracticeScreen
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 /** The graph the shell references; its screens stay private to this feature. */
@@ -32,34 +29,54 @@ private data class DictionaryDetailsRoute(val dictionaryId: String)
 @Serializable
 private data class SelfPracticeRoute(val dictionaryId: String)
 
+/** A multiple-choice test over one dictionary's words. */
+@Serializable
+private data class MultipleChoiceRoute(val dictionaryId: String)
+
+/** The dictionary form: a null id creates, an id edits. */
+@Serializable
+internal data class CreateDictionaryRoute(val dictionaryId: String? = null)
+
+/** The word form, always within a dictionary; a null word id creates. */
+@Serializable
+private data class CreateWordRoute(val dictionaryId: String, val wordId: String? = null)
+
+/**
+ * Starts a new dictionary from outside the feature — the web shell's sidebar offers this from every
+ * screen. The second thing this feature makes public, alongside its graph: the shell needs somewhere
+ * to send that button, and it must not learn the route to get there.
+ */
+fun NavController.navigateToCreateDictionary() {
+    navigate(CreateDictionaryRoute())
+}
+
 fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
     navigation<BibliothecaGraph>(startDestination = DictionaryListRoute) {
         composable<DictionaryListRoute> {
-            // Creating and editing a dictionary are still to come, as in the Android app; until then
-            // the intent is acknowledged rather than silently dropped.
-            val notice = rememberPendingScreenNotice()
-
             DictionaryListScreen(
                 onDictionaryClick = { dictionaryId ->
                     navController.navigate(DictionaryDetailsRoute(dictionaryId))
                 },
-                onCreateDictionaryClick = { notice("Creating a dictionary arrives with the next screen.") },
-                onEditDictionaryClick = { notice("Editing a dictionary arrives with the next screen.") },
+                onCreateDictionaryClick = { navController.navigate(CreateDictionaryRoute()) },
+                onEditDictionaryClick = { dictionaryId ->
+                    navController.navigate(CreateDictionaryRoute(dictionaryId))
+                },
             )
         }
 
         composable<DictionaryDetailsRoute> { entry ->
-            val notice = rememberPendingScreenNotice()
             val dictionaryId = entry.toRoute<DictionaryDetailsRoute>().dictionaryId
 
             DictionaryDetailsScreen(
                 dictionaryId = dictionaryId,
-                onTestClick = { notice("The multiple-choice test arrives with a later screen.") },
+                onTestClick = { navController.navigate(MultipleChoiceRoute(dictionaryId)) },
                 onSelfPracticeClick = {
                     navController.navigate(SelfPracticeRoute(dictionaryId))
                 },
-                onCreateWordClick = { notice("Adding a word arrives with the next screen.") },
-                onEditWordClick = { notice("Editing a word arrives with the next screen.") },
+                onCreateWordClick = { navController.navigate(CreateWordRoute(dictionaryId)) },
+                onEditWordClick = { wordId ->
+                    navController.navigate(CreateWordRoute(dictionaryId, wordId))
+                },
                 // The dictionary is gone, so there is nothing left to show here.
                 onDictionaryDeleted = { navController.popBackStack() },
             )
@@ -68,20 +85,41 @@ fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
         composable<SelfPracticeRoute> { entry ->
             SelfPracticeScreen(dictionaryId = entry.toRoute<SelfPracticeRoute>().dictionaryId)
         }
+
+        composable<CreateDictionaryRoute> { entry ->
+            val route = entry.toRoute<CreateDictionaryRoute>()
+
+            CreateDictionaryScreen(
+                dictionaryId = route.dictionaryId,
+                onSaved = { saved ->
+                    // A new dictionary opens straight away; an edit returns where it came from.
+                    if (saved.wasEditing) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(DictionaryDetailsRoute(saved.dictionaryId)) {
+                            popUpTo(DictionaryListRoute)
+                        }
+                    }
+                },
+            )
+        }
+
+        composable<CreateWordRoute> { entry ->
+            val route = entry.toRoute<CreateWordRoute>()
+
+            CreateWordScreen(
+                dictionaryId = route.dictionaryId,
+                wordId = route.wordId,
+                onSaved = { navController.popBackStack() },
+            )
+        }
+
+        composable<MultipleChoiceRoute> { entry ->
+            MultipleChoiceScreen(
+                dictionaryId = entry.toRoute<MultipleChoiceRoute>().dictionaryId,
+                // Finishing returns to the dictionary the test came from.
+                onFinished = { navController.popBackStack() },
+            )
+        }
     }
-}
-
-/**
- * Reports a not-yet-built destination on the shared snackbar. Deliberately local to the graph: the
- * screens keep taking plain navigation lambdas, so nothing about them changes when the real
- * destinations land — only these lambdas do.
- */
-@Composable
-private fun rememberPendingScreenNotice(): (String) -> Unit {
-    val notices = remember { MutableSharedFlow<String>(extraBufferCapacity = 1) }
-    val scope = rememberCoroutineScope()
-
-    ShowSnackbarMessages(notices)
-
-    return { message -> scope.launch { notices.emit(message) } }
 }

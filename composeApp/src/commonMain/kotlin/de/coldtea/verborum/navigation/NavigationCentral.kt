@@ -1,26 +1,10 @@
 package de.coldtea.verborum.navigation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -28,19 +12,23 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
 import de.coldtea.verborum.core.designsystem.component.LocalSnackbarHostState
 import de.coldtea.verborum.core.designsystem.component.LocalVerborumTopBarController
-import de.coldtea.verborum.core.designsystem.component.OfflineBanner
-import de.coldtea.verborum.core.designsystem.component.VerborumTopBar
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarController
+import de.coldtea.verborum.core.designsystem.component.VerborumTopBarState
 import de.coldtea.verborum.core.designsystem.component.rememberIsOnline
 
 /**
- * The app's navigation centre: one nav host, one header, one snackbar, one set of tabs.
+ * The app's navigation centre: one nav host, one snackbar, one set of destinations.
  *
- * Screens own neither their header nor their navigation — they declare a header with
+ * Screens own neither their chrome nor their navigation — they declare a header with
  * `RegisterTopBar` and receive navigation as lambdas from their feature's graph, so this composable
  * stays the only place that knows the app's shape.
+ *
+ * The *shape* itself is per-platform, and that is the only fork: iOS keeps the phone chrome — a top
+ * bar over tabs — while the web app is a desktop page behind a persistent sidebar. Both hosts render
+ * the same nav host with the same state.
  */
 @Composable
 fun NavigationCentral(navController: NavHostController = rememberNavController()) {
@@ -54,94 +42,40 @@ fun NavigationCentral(navController: NavHostController = rememberNavController()
     // shell does not clear it on destination changes: `currentDestination` resolves a frame *after*
     // the first screen has registered, so clearing here blanked a header nothing would restore.
     val topBarState = topBarController.state
-    // An empty title is how a destination opts out of the app chrome entirely (onboarding).
-    val showChrome = topBarState.title.isNotEmpty()
-    val isOnline = rememberIsOnline()
-    val isTabRoot = currentDestination.isTabRoot()
 
     CompositionLocalProvider(
         LocalVerborumTopBarController provides topBarController,
         LocalSnackbarHostState provides snackbarHostState,
+        LocalNavigateBack provides { navController.popBackStack() },
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            // A bottom bar stretched across a desktop browser or an iPad is a phone idiom; at
-            // expanded width the same destinations become a rail.
-            val useRail = maxWidth >= ExpandedWidthBreakpoint
-
-            Scaffold(
-                topBar = {
-                    Column {
-                        if (showChrome) {
-                            VerborumTopBar(
-                                state = topBarState,
-                                onBackClick = { navController.popBackStack() },
-                            )
-                        }
-                        AnimatedVisibility(visible = showChrome && !isOnline) {
-                            OfflineBanner()
-                        }
-                    }
-                },
-                bottomBar = {
-                    // Only tab roots get the bottom bar; deeper screens are left via the header's
-                    // back button, so the tabs cannot swallow the back stack.
-                    if (!useRail && isTabRoot) {
-                        VerborumNavigationBar(navController, currentDestination)
-                    }
-                },
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                modifier = Modifier.fillMaxSize(),
-            ) { padding ->
-                Row(modifier = Modifier.padding(padding)) {
-                    if (useRail) {
-                        VerborumNavigationRail(navController, currentDestination)
-                    }
-                    VerborumNavHost(
-                        navController = navController,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-            }
-        }
+        VerborumAppScaffold(
+            navController = navController,
+            currentDestination = currentDestination,
+            topBarState = topBarState,
+            isOnline = rememberIsOnline(),
+            snackbarHostState = snackbarHostState,
+        )
     }
 }
 
+/**
+ * The platform's chrome around [VerborumNavHost].
+ *
+ * iOS: the shared top bar over a bottom navigation bar, becoming a rail on an iPad — the Android
+ * app's shape. Web: a fixed sidebar beside a scrolling page area, where the pages title themselves
+ * and the top bar is not drawn at all.
+ */
 @Composable
-private fun VerborumNavigationBar(
+internal expect fun VerborumAppScaffold(
     navController: NavHostController,
     currentDestination: NavDestination?,
-) {
-    NavigationBar {
-        TopLevelDestination.entries.forEach { destination ->
-            NavigationBarItem(
-                selected = currentDestination.isIn(destination),
-                onClick = { navController.switchTab(destination) },
-                icon = { Icon(destination.icon, contentDescription = null) },
-                label = { Text(destination.label) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun VerborumNavigationRail(
-    navController: NavHostController,
-    currentDestination: NavDestination?,
-) {
-    NavigationRail {
-        TopLevelDestination.entries.forEach { destination ->
-            NavigationRailItem(
-                selected = currentDestination.isIn(destination),
-                onClick = { navController.switchTab(destination) },
-                icon = { Icon(destination.icon, contentDescription = null) },
-                label = { Text(destination.label) },
-            )
-        }
-    }
-}
+    topBarState: VerborumTopBarState,
+    isOnline: Boolean,
+    snackbarHostState: SnackbarHostState,
+)
 
 /** Tab switches keep one back stack per tab and never re-add a tab twice. */
-private fun NavHostController.switchTab(destination: TopLevelDestination) {
+internal fun NavHostController.switchTab(destination: TopLevelDestination) {
     navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
@@ -150,15 +84,12 @@ private fun NavHostController.switchTab(destination: TopLevelDestination) {
 }
 
 /** True while anywhere inside [destination]'s graph, which is what marks its tab as selected. */
-private fun NavDestination?.isIn(destination: TopLevelDestination): Boolean =
+internal fun NavDestination?.isIn(destination: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
 
 /**
  * A tab root is the start destination of its own graph — the one screen in a tab from which back
  * leaves the app rather than the tab.
  */
-private fun NavDestination?.isTabRoot(): Boolean =
+internal fun NavDestination?.isTabRoot(): Boolean =
     this != null && parent?.startDestinationId == id
-
-/** Material's expanded window-size class; below it the phone layout is the right one. */
-private val ExpandedWidthBreakpoint = 840.dp

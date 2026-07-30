@@ -33,6 +33,7 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 internal fun OptionsScreen(
+    onHowToUseApp: (() -> Unit)?,
     modifier: Modifier = Modifier,
     viewModel: OptionsViewModel = koinViewModel(),
 ) {
@@ -44,6 +45,7 @@ internal fun OptionsScreen(
     OptionsContent(
         state = state,
         onSignOut = viewModel::signOut,
+        onHowToUseApp = onHowToUseApp,
         modifier = modifier,
     )
 }
@@ -52,9 +54,23 @@ internal fun OptionsScreen(
 internal fun OptionsContent(
     state: OptionsState,
     onSignOut: () -> Unit,
+    /**
+     * Opens the welcome tour. Null where the platform has already shown it unprompted, and the row is
+     * then left out entirely rather than shown doing nothing.
+     */
+    onHowToUseApp: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     ContentColumn(modifier = modifier) {
+        onHowToUseApp?.let { openTour ->
+            OptionRow(
+                icon = VerborumIcons.Book,
+                label = "How to use the app",
+                onClick = openTour,
+                modifier = Modifier.padding(top = Spacing.medium),
+            )
+        }
+
         OptionRow(
             icon = VerborumIcons.Logout,
             label = if (state.isSigningOut) "Signing out…" else "Sign out",

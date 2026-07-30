@@ -48,6 +48,7 @@ kotlin {
             implementation(project(":feature:auth"))
             implementation(project(":feature:bibliotheca"))
             implementation(project(":feature:forum"))
+            implementation(project(":feature:onboarding"))
             implementation(project(":feature:options"))
 
             implementation(libs.navigation.compose)

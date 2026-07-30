@@ -21,6 +21,12 @@ internal class WordService(
     fun observeWordCounts(): Flow<Map<String, Int>?> =
         repository.observeWordCounts().distinctUntilChanged()
 
+    /** One-shot read for prefilling the edit form. */
+    fun word(wordId: String): Word? = repository.findWord(wordId)
+
+    suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> =
+        repository.saveWord(word, isNew)
+
     /**
      * Records practice progress. Clamped to the ladder here so no caller can push a level the rest of
      * the app would have to defend against.

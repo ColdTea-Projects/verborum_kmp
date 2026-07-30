@@ -19,6 +19,9 @@ object Dimens {
     /** The tinted square a glyph sits in, as on a list row's leading badge. */
     val iconBadge = 48.dp
 
+    /** The lettered badge on a test answer — smaller than a leading icon, larger than a glyph. */
+    val iconBadgeSmall = 32.dp
+
     /** Minimum comfortable hit target — 48dp Material, 44pt iOS HIG; the larger wins. */
     val touchTarget = 48.dp
 
@@ -31,11 +34,17 @@ object Dimens {
     /** Outline width for chips and bordered surfaces. */
     val border = 1.dp
 
+    /** The heavier outline the web design gives its buttons and answer rows. */
+    val borderStrong = 2.dp
+
     /** Skeleton placeholder line heights, matching the text they stand in for. */
     val skeletonTitle = 20.dp
     val skeletonLine = 14.dp
 
     val elevationCard = 4.dp
+
+    /** The barely-there lift the web cards carry, where the border does most of the separating. */
+    val elevationCardSubtle = 1.dp
     val tonalElevationCard = 2.dp
 
     /** Caps a bottom sheet's list so a long one scrolls while a short one still wraps. */

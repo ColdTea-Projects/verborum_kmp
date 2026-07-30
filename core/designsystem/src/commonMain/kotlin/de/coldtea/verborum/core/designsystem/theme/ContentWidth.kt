@@ -24,4 +24,26 @@ object ContentWidth {
 
     /** Body copy — beyond this a line becomes hard to track back from. */
     val reading = 720.dp
+
+    /**
+     * The redesigned web panes. Unlike [column] these are not phone-shaped: the web app has a
+     * persistent sidebar and lays its content out as a desktop page, so each screen gets the measure
+     * its own design calls for rather than one shared cap.
+     */
+    object Web {
+        /** The dictionary list — wide enough for a multi-column card grid. */
+        val list = 1040.dp
+
+        /** The dictionary detail: practice tiles over the word list. */
+        val detail = 840.dp
+
+        /** The word form, whose two language cards sit side by side. */
+        val wordForm = 900.dp
+
+        /** The dictionary form — a single column of fields. */
+        val dictionaryForm = 560.dp
+
+        /** The test: one question card, read straight down. */
+        val test = 640.dp
+    }
 }

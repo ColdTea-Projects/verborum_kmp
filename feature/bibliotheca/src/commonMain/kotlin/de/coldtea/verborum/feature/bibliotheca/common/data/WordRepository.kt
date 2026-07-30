@@ -14,6 +14,9 @@ internal interface WordRepository {
 
     fun observeWordCounts(): Flow<Map<String, Int>?>
 
+    /** Every word the app knows, across dictionaries — what a test draws its distractors from. */
+    fun observeAllWords(): Flow<List<Word>>
+
     suspend fun pullWords(dictionaryId: String): Outcome<Unit>
 
     /** Every word the user owns, in one request — what the list's counts are built from. */
@@ -23,6 +26,9 @@ internal interface WordRepository {
     fun findWord(wordId: String): Word?
 
     suspend fun updateWord(word: Word): Outcome<Unit>
+
+    /** Creates a word, or updates it when [isNew] is false. */
+    suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit>
 
     suspend fun markDeleted(wordId: String)
 
@@ -49,6 +55,8 @@ internal class NetworkWordRepository(
     override fun observeWords(dictionaryId: String): Flow<List<Word>> = store.wordsOf(dictionaryId)
 
     override fun observeWordCounts(): Flow<Map<String, Int>?> = store.counts()
+
+    override fun observeAllWords(): Flow<List<Word>> = store.all()
 
     override suspend fun pullWords(dictionaryId: String): Outcome<Unit> =
         api.wordsOfDictionary(dictionaryId)
@@ -82,6 +90,24 @@ internal class NetworkWordRepository(
         }
 
         return outcome.map { }
+    }
+
+    override suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> {
+        val previous = store.find(word.wordId)
+        store.upsert(word.copy(isSynced = false))
+
+        val bundles = listOf(
+            WordBundleRequest(dictionaryId = word.dictionaryId, words = listOf(word.toRequest())),
+        )
+        val outcome = if (isNew) api.create(bundles) else api.update(bundles)
+
+        when {
+            outcome is Outcome.Success -> store.upsert(word.copy(isSynced = true))
+            previous != null -> store.upsert(previous)
+            else -> store.remove(word.wordId)
+        }
+
+        return outcome
     }
 
     override suspend fun markDeleted(wordId: String) = store.markDeleted(wordId)

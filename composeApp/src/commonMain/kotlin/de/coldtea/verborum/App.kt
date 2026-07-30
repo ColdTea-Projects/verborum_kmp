@@ -11,6 +11,7 @@ import de.coldtea.verborum.core.auth.SessionState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.theme.VerborumTheme
 import de.coldtea.verborum.feature.auth.ui.LoginScreen
+import de.coldtea.verborum.feature.onboarding.ui.OnboardingGate
 import de.coldtea.verborum.navigation.NavigationCentral
 import org.koin.compose.koinInject
 
@@ -48,6 +49,7 @@ private fun AuthGate(
         SessionState.Unknown -> LoadingState()
         SessionState.SignedOut -> LoginScreen()
         // Signing out lives in the Options tab, so the shell only decides wall-or-app.
-        is SessionState.SignedIn -> NavigationCentral(navController)
+        // The tour, where a platform shows it at all, comes between signing in and the app.
+        is SessionState.SignedIn -> OnboardingGate { NavigationCentral(navController) }
     }
 }

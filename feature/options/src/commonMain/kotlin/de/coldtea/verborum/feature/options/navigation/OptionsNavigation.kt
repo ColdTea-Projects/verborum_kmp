@@ -13,10 +13,14 @@ data object OptionsGraph
 @Serializable
 private data object OptionsHomeRoute
 
-fun NavGraphBuilder.optionsGraph() {
+/**
+ * [onHowToUseApp] is supplied by the shell — null leaves that row out. Passing it in keeps this
+ * feature unaware of the tour it opens, which lives in a feature of its own.
+ */
+fun NavGraphBuilder.optionsGraph(onHowToUseApp: (() -> Unit)? = null) {
     navigation<OptionsGraph>(startDestination = OptionsHomeRoute) {
         composable<OptionsHomeRoute> {
-            OptionsScreen()
+            OptionsScreen(onHowToUseApp = onHowToUseApp)
         }
     }
 }

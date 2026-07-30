@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
@@ -16,6 +17,7 @@ internal class DictionaryService(
     private val observeDictionariesUseCase: ObserveDictionariesUseCase,
     private val observeDictionaryUseCase: ObserveDictionaryUseCase,
     private val deleteDictionaryUseCase: DeleteDictionaryUseCase,
+    private val repository: DictionaryRepository,
 ) {
 
     fun observeDictionaries(): Flow<List<Dictionary>> = observeDictionariesUseCase()
@@ -26,4 +28,10 @@ internal class DictionaryService(
 
     suspend fun deleteDictionary(dictionaryId: String): Outcome<Unit> =
         deleteDictionaryUseCase(dictionaryId)
+
+    /** One-shot read for prefilling the edit form. */
+    suspend fun dictionary(dictionaryId: String): Dictionary? = repository.findDictionary(dictionaryId)
+
+    suspend fun saveDictionary(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> =
+        repository.save(dictionary, isNew)
 }

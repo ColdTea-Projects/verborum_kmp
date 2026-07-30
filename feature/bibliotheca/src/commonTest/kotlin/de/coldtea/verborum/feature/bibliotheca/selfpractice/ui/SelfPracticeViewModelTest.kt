@@ -56,6 +56,7 @@ class SelfPracticeViewModelTest {
                 observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaries),
                 observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaries),
                 deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaries),
+                repository = dictionaries,
             ),
             wordService = WordService(repository = wordRepository),
             syncService = SyncService(
@@ -188,6 +189,7 @@ class SelfPracticeViewModelTest {
                     observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaries),
                     observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaries),
                     deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaries),
+                repository = dictionaries,
                 ),
                 wordService = WordService(repository = wordRepository),
                 syncService = SyncService(

@@ -69,6 +69,7 @@ class DictionaryListViewModelTest {
                 observeDictionariesUseCase = ObserveDictionariesUseCase(repository),
                 observeDictionaryUseCase = ObserveDictionaryUseCase(repository),
                 deleteDictionaryUseCase = DeleteDictionaryUseCase(repository),
+                repository = repository,
             ),
             wordService = WordService(repository = wordRepository),
             syncService = SyncService(

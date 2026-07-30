@@ -16,6 +16,10 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.activeUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.di.createDictionaryModule
+import de.coldtea.verborum.feature.bibliotheca.createword.di.createWordModule
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.di.multipleChoiceModule
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.di.dictionaryDetailsModule
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.di.dictionaryListModule
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.di.selfPracticeModule
@@ -46,9 +50,13 @@ val bibliothecaModule: Module = module {
             observeDictionariesUseCase = get(),
             observeDictionaryUseCase = get(),
             deleteDictionaryUseCase = get(),
+            repository = get(),
         )
     }
     factory { WordService(repository = get()) }
+    factory {
+        ObserveLanguagePairWordsUseCase(dictionaryRepository = get(), wordRepository = get())
+    }
 
     factory { activeUserUseCase(authService = get()) }
     factory { SyncUserDictionariesUseCase(repository = get()) }
@@ -60,5 +68,12 @@ val bibliothecaModule: Module = module {
         )
     }
 
-    includes(dictionaryListModule, dictionaryDetailsModule, selfPracticeModule)
+    includes(
+        dictionaryListModule,
+        dictionaryDetailsModule,
+        selfPracticeModule,
+        multipleChoiceModule,
+        createDictionaryModule,
+        createWordModule,
+    )
 }

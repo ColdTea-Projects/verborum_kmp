@@ -26,13 +26,16 @@ composeApp  ──▶ feature/*  ──▶ core/*
 | `feature:auth`        | the login wall (Keycloak, Authorization Code + PKCE)                    |
 | `feature:bibliotheca`| the library — slice per screen (`dictionarylist`, `dictionarydetails`)   |
 | `feature:forum`      | marketplace listings                                                    |
+| `feature:onboarding` | the welcome tour; owns when it is shown per platform                     |
 | `feature:options`     | the Options tab; owns sign-out                                          |
 
 ### Non-negotiable rules
 
 1. **Dependencies point one way only.** `composeApp → feature → core`. Never `core → feature`,
    never `feature → composeApp`.
-2. **Features never depend on features.** Shared behaviour is promoted to a `core:*` module.
+2. **Features never depend on features.** Shared behaviour is promoted to a `core:*` module. When one
+   feature's screen must open another's, the graph builder takes a lambda and the **shell** supplies it
+   (`optionsGraph(onHowToUseApp = …)` opens onboarding without Options knowing it exists).
 3. **A feature exposes exactly two things**: its nav-graph entry (`BibliothecaGraph` +
    `bibliothecaGraph()`) and its Koin module (`bibliothecaModule`). Screens, view models,
    repositories and route classes stay `internal`/`private` to the feature.
@@ -78,9 +81,30 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   still sees exactly one module per feature.
 - **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add
   no new public API.
-- **A slice may fork its UI per platform** when the design genuinely differs — `expect`/`actual` on the
-  content composable, with `iosMain`/`webMain` actuals. The view model stays shared, so the fork is
-  presentation only (`selfpractice` is the reference). Adapt by layout first; fork only on a decision.
+- **A slice forks its UI per platform** — `expect`/`actual` on the content composable, with
+  `iosMain`/`webMain` actuals. This is the norm in `feature:bibliotheca`, not the exception: the web
+  app follows `docs/design_handoff_verborum_web/` and iOS follows the Android design, so the two
+  differ by intent. The split is always the same:
+
+  ```
+  ui/<Screen>Screen.kt          commonMain — the stateful half: view model, RegisterTopBar,
+                                             then `expect fun <Screen>Content(…)`
+  ui/<Screen>Content.ios.kt     iosMain    — the Android design
+  ui/<Screen>Content.web.kt     webMain    — the desktop design
+  ui/composables/…              whichever source set actually draws them
+  ```
+
+  The view model, the state and the callback signatures stay shared, so the fork is presentation
+  only and no behaviour can drift. A composable only one platform draws belongs in that platform's
+  source set — leaving it in `commonMain` is how the two designs start bleeding into each other.
+
+  Web pages take their furniture from `core:designsystem/webMain` (`WebPageTitle`, `WebBackLink`,
+  `WebChip`, `WebPanel`, `WebSelect`, `WebTextField`, `WebPrimaryButton`) and their measure from
+  `ContentPane` + `ContentWidth.Web`; iOS screens keep `ContentColumn` and the shared top bar. A web
+  page draws its own header — there is no top app bar on that platform — and navigates back through
+  `LocalNavigateBack`.
+
+  `selfpractice` is the one screen the handoff leaves out, so both platforms keep what they had.
 - A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat
   `data`/`di`/`ui` layout until a second screen arrives; the slice folders are what a second screen
   introduces.

@@ -7,6 +7,9 @@ import androidx.navigation.compose.NavHost
 import de.coldtea.verborum.feature.bibliotheca.navigation.BibliothecaGraph
 import de.coldtea.verborum.feature.bibliotheca.navigation.bibliothecaGraph
 import de.coldtea.verborum.feature.forum.navigation.forumGraph
+import de.coldtea.verborum.feature.onboarding.navigation.OnboardingGraph
+import de.coldtea.verborum.feature.onboarding.navigation.onboardingGraph
+import de.coldtea.verborum.feature.onboarding.ui.isOnboardingOpenedFromOptions
 import de.coldtea.verborum.feature.options.navigation.optionsGraph
 
 /**
@@ -28,6 +31,12 @@ fun VerborumNavHost(
     ) {
         bibliothecaGraph(navController)
         forumGraph()
-        optionsGraph()
+        // Where the tour is not shown unprompted, Options is how it is reached. The shell decides
+        // that, so neither feature has to know about the other.
+        optionsGraph(
+            onHowToUseApp = { navController.navigate(OnboardingGraph) }
+                .takeIf { isOnboardingOpenedFromOptions },
+        )
+        onboardingGraph(onDone = { navController.popBackStack() })
     }
 }

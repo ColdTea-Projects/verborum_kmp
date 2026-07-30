@@ -26,8 +26,12 @@ verborum_kmp/
     │   ├── common/              #   shared inside the feature: dictionary + word layers, SyncService
     │   ├── dictionarylist/      #   di / ui for the dictionary list
     │   ├── dictionarydetails/   #   di / ui for one dictionary's words
-    │   └── selfpractice/        #   shared session logic; the UI forks per platform
+    │   ├── selfpractice/        #   shared session logic; the UI forks per platform
+    │   ├── multiplechoice/      #   the test — one design for both platforms
+    │   ├── createdictionary/    #   the dictionary form — create and edit
+    │   └── createword/          #   the word form — create and edit
     ├── forum/                   # marketplace
+    ├── onboarding/              # the welcome tour; when it shows differs per platform
     └── options/                 # the Options tab — signing out lives here
 ```
 
@@ -112,8 +116,79 @@ screens, are still to come; until then those taps report themselves on the snack
 Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
 it, so no CORS configuration is required on the service.
 
-### Self practice — the one forked screen
+### The test
 
+Multiple choice over a dictionary's words, ported from Android and **not** forked — a question card
+over two actions reads the same with a finger or a mouse — inside the app's usual capped column.
+
+A word contributes one question per grammatical form both languages recorded, so `go/went/gone →
+gehen/ging/gegangen` asks three separate things. Wrong answers are drawn from **every dictionary
+sharing the language pair**, preferring the same form, so a past-tense question is offered other past
+tenses; that is also why the test needs four distinct entries in the pair before it will start.
+
+Scoring and levelling are deliberately different things: the score counts every correct *question*,
+while a word's *level* moves at most one rung each way per run — the first correct answer raises it,
+the first wrong answer lowers it, and both together leave it where it started. The delta is measured
+against the level as it stood when the run began, not the current one, since each save flows straight
+back through the observed words.
+
+### The two forms — dictionary and word
+
+`createdictionary` is a name, two language dropdowns and the tag catalogue (level / topic / exam).
+A new dictionary gets its id client-side, so the row can appear in the list before the server has
+answered; saving a new one opens it, saving an edit returns where it came from.
+
+`createword` follows the dictionary's two languages, and what it asks for is decided by
+`WordGrammar` per **language and word type** — a German noun offers *der/die/das* and a plural, a
+German verb offers past / participle / *haben*-or-*sein*, a Japanese noun offers a counter and no
+gender at all, an adverb offers nothing beyond the word itself. A word can hold several meanings;
+the two language cards of a meaning stay index-aligned, and adding or removing one moves both sides
+together.
+
+What is stored is not what is typed. `composeWordText` folds the article back in — `Apfel` +
+masculine becomes `["der Apfel"]`, and French elides to `["l'eau"]` — while `composeWordMeta`
+writes the grammar as `{"lang":"de","type":"noun","genders":["m"],"fields":{"plural":["Äpfel"]}}`.
+`parseWordFormInputs` is the exact inverse, so opening a word for editing shows *Apfel* with its
+gender chip lit rather than the stored surface. Editing preserves the word's id, its level and its
+creation time: correcting a typo must not cost the user the progress they built on that word.
+
+Two things from the Android form are deliberately not ported yet: the per-language hint texts under
+each field, and the Japanese verb/adjective class pickers.
+
+### Two designs, one app
+
+Every screen the browser shows follows `docs/design_handoff_verborum_web/` — a desktop reinterpretation
+of the app — while iOS keeps the Android design it was built from. The split is always the same shape:
+the view model, the state and the callbacks are shared in `commonMain`, and only a `@Composable
+expect fun …Content(…)` forks. Both actuals render the same state and call the same lambdas, so no
+behaviour can drift between the two.
+
+| | iOS (`iosMain`) | Web (`webMain`) |
+|---|---|---|
+| Chrome | shared top bar over tabs, a rail on iPad | fixed 240dp sidebar; **no top bar at all** |
+| Headers | the shell draws what `RegisterTopBar` registered | each page draws its own back link and serif title |
+| Measure | one phone-shaped `ContentColumn`, centred | a per-screen `ContentPane`, start-aligned |
+| List | one column of cards, search behind a magnifier | card grid, filters always in view |
+| Detail | tiles over a lazy word list | tiles over a bordered "WORD LIST" panel |
+| Word form | the two language cards stacked | the two side by side, crimson and gold edges |
+| Test | question card over two buttons | the same, plus answers that mark themselves after checking |
+
+The web pages are built from one set of parts in `core:designsystem/webMain` — `WebPageTitle`,
+`WebBackLink`, `WebChip`, `WebPrimaryButton`, `WebPanel`, `WebSelect`, `WebTextField`. A page that
+needs furniture the others do not have belongs there too, not in the feature.
+
+Two deliberate deviations from the handoff. **Type**: it asks for Lora and Work Sans; rather than ship
+font binaries the two `display*` slots carry `FontFamily.Serif`, so the platform's serif stands in for
+Lora, and no other slot changed — which is why the iOS screens look exactly as they did. **Filters**:
+the handoff's list has only a search box and a sort menu, but the app also filters by language pair,
+so those two menus join the same row rather than being dropped.
+
+`Forum` and `Options` are not in the handoff. Until they get pages of their own, the web shell draws
+their headers from what they registered — see the branch in `VerborumAppScaffold.web.kt`.
+
+### Self practice — the one screen the handoff skips
+
+The handoff deliberately leaves this screen out, so both platforms keep the designs they already had.
 `selfpractice` shares everything about a *session* — deck order, direction, which cards are open, how
 an answer moves the level — in `SelfPracticeViewModel`. Only the presentation forks, through an
 `expect`/`actual` `SelfPracticeContent`:
@@ -126,9 +201,28 @@ an answer moves the level — in `SelfPracticeViewModel`. Only the presentation 
 | Forms | side by side: `go · went · gone` | stacked and centred: `go` / `went` / `gone` |
 | Shape | full-width row | square, or spanning two grid cells when a form is too long for one |
 
-iOS deliberately reproduces the Android screen. Everywhere else in the app a screen adapts by layout
-instead of forking — this is the exception, and the fork stops at `SelfPracticeContent`: both actuals
+iOS deliberately reproduces the Android screen, and the fork stops at `SelfPracticeContent`: both actuals
 render the same state and call the same callbacks.
+
+### Onboarding
+
+The four-panel welcome tour, ported from Android. The panels and their copy are shared; **when** it
+appears and **how it is laid out** both differ per platform, through `expect`/`actual`
+(`OnboardingGate`, `isOnboardingOpenedFromOptions`, `OnboardingContent`):
+
+| | iOS | Web |
+|---|---|---|
+| When | a wall between signing in and the app, first launch only | only from Options → "How to use the app" |
+| Layout | one panel at a time, swiped, dots indicator | all four at once, 2×2 grid filling the screen |
+| Done button | on the last panel | pinned at the bottom, always visible |
+| Practice panel | "Practice with a swipe" | "Practice with a flip" — the web app has flip cards, not swipes |
+| On finish | the app | back to Options |
+
+Finishing records the fact in `LocalCache`, so iOS shows it exactly once. The web grid drops to a
+single scrolling column below 700dp, where two panels side by side would leave neither readable.
+
+`feature:options` knows nothing about it: the shell passes `optionsGraph` a nullable lambda, and a
+null leaves that row out entirely.
 
 ### Convention plugins
 

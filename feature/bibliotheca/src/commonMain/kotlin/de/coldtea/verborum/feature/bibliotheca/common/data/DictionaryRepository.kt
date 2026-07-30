@@ -22,6 +22,11 @@ internal interface DictionaryRepository {
     /** Pulls the user's dictionaries and merges them into the store. */
     suspend fun pullDictionaries(userId: String): Outcome<List<Dictionary>>
 
+    fun findDictionary(dictionaryId: String): Dictionary?
+
+    /** Saves a new dictionary and returns its id, or updates an existing one. */
+    suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit>
+
     suspend fun markDeleted(dictionaryId: String)
 
     suspend fun deleteRemotely(dictionaryId: String): Outcome<Unit>
@@ -57,6 +62,27 @@ internal class NetworkDictionaryRepository(
                 // "the user has no dictionaries".
                 if (outcome is Outcome.Success) store.merge(outcome.data)
             }
+
+    override fun findDictionary(dictionaryId: String): Dictionary? = store.find(dictionaryId)
+
+    override suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> {
+        val previous = store.find(dictionary.dictionaryId)
+
+        // Optimistic, like every other write here: the row appears at once and is rolled back if
+        // the server refuses, so the list never shows something the backend does not have.
+        store.upsert(dictionary.copy(isSynced = false))
+
+        val request = dictionary.toRequest()
+        val outcome = if (isNew) api.create(request) else api.update(request)
+
+        when {
+            outcome is Outcome.Success -> store.upsert(dictionary.copy(isSynced = true))
+            previous != null -> store.upsert(previous)
+            else -> store.remove(dictionary.dictionaryId)
+        }
+
+        return outcome
+    }
 
     override suspend fun markDeleted(dictionaryId: String) = store.markDeleted(dictionaryId)
 

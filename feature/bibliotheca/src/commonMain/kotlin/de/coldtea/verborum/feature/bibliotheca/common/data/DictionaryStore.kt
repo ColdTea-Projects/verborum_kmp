@@ -72,6 +72,22 @@ internal class DictionaryStore {
         }
     }
 
+    fun find(dictionaryId: String): Dictionary? =
+        _rows.value.firstOrNull { it.dictionaryId == dictionaryId }
+
+    /** Replaces one row in place, or appends it when it is new. */
+    suspend fun upsert(dictionary: Dictionary) = mutex.withLock {
+        val exists = _rows.value.any { it.dictionaryId == dictionary.dictionaryId }
+
+        _rows.value = if (exists) {
+            _rows.value.map { row ->
+                if (row.dictionaryId == dictionary.dictionaryId) dictionary else row
+            }
+        } else {
+            _rows.value + dictionary
+        }
+    }
+
     /** Timestamps already known locally, used as fallbacks when the server omits its own. */
     fun knownTimestamps(dictionaryId: String): Pair<Long, Long>? =
         _rows.value.firstOrNull { it.dictionaryId == dictionaryId }

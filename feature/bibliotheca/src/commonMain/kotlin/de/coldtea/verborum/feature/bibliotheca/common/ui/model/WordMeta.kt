@@ -9,24 +9,24 @@ import kotlinx.serialization.Serializable
  * A grammatical form stored alongside the base word. [metaKey] is the key in the meta blob; the
  * **declaration order is the display order**, so a verb reads "go · went · gone".
  */
-internal enum class FieldKey(val metaKey: String) {
+internal enum class FieldKey(val metaKey: String, val label: String) {
     // Reading leads so kana/pinyin show before every other form.
-    READING("reading"),
-    PLURAL("plural"),
-    FEMININE("feminine"),
-    COMPARATIVE("comparative"),
-    SUPERLATIVE("superlative"),
-    PRESENT_3RD("present"),
-    PAST("past"),
-    PAST_3RD("past3"),
-    PARTICIPLE("participle"),
-    AUXILIARY("aux"),
-    ASPECT("aspect"),
-    ROOT("root"),
-    STEM("stem"),
-    MEASURE("measure"),
-    CLASS("class"),
-    POLITE("polite"),
+    READING("reading", "Reading"),
+    PLURAL("plural", "Plural"),
+    FEMININE("feminine", "Feminine"),
+    COMPARATIVE("comparative", "Comparative"),
+    SUPERLATIVE("superlative", "Superlative"),
+    PRESENT_3RD("present", "Present"),
+    PAST("past", "Past"),
+    PAST_3RD("past3", "Past form"),
+    PARTICIPLE("participle", "Participle"),
+    AUXILIARY("aux", "Auxiliary"),
+    ASPECT("aspect", "Aspect"),
+    ROOT("root", "Root"),
+    STEM("stem", "Stem"),
+    MEASURE("measure", "Measure"),
+    CLASS("class", "Class"),
+    POLITE("polite", "Polite"),
 }
 
 /** The part of speech, shown after the word. English only, as the rest of this app is for now. */
@@ -54,6 +54,8 @@ internal data class WordMetaBundle(
     val languageCode: String,
     val wordType: WordType?,
     val meanings: List<Meaning>,
+    /** Per meaning, in the same order — kept raw so the edit form can restore the chips. */
+    val genderCodes: List<String> = emptyList(),
 ) {
     data class Meaning(val fields: Map<FieldKey, String>)
 }
@@ -93,7 +95,12 @@ internal fun parseWordMeta(meta: String): WordMetaBundle? {
         WordMetaBundle.Meaning(fields)
     }
 
-    return WordMetaBundle(dto.lang, WordType.fromMeta(dto.type), meanings)
+    return WordMetaBundle(
+        languageCode = dto.lang,
+        wordType = WordType.fromMeta(dto.type),
+        meanings = meanings,
+        genderCodes = dto.genders,
+    )
 }
 
 /**
@@ -138,6 +145,18 @@ internal fun displayLine(surfaces: String, meta: String): String {
     val languageCode = parseWordMeta(meta)?.languageCode.orEmpty()
 
     return displayColumns(surfaces, meta).joinToString(columnSeparatorFor(languageCode))
+}
+
+/**
+ * The first meaning's grammatical forms, keyed by form. The quiz asks about one form at a time, so
+ * unlike the display helpers it needs them apart rather than joined into a line.
+ */
+internal fun formsOf(meta: String): Map<FieldKey, String> {
+    val fields = parseWordMeta(meta)?.meanings?.firstOrNull()?.fields.orEmpty()
+
+    return FieldKey.entries.mapNotNull { key ->
+        displayForm(fields, key)?.let { form -> key to form }
+    }.toMap()
 }
 
 /** The part of speech to show after the word, if the meta records one. */

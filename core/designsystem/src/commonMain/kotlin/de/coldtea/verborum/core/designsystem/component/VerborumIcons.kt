@@ -251,6 +251,18 @@ object VerborumIcons {
         }
     }
 
+    val Play: ImageVector by lazy {
+        materialIcon {
+            // A solid rightwards triangle: "start practising".
+            path {
+                moveTo(8f, 5f)
+                lineTo(19f, 12f)
+                lineTo(8f, 19f)
+                close()
+            }
+        }
+    }
+
     val ArrowBack: ImageVector by lazy {
         materialIcon {
             // A leftwards arrow: shaft plus chevron head, for the shared top bar's back button.

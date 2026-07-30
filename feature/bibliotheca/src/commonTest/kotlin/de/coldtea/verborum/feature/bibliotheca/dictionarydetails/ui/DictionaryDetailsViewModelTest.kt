@@ -59,6 +59,7 @@ class DictionaryDetailsViewModelTest {
                 observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaryRepository),
                 observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaryRepository),
                 deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaryRepository),
+                repository = dictionaryRepository,
             ),
             wordService = WordService(repository = wordRepository),
             syncService = SyncService(

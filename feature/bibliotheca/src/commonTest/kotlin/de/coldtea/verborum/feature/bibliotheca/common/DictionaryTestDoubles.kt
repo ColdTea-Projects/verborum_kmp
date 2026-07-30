@@ -55,11 +55,18 @@ internal class FakeDictionaryRepository(
     initial: List<Dictionary> = emptyList(),
     private val pullResult: Outcome<List<Dictionary>>? = null,
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
+    private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
 ) : DictionaryRepository {
 
     private val rows = MutableStateFlow(initial)
 
     var pulledUserId: String? = null
+        private set
+
+    var savedDictionary: Dictionary? = null
+        private set
+
+    var savedAsNew: Boolean? = null
         private set
 
     override fun observeDictionaries(): Flow<List<Dictionary>> =
@@ -75,6 +82,20 @@ internal class FakeDictionaryRepository(
         if (outcome is Outcome.Success) rows.value = outcome.data
 
         return outcome
+    }
+
+    override fun findDictionary(dictionaryId: String): Dictionary? =
+        rows.value.firstOrNull { it.dictionaryId == dictionaryId }
+
+    override suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> {
+        savedDictionary = dictionary
+        savedAsNew = isNew
+
+        if (saveResult is Outcome.Success) {
+            rows.value = rows.value.filterNot { it.dictionaryId == dictionary.dictionaryId } + dictionary
+        }
+
+        return saveResult
     }
 
     override suspend fun markDeleted(dictionaryId: String) {
@@ -105,9 +126,16 @@ internal class FakeWordRepository(
     private val pullResult: Outcome<Unit>? = null,
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
     private val updateResult: Outcome<Unit> = Outcome.Success(Unit),
+    private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
 ) : WordRepository {
 
     private val rows = MutableStateFlow(initial)
+
+    var savedWord: Word? = null
+        private set
+
+    var savedAsNew: Boolean? = null
+        private set
 
     var pulledDictionaryId: String? = null
         private set
@@ -123,6 +151,8 @@ internal class FakeWordRepository(
     override fun observeWordCounts(): Flow<Map<String, Int>?> =
         visible().map { list -> list.groupingBy(Word::dictionaryId).eachCount() }
 
+    override fun observeAllWords(): Flow<List<Word>> = visible()
+
     override suspend fun pullWords(dictionaryId: String): Outcome<Unit> {
         pulledDictionaryId = dictionaryId
 
@@ -136,6 +166,17 @@ internal class FakeWordRepository(
     }
 
     override fun findWord(wordId: String): Word? = rows.value.firstOrNull { it.wordId == wordId }
+
+    override suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> {
+        savedWord = word
+        savedAsNew = isNew
+
+        if (saveResult is Outcome.Success) {
+            rows.value = rows.value.filterNot { it.wordId == word.wordId } + word
+        }
+
+        return saveResult
+    }
 
     override suspend fun updateWord(word: Word): Outcome<Unit> {
         // Mirrors the real repository: written locally first, put back on refusal.
