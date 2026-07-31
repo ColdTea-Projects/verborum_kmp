@@ -98,11 +98,18 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   only and no behaviour can drift. A composable only one platform draws belongs in that platform's
   source set — leaving it in `commonMain` is how the two designs start bleeding into each other.
 
-  Web pages take their furniture from `core:designsystem/webMain` (`WebPageTitle`, `WebBackLink`,
-  `WebChip`, `WebPanel`, `WebSelect`, `WebTextField`, `WebPrimaryButton`) and their measure from
-  `ContentPane` + `ContentWidth.Web`; iOS screens keep `ContentColumn` and the shared top bar. A web
-  page draws its own header — there is no top app bar on that platform — and navigates back through
-  `LocalNavigateBack`.
+  Web pages take their furniture from `core:designsystem/webMain` (`WebPageTitle`, `WebChip`,
+  `WebPanel`, `WebSelect`, `WebTextField`, `WebPrimaryButton`) and their measure from `ContentPane` +
+  `ContentWidth.Web`; iOS screens keep `ContentColumn`.
+
+- **Every screen calls `RegisterTopBar`, on both platforms.** iOS renders it as the top bar; web
+  renders it as `WebTopBar`, the strip above the page holding the way back, and pages add a
+  `backLabel` naming where back leads. Register in the shared half where the title is the same on
+  both platforms, and in each actual where it is not.
+
+- **Web navigation follows the window.** Sidebar at ≥700dp, bottom bar below it; the shell decides
+  from the destination, and only the onboarding graph goes without. Do not gate navigation on what a
+  screen registered — a screen that forgets would silently lose it.
 
   `selfpractice` is the one screen the handoff leaves out, so both platforms keep what they had.
 - A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat

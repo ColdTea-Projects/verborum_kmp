@@ -19,8 +19,7 @@ import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
-import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
-import de.coldtea.verborum.core.designsystem.component.WebBackLink
+import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.WebChip
 import de.coldtea.verborum.core.designsystem.component.WebEyebrow
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
@@ -56,8 +55,16 @@ internal actual fun CreateWordContent(
     onRetry: () -> Unit,
     modifier: Modifier,
 ) {
-    val navigateBack = LocalNavigateBack.current
     val dictionary = state.dictionary
+
+    // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
+    // that wants no chrome at all, and would lose the sidebar with it.
+    RegisterTopBar(
+        title = if (state.isEditing) "Edit word" else "New word",
+        subtitle = dictionary?.name,
+        showBackButton = true,
+        backLabel = dictionary?.let { "Back to ${it.name}" } ?: "Back",
+    )
 
     when {
         state.hasFailed -> ErrorState(
@@ -74,10 +81,6 @@ internal actual fun CreateWordContent(
             ContentPane(maxWidth = ContentWidth.Web.wordForm) {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     WebPageSpacer(Spacing.extraLarge)
-
-                    WebBackLink(label = "Back to ${dictionary.name}", onClick = navigateBack)
-
-                    WebPageSpacer(Spacing.small)
 
                     WebPageTitle(title = if (state.isEditing) "Edit Word" else "Add Word")
 

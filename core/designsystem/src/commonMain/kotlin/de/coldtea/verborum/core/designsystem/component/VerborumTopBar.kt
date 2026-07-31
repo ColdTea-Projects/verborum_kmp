@@ -47,6 +47,13 @@ data class VerborumTopBarState(
     val subtitle: String? = null,
     val showBackButton: Boolean = false,
     val action: VerborumTopBarAction? = null,
+    /**
+     * What going back leads to — "Back to dictionaries", "Exit test".
+     *
+     * The web top bar spells this out beside its arrow, where there is room for it. iOS ignores it:
+     * a bare chevron is the platform's own convention and a label beside it reads as clutter.
+     */
+    val backLabel: String? = null,
 )
 
 /**
@@ -101,14 +108,22 @@ fun RegisterTopBar(
     subtitle: String? = null,
     showBackButton: Boolean = true,
     action: VerborumTopBarAction? = null,
+    backLabel: String? = null,
 ) {
     val controller = LocalVerborumTopBarController.current
 
     // Keyed on the action's identity rather than the object, since its onClick is a fresh lambda
     // each recomposition; that lambda closes over remembered state, so a "stale" one still works.
-    DisposableEffect(controller, title, subtitle, showBackButton, action?.contentDescription) {
+    DisposableEffect(
+        controller,
+        title,
+        subtitle,
+        showBackButton,
+        action?.contentDescription,
+        backLabel,
+    ) {
         val token = controller.register(
-            VerborumTopBarState(title, subtitle, showBackButton, action),
+            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel),
         )
 
         onDispose { controller.unregister(token) }

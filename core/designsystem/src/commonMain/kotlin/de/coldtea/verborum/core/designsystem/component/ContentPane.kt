@@ -1,6 +1,6 @@
 package de.coldtea.verborum.core.designsystem.component
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +12,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 
 /**
@@ -29,13 +30,15 @@ fun ContentPane(
     horizontalPadding: Dp = Spacing.extraLarge,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+        val padding = narrowAwarePadding(this.maxWidth, horizontalPadding)
+
         Column(
             modifier = Modifier
                 // The cap first, then fill: this is the load-bearing order.
                 .widthIn(max = maxWidth)
                 .fillMaxSize()
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontal = padding),
             content = content,
         )
     }
@@ -49,16 +52,28 @@ fun ContentPaneWidth(
     horizontalPadding: Dp = Spacing.extraLarge,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+        val padding = narrowAwarePadding(this.maxWidth, horizontalPadding)
+
         Column(
             modifier = Modifier
                 .widthIn(max = maxWidth)
                 .fillMaxWidth()
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontal = padding),
             content = content,
         )
     }
 }
+
+/**
+ * A desktop gutter on a phone-width window is width the content cannot spare — 32dp each side takes
+ * a sixth of a 390dp viewport — so a narrow pane falls back to the smaller gutter.
+ */
+private fun narrowAwarePadding(available: Dp, wide: Dp): Dp =
+    if (available < NarrowPaneWidth) Spacing.medium else wide
+
+/** Material's compact window-size class: below it the layout is phone-shaped. */
+private val NarrowPaneWidth = 600.dp
 
 /**
  * Navigates back, provided by the navigation shell.

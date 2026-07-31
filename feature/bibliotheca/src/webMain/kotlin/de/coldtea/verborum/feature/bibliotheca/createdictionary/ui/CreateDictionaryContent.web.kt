@@ -17,8 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.designsystem.component.ContentPane
-import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
-import de.coldtea.verborum.core.designsystem.component.WebBackLink
+import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.WebChip
 import de.coldtea.verborum.core.designsystem.component.WebFieldLabel
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
@@ -49,16 +48,18 @@ internal actual fun CreateDictionaryContent(
     onSave: () -> Unit,
     modifier: Modifier,
 ) {
-    val navigateBack = LocalNavigateBack.current
+    // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
+    // that wants no chrome at all, and would lose the sidebar with it.
+    RegisterTopBar(
+        title = if (state.isEditing) "Edit dictionary" else "New dictionary",
+        showBackButton = true,
+        backLabel = "Back to dictionaries",
+    )
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         ContentPane(maxWidth = ContentWidth.Web.dictionaryForm) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 WebPageSpacer(Spacing.extraLarge)
-
-                WebBackLink(label = "Back to dictionaries", onClick = navigateBack)
-
-                WebPageSpacer(Spacing.small)
 
                 WebPageTitle(
                     title = if (state.isEditing) "Edit Dictionary" else "Create Dictionary",

@@ -21,10 +21,8 @@ import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
-import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
-import de.coldtea.verborum.core.designsystem.component.WebBackLink
 import de.coldtea.verborum.core.designsystem.component.WebEyebrow
 import de.coldtea.verborum.core.designsystem.component.WebOutlinedButton
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
@@ -43,9 +41,8 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.Del
  * One dictionary as a desktop page: the two practice modes as tiles, then every word in a bordered
  * panel, then the two things you can do to the dictionary itself.
  *
- * The page still calls `RegisterTopBar`, even though the web shell draws no top bar: an empty title
- * is how a destination tells the shell it wants no chrome at all, so a registration is what keeps
- * the sidebar in place.
+ * The way back lives in the shell's top bar, registered here through `RegisterTopBar` — the page
+ * itself only titles its content.
  *
  * `onRefresh` goes unused — pull-to-refresh is a touch gesture, and the page re-syncs on arrival.
  */
@@ -63,8 +60,6 @@ internal actual fun DictionaryDetailsContent(
     onUnavailableMode: (isTest: Boolean) -> Unit,
     modifier: Modifier,
 ) {
-    val navigateBack = LocalNavigateBack.current
-
     when (val details = state.details) {
         DictionaryDetailsState.Loading -> {
             RegisterTopBar(title = "Dictionary")
@@ -84,7 +79,11 @@ internal actual fun DictionaryDetailsContent(
         DictionaryDetailsState.Deleted -> Unit
 
         is DictionaryDetailsState.Success -> {
-            RegisterTopBar(title = details.name, showBackButton = true)
+            RegisterTopBar(
+                title = details.name,
+                showBackButton = true,
+                backLabel = "Back to dictionaries",
+            )
 
             var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -106,10 +105,6 @@ internal actual fun DictionaryDetailsContent(
                 ContentPane(maxWidth = ContentWidth.Web.detail) {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         WebPageSpacer(Spacing.extraLarge)
-
-                        WebBackLink(label = "Back to dictionaries", onClick = navigateBack)
-
-                        WebPageSpacer(Spacing.small)
 
                         WebPageTitle(
                             title = details.name,

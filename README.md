@@ -165,8 +165,8 @@ behaviour can drift between the two.
 
 | | iOS (`iosMain`) | Web (`webMain`) |
 |---|---|---|
-| Chrome | shared top bar over tabs, a rail on iPad | fixed 240dp sidebar; **no top bar at all** |
-| Headers | the shell draws what `RegisterTopBar` registered | each page draws its own back link and serif title |
+| Chrome | shared top bar over tabs, a rail on iPad | slim top bar, plus a sidebar or a bottom bar |
+| Headers | the shell draws what `RegisterTopBar` registered | the bar holds the way back; the page holds the serif title |
 | Measure | one phone-shaped `ContentColumn`, centred | a per-screen `ContentPane`, start-aligned |
 | List | one column of cards, search behind a magnifier | card grid, filters always in view |
 | Detail | tiles over a lazy word list | tiles over a bordered "WORD LIST" panel |
@@ -183,8 +183,24 @@ Lora, and no other slot changed — which is why the iOS screens look exactly as
 the handoff's list has only a search box and a sort menu, but the app also filters by language pair,
 so those two menus join the same row rather than being dropped.
 
+The web navigation follows the **window**, not the platform: at 700dp and wider it is the 240dp
+sidebar, and below that — a phone, or a browser dragged narrow — the same destinations become a
+bottom bar of glyphs over small labels, since a sidebar there would leave nothing to read. Pages take
+the smaller gutter below 600dp for the same reason. Which one shows is decided from the destination,
+not from what a screen registered: only the tour goes without.
+
+Both platforms declare their chrome the same way, with `RegisterTopBar`. On iOS that draws the top
+bar; on web it fills `WebTopBar` — a slim strip above the page carrying the way back, outside the
+page's scroll so a screen can always be left without scrolling up to find a link. Screens name what
+back leads to through `backLabel` ("Back to dictionaries", "Exit test"), which iOS ignores in favour
+of a bare chevron. The arrow is hidden only where there is genuinely nothing behind — the first
+screen after signing in.
+
+Onboarding is the one destination that goes without navigation entirely — it owns the window and
+carries its own way out.
+
 `Forum` and `Options` are not in the handoff. Until they get pages of their own, the web shell draws
-their headers from what they registered — see the branch in `VerborumAppScaffold.web.kt`.
+their page heading from what they registered — see the branch in `VerborumAppScaffold.web.kt`.
 
 ### Self practice — the one screen the handoff skips
 

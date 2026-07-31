@@ -18,9 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
-import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
-import de.coldtea.verborum.core.designsystem.component.WebBackLink
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.component.WebPrimaryButton
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
@@ -43,8 +41,6 @@ internal actual fun MultipleChoiceContent(
     onFinished: () -> Unit,
     modifier: Modifier,
 ) {
-    val navigateBack = LocalNavigateBack.current
-
     when (val test = state.test) {
         TestState.Loading -> {
             RegisterTopBar(title = "Test")
@@ -75,9 +71,9 @@ internal actual fun MultipleChoiceContent(
         }
 
         is TestState.Question -> {
-            RegisterTopBar(title = "Test", showBackButton = true)
+            RegisterTopBar(title = "Test", showBackButton = true, backLabel = "Exit test")
 
-            TestPage(modifier = modifier, onExit = navigateBack) {
+            TestPage(modifier = modifier) {
                 WebQuestionCard(
                     question = test,
                     selectedAnswer = state.selectedAnswer,
@@ -112,9 +108,13 @@ internal actual fun MultipleChoiceContent(
         }
 
         is TestState.Completed -> {
-            RegisterTopBar(title = "Test complete", showBackButton = true)
+            RegisterTopBar(
+                title = "Test complete",
+                showBackButton = true,
+                backLabel = "Exit test",
+            )
 
-            TestPage(modifier = modifier, onExit = navigateBack) {
+            TestPage(modifier = modifier) {
                 WebTestResult(
                     result = test,
                     onBackToDictionary = onFinished,
@@ -125,21 +125,16 @@ internal actual fun MultipleChoiceContent(
     }
 }
 
-/** The shared frame: an exit link over whatever the test is currently showing. */
+/** The shared frame around whatever the test is currently showing. */
 @Composable
 private fun TestPage(
     modifier: Modifier,
-    onExit: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         ContentPane(maxWidth = ContentWidth.Web.test) {
             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                 WebPageSpacer(Spacing.extraLarge)
-
-                WebBackLink(label = "Exit test", onClick = onExit)
-
-                WebPageSpacer(Spacing.medium)
 
                 content()
 

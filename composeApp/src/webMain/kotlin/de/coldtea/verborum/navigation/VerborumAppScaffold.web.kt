@@ -2,6 +2,7 @@ package de.coldtea.verborum.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,8 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import de.coldtea.verborum.core.designsystem.component.ContentPaneWidth
 import de.coldtea.verborum.core.designsystem.component.OfflineBanner
@@ -36,18 +42,24 @@ import de.coldtea.verborum.core.designsystem.component.VerborumTopBarState
 import de.coldtea.verborum.core.designsystem.component.WebOutlinedButton
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.component.WebPageTitle
+import de.coldtea.verborum.core.designsystem.component.WebTopBar
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.navigation.navigateToCreateDictionary
+import de.coldtea.verborum.feature.onboarding.navigation.OnboardingGraph
 
 /**
  * The desktop chrome: a fixed sidebar beside a scrolling page area.
  *
- * There is no top app bar here — each web page draws its own back link and title, so the header
- * lines up with the content underneath it and scrolls with the page. That is why [topBarState] is
- * read only for the one thing the shell still decides: whether a destination wants chrome at all.
+ * Each page still titles itself — the design puts a large serif title at the top of the content, and
+ * that scrolls with the page. Above it the shell keeps one slim [WebTopBar] holding the way back, so
+ * every screen can be left without scrolling up to find a link.
+ *
+ * The navigation follows the window rather than the platform: wide enough for a sidebar beside a
+ * readable page and it is a sidebar; narrower — a phone, or a browser dragged in — and the same
+ * destinations become a bottom bar, which is the shape that works when there is no width to spare.
  */
 @Composable
 internal actual fun VerborumAppScaffold(
@@ -57,20 +69,23 @@ internal actual fun VerborumAppScaffold(
     isOnline: Boolean,
     snackbarHostState: SnackbarHostState,
 ) {
-    // An empty title is how a destination opts out of the app chrome entirely (onboarding).
-    val showChrome = topBarState.title.isNotEmpty()
+    // The tour owns the whole window; every other destination gets the app's navigation. Keyed on
+    // the destination rather than on what the screen registered, so a screen that forgets to
+    // register cannot silently lose the navigation with it.
+    val showChrome = !currentDestination.isTutorial()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = Modifier.fillMaxSize(),
     ) { padding ->
         BoxWithConstraints(modifier = Modifier.fillMaxSize().padding(padding)) {
-            // A sidebar needs room for itself and a page beside it. Below that the window is
-            // phone-shaped, and the sidebar would leave nothing to read.
-            val showSidebar = showChrome && maxWidth >= SidebarBreakpoint
+            // A sidebar needs room for itself *and* a readable page beside it. Below that the window
+            // is phone-shaped — tall and narrow — and the sidebar would leave nothing to read, so the
+            // destinations move to the bottom where a narrow layout expects them.
+            val useSidebar = maxWidth >= SidebarBreakpoint
 
             Row(modifier = Modifier.fillMaxSize()) {
-                if (showSidebar) {
+                if (showChrome && useSidebar) {
                     VerborumSidebar(
                         navController = navController,
                         currentDestination = currentDestination,
@@ -83,10 +98,22 @@ internal actual fun VerborumAppScaffold(
                     }
 
                     // The redesign covers the library's screens, and those title themselves. The
-                    // screens it does not cover — Forum, Options — still expect a header, so the
-                    // shell draws theirs from what they registered. Remove this branch as each of
-                    // them gets a page of its own.
-                    if (showChrome && !currentDestination.isIn(TopLevelDestination.Bibliotheca)) {
+                    // screens it does not cover — Forum, Options — do not, so the bar carries their
+                    // title and the shell draws their page heading. Remove the extra heading as each
+                    // of them gets a page of its own.
+                    val drawsOwnTitle = currentDestination.isIn(TopLevelDestination.Bibliotheca)
+
+                    if (showChrome) {
+                        WebTopBar(
+                            state = topBarState,
+                            // Nothing sits behind the first screen after signing in.
+                            canNavigateBack = navController.previousBackStackEntry != null,
+                            onBackClick = { navController.popBackStack() },
+                            showTitle = !drawsOwnTitle,
+                        )
+                    }
+
+                    if (showChrome && !drawsOwnTitle) {
                         ContentPaneWidth(maxWidth = ContentWidth.Web.detail) {
                             WebPageSpacer(Spacing.extraLarge)
                             WebPageTitle(
@@ -101,6 +128,13 @@ internal actual fun VerborumAppScaffold(
                         navController = navController,
                         modifier = Modifier.weight(1f),
                     )
+
+                    if (showChrome && !useSidebar) {
+                        VerborumBottomBar(
+                            navController = navController,
+                            currentDestination = currentDestination,
+                        )
+                    }
                 }
             }
         }
@@ -138,6 +172,84 @@ private fun VerborumSidebar(
             label = "+ New Dictionary",
             onClick = { navController.navigateToCreateDictionary() },
             modifier = Modifier.padding(horizontal = Spacing.medium),
+        )
+    }
+}
+
+/**
+ * The same destinations as the sidebar, along the bottom: glyph over a small label.
+ *
+ * What a narrow window gets instead of the sidebar. The sidebar's "+ New Dictionary" has no place
+ * here — the list already carries a create button, and a bottom bar is for navigating, not acting.
+ */
+@Composable
+private fun VerborumBottomBar(
+    navController: NavHostController,
+    currentDestination: NavDestination?,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // A hairline, so the bar reads as chrome rather than as the end of the page.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Dimens.border)
+                .background(MaterialTheme.colorScheme.outline),
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = Spacing.small),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            TopLevelDestination.entries.forEach { destination ->
+                BottomBarItem(
+                    destination = destination,
+                    isSelected = currentDestination.isIn(destination),
+                    onClick = { navController.switchTab(destination) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomBarItem(
+    destination: TopLevelDestination,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val contentColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Column(
+        modifier = modifier
+            .heightIn(min = Dimens.touchTarget)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.extraSmall),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = destination.icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(Dimens.iconLarge),
+        )
+        Text(
+            text = destination.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = Spacing.extraSmall),
         )
     }
 }
@@ -217,6 +329,10 @@ private fun SidebarItem(
         }
     }
 }
+
+/** True anywhere inside the tour, the one destination that wants the window to itself. */
+private fun NavDestination?.isTutorial(): Boolean =
+    this?.hierarchy?.any { it.hasRoute(OnboardingGraph::class) } == true
 
 private val SidebarWidth = 240.dp
 private val SidebarBreakpoint = 700.dp
