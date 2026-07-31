@@ -187,6 +187,53 @@ The web pages are built from one set of parts in `core:designsystem/webMain` —
 `WebBackLink`, `WebChip`, `WebPrimaryButton`, `WebPanel`, `WebSelect`, `WebTextField`. A page that
 needs furniture the others do not have belongs there too, not in the feature.
 
+### Fonts: the canvas has none
+
+Compose renders the web app to a **canvas**, and a canvas has no system fonts behind it. Anything the
+bundled typeface does not cover is drawn as an empty box — which is why Arabic, the kana and even the
+"↵" on the keyboard were missing. Every script the app supports has to be shipped.
+
+`core:designsystem/composeResources/font` carries Noto Sans (Latin, Greek, Cyrillic) plus one face
+each for Arabic, Japanese, Korean and Chinese. They are **separate families picked per language** by
+`fontFamilyForLanguage`, not one family with a fallback list: Compose resolves a family by weight and
+style, not by which face happens to contain a glyph, so a list is not a reliable fallback chain.
+Choosing by language is deterministic — and it is what keeps the app light, because Compose fetches a
+resource only when something composes it. The three CJK faces are 17MB of the 18MB and never load for
+someone studying only European languages; the initial download is the 1.2MB Noto Sans.
+
+Anywhere a string's language is known — the keyboards, the word form's fields, the detail screen's
+word list, the practice cards — that language's family is applied. Keys that are actions rather than
+characters (shift, backspace, enter) are vector icons for the same reason: a symbol the face lacks
+would be another empty box.
+
+iOS is untouched: it draws with the system fonts, which already cover every script here.
+
+### The on-screen keyboards (web only)
+
+Every word card carries a key in its corner. Pressing it opens a keyboard for **that card's
+language**, anchored to the card: beside it when the window has room, underneath it when not, always
+clamped inside the window. Opening it on a card whose fields are all idle focuses the card's first
+field first — a keyboard with nowhere to type would be a dead panel.
+
+`KeyboardController` owns the whole thing: the registered fields in an explicit `order`, which one
+has focus, and whether the keyboard is showing. The keyboard follows the focus, never the reverse,
+which is what makes the two rules fall out of one place — Enter moves to the next field and an open
+keyboard travels with it, into the other language if that is where the next field is, while a closed
+keyboard stays closed because nothing here opens it on its own. Enter means the same from either
+keyboard: the on-screen key and `onPreviewKeyEvent` call the same method.
+
+Fields work in `TextFieldValue` rather than a plain string so keys insert at the cursor and replace a
+selection, instead of appending wherever the caret happens not to be. The popup is deliberately
+**not** focusable — taking focus would pull it out of the very field it types into.
+
+All 19 languages have a layout, in their own national arrangement (QWERTZ for German, AZERTY for
+French, ЙЦУКЕН for Russian, right-to-left rows for Arabic and Persian). Two need saying: Korean types
+jamo and `HangulComposer` folds them into syllables as they go — `ㅎ ㅏ ㄴ` becomes `한`, and a
+following vowel carries the tail into the next syllable — while Chinese offers pinyin with tone marks
+and says so on the keyboard, because hanzi cannot be produced without a conversion dictionary.
+
+This is web-only; the iOS cards are untouched.
+
 Two deliberate deviations from the handoff. **Type**: it asks for Lora and Work Sans; rather than ship
 font binaries the two `display*` slots carry `FontFamily.Serif`, so the platform's serif stands in for
 Lora, and no other slot changed — which is why the iOS screens look exactly as they did. **Filters**:

@@ -26,6 +26,7 @@ import de.coldtea.verborum.core.designsystem.component.WebTextAction
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
 
 /**
@@ -106,6 +107,9 @@ internal fun WebWordRow(
                     Text(
                         text = word.displayWord,
                         style = MaterialTheme.typography.titleSmall,
+                        // The canvas has no system font to fall back on, so a word in a script the
+                        // default face does not cover would be a row of empty boxes.
+                        fontFamily = fontFamilyForLanguage(word.languageCode),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -114,6 +118,7 @@ internal fun WebWordRow(
                         Text(
                             text = word.displayTranslation,
                             style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = fontFamilyForLanguage(word.translationLanguageCode),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

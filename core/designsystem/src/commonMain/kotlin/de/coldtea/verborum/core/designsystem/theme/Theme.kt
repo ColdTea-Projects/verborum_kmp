@@ -2,6 +2,7 @@ package de.coldtea.verborum.core.designsystem.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -72,6 +73,16 @@ private val LightColorScheme = lightColorScheme(
 )
 
 /**
+ * The type scale as the platform can actually render it.
+ *
+ * iOS draws with the system fonts, which cover every script the app supports. The web target draws
+ * to a canvas with no system fonts behind it at all: whatever is not in the bundled typeface comes
+ * out as empty boxes, so the web actual supplies one that covers the app's scripts.
+ */
+@Composable
+internal expect fun verborumTypography(): Typography
+
+/**
  * The single Material 3 theme for the whole app. Every entry point (iOS, web)
  * and every preview wraps its content in this.
  */
@@ -82,7 +93,7 @@ fun VerborumTheme(
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        typography = Typography,
+        typography = verborumTypography(),
         content = content,
     )
 }

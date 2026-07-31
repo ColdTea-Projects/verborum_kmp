@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model.PracticeWordUi
 
 /**
@@ -87,7 +88,11 @@ internal fun FlipWordCard(
             }
 
             if (!showsBack) {
-                CardFace(lines = word.promptColumns, caption = word.typeLabel)
+                CardFace(
+                    lines = word.promptColumns,
+                    languageCode = word.promptLanguageCode,
+                    caption = word.typeLabel,
+                )
             } else {
                 Box(
                     // The back is drawn on a face that is itself rotated, so it would otherwise
@@ -103,7 +108,7 @@ internal fun FlipWordCard(
 
 /** One face: the forms stacked and centred, with an optional caption underneath. */
 @Composable
-private fun CardFace(lines: List<String>, caption: String?) {
+private fun CardFace(lines: List<String>, languageCode: String, caption: String?) {
     Column(
         modifier = Modifier.fillMaxSize().padding(Spacing.medium),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -113,6 +118,9 @@ private fun CardFace(lines: List<String>, caption: String?) {
             Text(
                 text = line,
                 style = MaterialTheme.typography.titleMedium,
+                // The canvas has no system font behind it: a word in a script the default face does
+                // not cover would be a row of empty boxes.
+                fontFamily = fontFamilyForLanguage(languageCode),
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
@@ -145,6 +153,7 @@ private fun CardBack(word: PracticeWordUi, onCorrect: () -> Unit, onWrong: () ->
                 Text(
                     text = line,
                     style = MaterialTheme.typography.titleMedium,
+                    fontFamily = fontFamilyForLanguage(word.answerLanguageCode),
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
                 )

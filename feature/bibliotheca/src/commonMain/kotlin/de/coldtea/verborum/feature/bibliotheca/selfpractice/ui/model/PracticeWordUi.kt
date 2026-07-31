@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model
 
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordSurfaces
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationColumns
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationLine
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.wordColumns
@@ -23,6 +24,12 @@ internal data class PracticeWordUi(
     val answerColumns: List<String>,
     /** The part of speech, shown after the prompt; null for free text, which carries no type. */
     val typeLabel: String?,
+    /**
+     * The language each side is written in. The web card draws to a canvas with no system fonts
+     * behind it, so it has to know the script before it can pick a face that can render it.
+     */
+    val promptLanguageCode: String,
+    val answerLanguageCode: String,
     val level: Int,
 ) {
     /** Practice progress as a fraction of the ladder, for the card's progress bar. */
@@ -38,5 +45,7 @@ internal fun Word.toPracticeUi(isReversed: Boolean): PracticeWordUi = PracticeWo
     answerColumns = if (isReversed) wordColumns() else translationColumns(),
     // The type belongs to the word itself, so it follows the word's side.
     typeLabel = if (isReversed) wordTypeLabel(translationMeta) else wordTypeLabel(wordMeta),
+    promptLanguageCode = WordSurfaces.languageCodeOf(if (isReversed) translationMeta else wordMeta),
+    answerLanguageCode = WordSurfaces.languageCodeOf(if (isReversed) wordMeta else translationMeta),
     level = level,
 )

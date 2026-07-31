@@ -251,6 +251,107 @@ object VerborumIcons {
         }
     }
 
+    val Backspace: ImageVector by lazy {
+        materialIcon {
+            // A leftwards-pointing key with a cross in it.
+            path {
+                moveTo(9f, 5f)
+                horizontalLineTo(21f)
+                verticalLineTo(19f)
+                horizontalLineTo(9f)
+                lineTo(2f, 12f)
+                close()
+            }
+        }
+    }
+
+    val ShiftUp: ImageVector by lazy {
+        materialIcon {
+            // A hollow upwards arrow: the shift key.
+            path {
+                moveTo(12f, 4f)
+                lineTo(20f, 12f)
+                horizontalLineTo(15.5f)
+                verticalLineTo(19f)
+                horizontalLineTo(8.5f)
+                verticalLineTo(12f)
+                horizontalLineTo(4f)
+                close()
+            }
+        }
+    }
+
+    val EnterKey: ImageVector by lazy {
+        materialIcon {
+            // The return arrow: down the right-hand side, then left into a chevron head.
+            path {
+                moveTo(19f, 5f)
+                horizontalLineTo(21f)
+                verticalLineTo(15f)
+                horizontalLineTo(8f)
+                verticalLineTo(19f)
+                lineTo(2f, 14f)
+                lineTo(8f, 9f)
+                verticalLineTo(13f)
+                horizontalLineTo(19f)
+                close()
+            }
+        }
+    }
+
+    val Keyboard: ImageVector by lazy {
+        materialIcon {
+            // A key bed: the outer case with three rows of keys and a space bar.
+            path {
+                moveTo(3f, 5f)
+                horizontalLineTo(21f)
+                verticalLineTo(19f)
+                horizontalLineTo(3f)
+                close()
+                moveTo(5f, 8f)
+                horizontalLineTo(7f)
+                verticalLineTo(10f)
+                horizontalLineTo(5f)
+                close()
+                moveTo(9f, 8f)
+                horizontalLineTo(11f)
+                verticalLineTo(10f)
+                horizontalLineTo(9f)
+                close()
+                moveTo(13f, 8f)
+                horizontalLineTo(15f)
+                verticalLineTo(10f)
+                horizontalLineTo(13f)
+                close()
+                moveTo(17f, 8f)
+                horizontalLineTo(19f)
+                verticalLineTo(10f)
+                horizontalLineTo(17f)
+                close()
+                moveTo(5f, 12f)
+                horizontalLineTo(7f)
+                verticalLineTo(14f)
+                horizontalLineTo(5f)
+                close()
+                moveTo(9f, 12f)
+                horizontalLineTo(15f)
+                verticalLineTo(14f)
+                horizontalLineTo(9f)
+                close()
+                moveTo(17f, 12f)
+                horizontalLineTo(19f)
+                verticalLineTo(14f)
+                horizontalLineTo(17f)
+                close()
+                moveTo(7f, 16f)
+                horizontalLineTo(17f)
+                verticalLineTo(17.5f)
+                horizontalLineTo(7f)
+                close()
+            }
+        }
+    }
+
     val Play: ImageVector by lazy {
         materialIcon {
             // A solid rightwards triangle: "start practising".
