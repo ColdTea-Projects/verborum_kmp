@@ -95,6 +95,9 @@ private fun PanelGrid(pages: List<OnboardingPage>) {
                     OnboardingPanel(
                         page = page,
                         modifier = Modifier.weight(1f).fillMaxHeight(),
+                        // Its share of the height is fixed, so a panel too tall for it scrolls
+                        // inside itself rather than clipping.
+                        isScrollable = true,
                     )
                 }
 
@@ -124,9 +127,19 @@ private fun PanelColumn(pages: List<OnboardingPage>) {
     }
 }
 
-/** One panel: its illustration, title and description, bounded so the four read as a set. */
+/**
+ * One panel: its illustration, title and description, bounded so the four read as a set.
+ *
+ * [isScrollable] belongs to the grid only. There a panel is handed a fixed share of the window and
+ * must scroll within it; in the stacked layout the page itself scrolls, and a second scroll inside
+ * it would be measured against an unbounded height — which Compose refuses outright.
+ */
 @Composable
-private fun OnboardingPanel(page: OnboardingPage, modifier: Modifier = Modifier) {
+private fun OnboardingPanel(
+    page: OnboardingPage,
+    modifier: Modifier = Modifier,
+    isScrollable: Boolean = false,
+) {
     Surface(
         modifier = modifier,
         shape = Shapes.large,
@@ -135,8 +148,14 @@ private fun OnboardingPanel(page: OnboardingPage, modifier: Modifier = Modifier)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .then(
+                    if (isScrollable) {
+                        Modifier.fillMaxHeight().verticalScroll(rememberScrollState())
+                    } else {
+                        Modifier
+                    },
+                )
                 .padding(Spacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

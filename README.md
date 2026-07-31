@@ -167,7 +167,7 @@ behaviour can drift between the two.
 |---|---|---|
 | Chrome | shared top bar over tabs, a rail on iPad | slim top bar, plus a sidebar or a bottom bar |
 | Headers | the shell draws what `RegisterTopBar` registered | the bar holds the way back; the page holds the serif title |
-| Measure | one phone-shaped `ContentColumn`, centred | a per-screen `ContentPane`, start-aligned |
+| Measure | one phone-shaped `ContentColumn`, centred | a per-screen `ContentPane`, centred and top-anchored |
 | List | one column of cards, search behind a magnifier | card grid, filters always in view |
 | Detail | tiles over a lazy word list | tiles over a bordered "WORD LIST" panel |
 | Word form | the two language cards stacked | the two side by side, crimson and gold edges |

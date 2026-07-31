@@ -35,20 +35,11 @@ private data class MultipleChoiceRoute(val dictionaryId: String)
 
 /** The dictionary form: a null id creates, an id edits. */
 @Serializable
-internal data class CreateDictionaryRoute(val dictionaryId: String? = null)
+private data class CreateDictionaryRoute(val dictionaryId: String? = null)
 
 /** The word form, always within a dictionary; a null word id creates. */
 @Serializable
 private data class CreateWordRoute(val dictionaryId: String, val wordId: String? = null)
-
-/**
- * Starts a new dictionary from outside the feature — the web shell's sidebar offers this from every
- * screen. The second thing this feature makes public, alongside its graph: the shell needs somewhere
- * to send that button, and it must not learn the route to get there.
- */
-fun NavController.navigateToCreateDictionary() {
-    navigate(CreateDictionaryRoute())
-}
 
 fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
     navigation<BibliothecaGraph>(startDestination = DictionaryListRoute) {

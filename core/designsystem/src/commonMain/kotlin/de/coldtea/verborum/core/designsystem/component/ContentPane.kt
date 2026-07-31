@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 
 /**
- * A desktop content pane: capped at [maxWidth] and aligned to the **start** of the area left over by
- * the sidebar, which is what makes a screen's header line up with the content under it.
+ * A desktop content pane: capped at [maxWidth], centred in the area left over by the navigation, and
+ * anchored to the top of it so a short page starts where a long one does.
  *
  * The sibling of [ContentColumn], which centres a phone-shaped column instead. The same
  * modifier-order rule applies and is the reason this exists as one composable: the cap has to come
@@ -30,7 +30,7 @@ fun ContentPane(
     horizontalPadding: Dp = Spacing.extraLarge,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         val padding = narrowAwarePadding(this.maxWidth, horizontalPadding)
 
         Column(
@@ -52,7 +52,7 @@ fun ContentPaneWidth(
     horizontalPadding: Dp = Spacing.extraLarge,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopStart) {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
         val padding = narrowAwarePadding(this.maxWidth, horizontalPadding)
 
         Column(

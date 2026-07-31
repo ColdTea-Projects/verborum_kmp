@@ -39,7 +39,6 @@ import androidx.navigation.NavHostController
 import de.coldtea.verborum.core.designsystem.component.ContentPaneWidth
 import de.coldtea.verborum.core.designsystem.component.OfflineBanner
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarState
-import de.coldtea.verborum.core.designsystem.component.WebOutlinedButton
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.component.WebPageTitle
 import de.coldtea.verborum.core.designsystem.component.WebTopBar
@@ -47,7 +46,6 @@ import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import de.coldtea.verborum.feature.bibliotheca.navigation.navigateToCreateDictionary
 import de.coldtea.verborum.feature.onboarding.navigation.OnboardingGraph
 
 /**
@@ -141,7 +139,7 @@ internal actual fun VerborumAppScaffold(
     }
 }
 
-/** Logo, destinations, and the one action available from anywhere: starting a dictionary. */
+/** The logo over the app's destinations. */
 @Composable
 private fun VerborumSidebar(
     navController: NavHostController,
@@ -165,22 +163,12 @@ private fun VerborumSidebar(
                 onClick = { navController.switchTab(destination) },
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        WebOutlinedButton(
-            label = "+ New Dictionary",
-            onClick = { navController.navigateToCreateDictionary() },
-            modifier = Modifier.padding(horizontal = Spacing.medium),
-        )
     }
 }
 
 /**
- * The same destinations as the sidebar, along the bottom: glyph over a small label.
- *
- * What a narrow window gets instead of the sidebar. The sidebar's "+ New Dictionary" has no place
- * here — the list already carries a create button, and a bottom bar is for navigating, not acting.
+ * The same destinations as the sidebar, along the bottom: glyph over a small label. What a narrow
+ * window gets instead of the sidebar.
  */
 @Composable
 private fun VerborumBottomBar(
