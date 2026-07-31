@@ -93,6 +93,54 @@ class WordFormInputTest {
     }
 
     @Test
+    fun `the closed classes ask for nothing beyond the word itself`() {
+        WordType.otherTypes.forEach { type ->
+            assertEquals(emptyList(), WordGrammar.fieldsFor("de", type), "de/$type")
+            assertEquals(emptyList(), WordGrammar.fieldsFor("en", type), "en/$type")
+        }
+
+        // Which is the same shape an adverb has — the type they were asked to copy.
+        assertEquals(emptyList(), WordGrammar.fieldsFor("de", WordType.ADVERB))
+    }
+
+    @Test
+    fun `every closed class sits under Other, and the open ones each have their own chip`() {
+        assertEquals(
+            listOf(
+                WordType.FREE_TEXT,
+                WordType.PREPOSITION,
+                WordType.PRONOUN,
+                WordType.NUMERAL,
+                WordType.CONJUNCTION,
+                WordType.INTERJECTION,
+                WordType.ARTICLE,
+            ),
+            WordType.otherTypes,
+        )
+        assertEquals(WordType.FREE_TEXT, WordCategory.OTHER.defaultType)
+        assertEquals(WordType.NOUN, WordCategory.NOUN.defaultType)
+    }
+
+    @Test
+    fun `a sub-type round-trips through the meta`() {
+        val meta = composeWordMeta("en", WordType.CONJUNCTION, listOf(WordFormInput("but")))
+
+        assertTrue(meta.contains(""""type":"conjunction""""))
+        assertEquals(WordType.CONJUNCTION, parseWordMeta(meta)?.wordType)
+    }
+
+    @Test
+    fun `free text stores no type at all, and a word without one claims none`() {
+        val meta = composeWordMeta("en", WordType.FREE_TEXT, listOf(WordFormInput("good morning")))
+
+        assertTrue(!meta.contains("\"type\""))
+        // Read back it is *no* type rather than free text: a word that never claimed a part of
+        // speech must not be labelled with one wherever the app shows it.
+        assertNull(parseWordMeta(meta)?.wordType)
+        assertNull(wordTypeLabel(meta))
+    }
+
+    @Test
     fun `gender chips show the language's article where it has one`() {
         assertEquals("der", WordGrammar.genderLabel("de", Gender.MASCULINE))
         assertEquals("het", WordGrammar.genderLabel("nl", Gender.NEUTER))

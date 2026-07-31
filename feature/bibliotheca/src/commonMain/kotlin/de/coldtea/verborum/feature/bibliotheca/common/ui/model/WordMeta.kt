@@ -29,22 +29,70 @@ internal enum class FieldKey(val metaKey: String, val label: String) {
     POLITE("polite", "Polite"),
 }
 
-/** The part of speech, shown after the word. English only, as the rest of this app is for now. */
-internal enum class WordType(val metaType: String, val label: String) {
-    NOUN("noun", "noun"),
-    VERB("verb", "verb"),
-    ADJECTIVE("adjective", "adjective"),
-    ADVERB("adverb", "adverb"),
-    PREPOSITION("preposition", "preposition"),
-    PRONOUN("pronoun", "pronoun"),
-    NUMERAL("numeral", "numeral"),
+/**
+ * The top-level choice the form offers. The four open classes carry grammatical forms of their own;
+ * every closed class collapses into [OTHER], which then names itself.
+ */
+internal enum class WordCategory(val label: String) {
+    NOUN("Noun"),
+    VERB("Verb"),
+    ADJECTIVE("Adjective"),
+    ADVERB("Adverb"),
+    OTHER("Other"),
+}
+
+/**
+ * The part of speech, shown after the word. English only, as the rest of this app is for now.
+ *
+ * [FREE_TEXT] stores no type at all — that is what makes a word saved before sub-types existed load
+ * back as free text rather than as something it never claimed to be.
+ */
+internal enum class WordType(
+    val metaType: String?,
+    val label: String,
+    val category: WordCategory,
+) {
+    NOUN("noun", "noun", WordCategory.NOUN),
+    VERB("verb", "verb", WordCategory.VERB),
+    ADJECTIVE("adjective", "adjective", WordCategory.ADJECTIVE),
+    ADVERB("adverb", "adverb", WordCategory.ADVERB),
+    FREE_TEXT(null, "free text", WordCategory.OTHER),
+    PREPOSITION("preposition", "preposition", WordCategory.OTHER),
+    PRONOUN("pronoun", "pronoun", WordCategory.OTHER),
+    NUMERAL("numeral", "numeral", WordCategory.OTHER),
+    CONJUNCTION("conjunction", "conjunction", WordCategory.OTHER),
+    INTERJECTION("interjection", "interjection", WordCategory.OTHER),
+    ARTICLE("article", "article", WordCategory.OTHER),
     ;
 
+    /** The same name where it heads a control rather than trailing a word. */
+    val chipLabel: String
+        get() = label.replaceFirstChar(Char::uppercaseChar)
+
     companion object {
+        /** The sub-types offered under "Other", free text first. */
+        val otherTypes: List<WordType> = entries.filter { it.category == WordCategory.OTHER }
+
+        /**
+         * Null for a word that records no type. Deliberately *not* [FREE_TEXT]: a word saved before
+         * types existed has no part of speech to show, and labelling every one of them "free text"
+         * would be inventing an answer. The form maps the same absence to [FREE_TEXT], where a
+         * concrete choice is what the control needs.
+         */
         fun fromMeta(metaType: String?): WordType? =
-            entries.firstOrNull { it.metaType == metaType }
+            metaType?.let { type -> entries.firstOrNull { it.metaType == type } }
     }
 }
+
+/** What a freshly-picked category starts on; "Other" opens on free text. */
+internal val WordCategory.defaultType: WordType
+    get() = when (this) {
+        WordCategory.NOUN -> WordType.NOUN
+        WordCategory.VERB -> WordType.VERB
+        WordCategory.ADJECTIVE -> WordType.ADJECTIVE
+        WordCategory.ADVERB -> WordType.ADVERB
+        WordCategory.OTHER -> WordType.FREE_TEXT
+    }
 
 /**
  * A parsed meta blob. A word can carry several alternative meanings (*kaufen/erwerben*); each

@@ -138,12 +138,22 @@ back through the observed words.
 A new dictionary gets its id client-side, so the row can appear in the list before the server has
 answered; saving a new one opens it, saving an edit returns where it came from.
 
-`createword` follows the dictionary's two languages, and what it asks for is decided by
-`WordGrammar` per **language and word type** — a German noun offers *der/die/das* and a plural, a
+`createword` follows the dictionary's two languages. The part of speech comes in two layers: the
+four open classes — noun, verb, adjective, adverb — carry grammatical forms of their own, while every
+closed class (free text, preposition, pronoun, numeral, conjunction, interjection, article) sits
+under `WordCategory.OTHER` and asks for nothing beyond the word itself. **iOS** shows the five
+categories as chips and lets "Other" name itself in a dropdown, as Android does; **web** has the room
+to give all eleven types a chip of their own and drops the "Other" bucket entirely. Free text stores
+no `type` at all, which is what makes a word saved before sub-types existed edit as free text —
+though it still *displays* as no part of speech, since it never claimed one.
+
+What the form asks for beyond that is decided by `WordGrammar` per **language and word type** — a German noun offers *der/die/das* and a plural, a
 German verb offers past / participle / *haben*-or-*sein*, a Japanese noun offers a counter and no
-gender at all, an adverb offers nothing beyond the word itself. A word can hold several meanings;
-the two language cards of a meaning stay index-aligned, and adding or removing one moves both sides
-together.
+gender at all, an adverb offers nothing beyond the word itself. A word can hold several
+alternatives per language, and **the two sides are independent**: *kaufen* and *erwerben* can both
+mean *buy*, so each language has its own add button and its own list. Surfaces and meta are
+index-aligned *within* a side, never across the pair, which is what lets the counts differ. Each side
+always keeps at least one entry.
 
 What is stored is not what is typed. `composeWordText` folds the article back in — `Apfel` +
 masculine becomes `["der Apfel"]`, and French elides to `["l'eau"]` — while `composeWordMeta`

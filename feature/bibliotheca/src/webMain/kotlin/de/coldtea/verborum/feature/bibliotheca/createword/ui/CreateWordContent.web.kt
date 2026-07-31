@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
@@ -30,16 +31,16 @@ import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.WebLanguageCard
 
 /**
- * The word form as a desktop page: the word type across the top, then the two languages side by
- * side, one card each.
+ * The word form as a desktop page: the word type across the top, then one column per language, each
+ * holding that language's alternatives and its own add button.
  *
- * Which grammatical fields each card asks for is still `WordGrammar`'s decision, so the pairing is
- * the only thing the wider layout changes — a German verb asks for the same things here as it does
- * on the phone.
+ * Which grammatical fields each card asks for is still `WordGrammar`'s decision — a German verb asks
+ * for the same things here as it does on the phone.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -49,8 +50,8 @@ internal actual fun CreateWordContent(
     onTextChanged: (WordSide, Int, String) -> Unit,
     onGenderChanged: (WordSide, Int, Gender?) -> Unit,
     onFieldChanged: (WordSide, Int, FieldKey, String) -> Unit,
-    onAddMeaning: () -> Unit,
-    onRemoveMeaning: (Int) -> Unit,
+    onAddMeaning: (WordSide) -> Unit,
+    onRemoveMeaning: (WordSide, Int) -> Unit,
     onSave: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier,
@@ -90,68 +91,54 @@ internal actual fun CreateWordContent(
 
                     WebPageSpacer(Spacing.small)
 
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                    // Every type gets its own chip here, the closed classes included: a desktop row
+                    // wraps to a second line where a phone would need the "Other" dropdown instead.
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.small),
+                    ) {
                         WordType.entries.forEach { type ->
                             WebChip(
-                                label = type.label,
+                                label = type.chipLabel,
                                 isSelected = type == state.wordType,
                                 onClick = { onWordTypeChanged(type) },
                             )
                         }
                     }
 
-                    repeat(state.meaningCount) { index ->
-                        WebPageSpacer()
+                    WebPageSpacer()
 
-                        MeaningHeader(
-                            index = index,
-                            canRemove = state.meaningCount > 1,
-                            onRemove = { onRemoveMeaning(index) },
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                    ) {
+                        MeaningColumn(
+                            side = WordSide.SOURCE,
+                            languageCode = dictionary.fromLang,
+                            accentColor = MaterialTheme.colorScheme.primary,
+                            inputs = state.sourceInputs,
+                            wordType = state.wordType,
+                            onTextChanged = onTextChanged,
+                            onGenderChanged = onGenderChanged,
+                            onFieldChanged = onFieldChanged,
+                            onAddMeaning = onAddMeaning,
+                            onRemoveMeaning = onRemoveMeaning,
+                            modifier = Modifier.weight(1f),
                         )
-
-                        WebPageSpacer(Spacing.small)
-
-                        Row(
-                            // Both cards take the height of the taller one, so the accent bars run
-                            // the full side of the pair rather than stopping short.
-                            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-                        ) {
-                            state.sourceInputs.getOrNull(index)?.let { input ->
-                                WebLanguageCard(
-                                    languageCode = dictionary.fromLang,
-                                    wordType = state.wordType,
-                                    input = input,
-                                    accentColor = MaterialTheme.colorScheme.primary,
-                                    onTextChanged = { onTextChanged(WordSide.SOURCE, index, it) },
-                                    onGenderChanged = { onGenderChanged(WordSide.SOURCE, index, it) },
-                                    onFieldChanged = { key, value ->
-                                        onFieldChanged(WordSide.SOURCE, index, key, value)
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-
-                            state.targetInputs.getOrNull(index)?.let { input ->
-                                WebLanguageCard(
-                                    languageCode = dictionary.toLang,
-                                    wordType = state.wordType,
-                                    input = input,
-                                    accentColor = MaterialTheme.colorScheme.secondary,
-                                    onTextChanged = { onTextChanged(WordSide.TARGET, index, it) },
-                                    onGenderChanged = { onGenderChanged(WordSide.TARGET, index, it) },
-                                    onFieldChanged = { key, value ->
-                                        onFieldChanged(WordSide.TARGET, index, key, value)
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
-                            }
-                        }
+                        MeaningColumn(
+                            side = WordSide.TARGET,
+                            languageCode = dictionary.toLang,
+                            accentColor = MaterialTheme.colorScheme.secondary,
+                            inputs = state.targetInputs,
+                            wordType = state.wordType,
+                            onTextChanged = onTextChanged,
+                            onGenderChanged = onGenderChanged,
+                            onFieldChanged = onFieldChanged,
+                            onAddMeaning = onAddMeaning,
+                            onRemoveMeaning = onRemoveMeaning,
+                            modifier = Modifier.weight(1f),
+                        )
                     }
-
-                    WebPageSpacer(Spacing.medium)
-
-                    WebTextAction(label = "+ Add another meaning", onClick = onAddMeaning)
 
                     WebPageSpacer()
 
@@ -172,21 +159,59 @@ internal actual fun CreateWordContent(
     }
 }
 
-/** Meanings are numbered so the two language cards below them read as a pair. */
+/**
+ * One language's alternatives, with its own add button.
+ *
+ * The two sides are independent: *kaufen* and *erwerben* can both mean *buy*, so adding an
+ * alternative here adds a card to this column only, and the other language keeps whatever it has.
+ */
 @Composable
-private fun MeaningHeader(index: Int, canRemove: Boolean, onRemove: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        WebEyebrow("Meaning ${index + 1}")
+private fun MeaningColumn(
+    side: WordSide,
+    languageCode: String,
+    accentColor: Color,
+    inputs: List<WordFormInput>,
+    wordType: WordType,
+    onTextChanged: (WordSide, Int, String) -> Unit,
+    onGenderChanged: (WordSide, Int, Gender?) -> Unit,
+    onFieldChanged: (WordSide, Int, FieldKey, String) -> Unit,
+    onAddMeaning: (WordSide) -> Unit,
+    onRemoveMeaning: (WordSide, Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        inputs.forEachIndexed { index, input ->
+            if (index != 0) WebPageSpacer(Spacing.medium)
 
-        if (canRemove) {
-            WebTextAction(
-                label = "Remove",
-                onClick = onRemove,
-                color = MaterialTheme.colorScheme.error,
+            // A single alternative needs no numbering — the card already names its language.
+            if (inputs.size > 1) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    WebEyebrow("Meaning ${index + 1}")
+                    WebTextAction(
+                        label = "Remove",
+                        onClick = { onRemoveMeaning(side, index) },
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                WebPageSpacer(Spacing.small)
+            }
+
+            WebLanguageCard(
+                languageCode = languageCode,
+                wordType = wordType,
+                input = input,
+                accentColor = accentColor,
+                onTextChanged = { onTextChanged(side, index, it) },
+                onGenderChanged = { onGenderChanged(side, index, it) },
+                onFieldChanged = { key, value -> onFieldChanged(side, index, key, value) },
             )
         }
+
+        WebPageSpacer(Spacing.small)
+
+        WebTextAction(label = "+ Add another meaning", onClick = { onAddMeaning(side) })
     }
 }

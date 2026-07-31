@@ -30,7 +30,12 @@ internal enum class WordSide { SOURCE, TARGET }
 internal data class CreateWordUiState(
     val dictionary: Dictionary? = null,
     val wordType: WordType = WordType.NOUN,
-    /** One entry per alternative meaning; the lists stay the same length on both sides. */
+    /**
+     * One entry per alternative on each side, and the two sides are independent: *kaufen/erwerben*
+     * can both mean *buy*, so a word may carry two alternatives in one language and one in the
+     * other. Each side is stored on its own — surfaces and meta are index-aligned *within* a side,
+     * never across the pair — so nothing requires the lists to be the same length.
+     */
     val sourceInputs: List<WordFormInput> = listOf(WordFormInput()),
     val targetInputs: List<WordFormInput> = listOf(WordFormInput()),
     val isEditing: Boolean = false,
@@ -44,7 +49,10 @@ internal data class CreateWordUiState(
             targetInputs.firstOrNull()?.text?.isNotBlank() == true &&
             !isSaving
 
-    val meaningCount: Int get() = maxOf(sourceInputs.size, targetInputs.size)
+    fun inputsFor(side: WordSide): List<WordFormInput> = when (side) {
+        WordSide.SOURCE -> sourceInputs
+        WordSide.TARGET -> targetInputs
+    }
 }
 
 internal class CreateWordViewModel(
@@ -88,7 +96,12 @@ internal class CreateWordViewModel(
                     hasFailed = false,
                     // An edited word arrives as stored, so the form shows what was typed: the base
                     // word without its article, with the gender chip selected instead.
-                    wordType = word?.let { parseWordMeta(it.wordMeta)?.wordType } ?: WordType.NOUN,
+                    // An existing word that records no type predates sub-types, so it edits as
+                    // free text; a new word starts on the commonest choice instead.
+                    wordType = when (word) {
+                        null -> WordType.NOUN
+                        else -> parseWordMeta(word.wordMeta)?.wordType ?: WordType.FREE_TEXT
+                    },
                     sourceInputs = word
                         ?.let { parseWordFormInputs(dictionary.fromLang, it.word, it.wordMeta) }
                         ?: listOf(WordFormInput()),
@@ -118,19 +131,24 @@ internal class CreateWordViewModel(
     fun onFieldChanged(side: WordSide, index: Int, key: FieldKey, value: String) =
         updateInput(side, index) { it.withField(key, value) }
 
-    /** Adds a meaning to both sides at once: they are stored index-aligned and must stay so. */
-    fun addMeaning() = setState {
-        copy(sourceInputs = sourceInputs + WordFormInput(), targetInputs = targetInputs + WordFormInput())
+    /** Adds an alternative to one side only — the side whose button was pressed. */
+    fun addMeaning(side: WordSide) = setState {
+        when (side) {
+            WordSide.SOURCE -> copy(sourceInputs = sourceInputs + WordFormInput())
+            WordSide.TARGET -> copy(targetInputs = targetInputs + WordFormInput())
+        }
     }
 
-    fun removeMeaning(index: Int) = setState {
-        if (meaningCount <= 1) {
-            this
-        } else {
-            copy(
-                sourceInputs = sourceInputs.filterIndexed { i, _ -> i != index },
-                targetInputs = targetInputs.filterIndexed { i, _ -> i != index },
-            )
+    /** Removes one alternative from one side; a side always keeps at least one. */
+    fun removeMeaning(side: WordSide, index: Int) = setState {
+        val inputs = inputsFor(side)
+        if (inputs.size <= 1) return@setState this
+
+        val remaining = inputs.filterIndexed { i, _ -> i != index }
+
+        when (side) {
+            WordSide.SOURCE -> copy(sourceInputs = remaining)
+            WordSide.TARGET -> copy(targetInputs = remaining)
         }
     }
 

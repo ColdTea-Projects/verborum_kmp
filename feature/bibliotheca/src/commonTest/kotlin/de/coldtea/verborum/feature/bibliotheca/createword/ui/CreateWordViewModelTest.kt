@@ -113,22 +113,109 @@ class CreateWordViewModelTest {
     }
 
     @Test
-    fun `a second meaning is added to both sides at once and removed the same way`() = runTest {
+    fun `a word saved before types existed edits as free text, not as a noun`() = runTest {
+        val untyped = Word(
+            wordId = "word-1",
+            dictionaryId = "dict-1",
+            word = """["good morning"]""",
+            wordMeta = """{"lang":"en"}""",
+            translation = """["guten Morgen"]""",
+            translationMeta = """{"lang":"de"}""",
+            createdAt = 0L,
+            updatedAt = 0L,
+            level = 0,
+            isSynced = true,
+        )
+        val words = FakeWordRepository(initial = listOf(untyped))
+
+        val viewModel = viewModel(words = words, wordId = "word-1")
+        advanceUntilIdle()
+
+        assertEquals(WordType.FREE_TEXT, viewModel.state.value.wordType)
+        // And a new word still opens on the commonest choice rather than on free text.
+        val fresh = viewModel()
+        advanceUntilIdle()
+        assertEquals(WordType.NOUN, fresh.state.value.wordType)
+    }
+
+    @Test
+    fun `a closed-class word stores its own part of speech`() = runTest {
+        val words = FakeWordRepository()
+        val viewModel = viewModel(words = words)
+        advanceUntilIdle()
+
+        viewModel.onWordTypeChanged(WordType.INTERJECTION)
+        viewModel.onTextChanged(WordSide.SOURCE, 0, "ouch")
+        viewModel.onTextChanged(WordSide.TARGET, 0, "autsch")
+        viewModel.save()
+        advanceUntilIdle()
+
+        val meta = words.savedWord?.wordMeta.orEmpty()
+        assertTrue(meta.contains(""""type":"interjection""""), meta)
+        // Nothing beyond the word itself, exactly like an adverb.
+        assertTrue(meta.contains(""""fields":{}"""), meta)
+    }
+
+    @Test
+    fun `an alternative is added to the side that asked for it, and to that side only`() = runTest {
         val viewModel = viewModel()
         advanceUntilIdle()
 
-        viewModel.addMeaning()
+        viewModel.addMeaning(WordSide.SOURCE)
 
-        assertEquals(2, viewModel.state.value.meaningCount)
         assertEquals(2, viewModel.state.value.sourceInputs.size)
-        assertEquals(2, viewModel.state.value.targetInputs.size)
-
-        viewModel.onTextChanged(WordSide.SOURCE, 1, "buy")
-        viewModel.removeMeaning(0)
-
-        assertEquals(1, viewModel.state.value.meaningCount)
-        assertEquals("buy", viewModel.state.value.sourceInputs.single().text)
         assertEquals(1, viewModel.state.value.targetInputs.size)
+
+        viewModel.addMeaning(WordSide.TARGET)
+        viewModel.addMeaning(WordSide.TARGET)
+
+        assertEquals(2, viewModel.state.value.sourceInputs.size)
+        assertEquals(3, viewModel.state.value.targetInputs.size)
+    }
+
+    @Test
+    fun `removing takes the chosen entry off one side and leaves the other untouched`() = runTest {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.addMeaning(WordSide.SOURCE)
+        viewModel.onTextChanged(WordSide.SOURCE, 0, "kaufen")
+        viewModel.onTextChanged(WordSide.SOURCE, 1, "erwerben")
+        viewModel.onTextChanged(WordSide.TARGET, 0, "buy")
+
+        viewModel.removeMeaning(WordSide.SOURCE, 0)
+
+        assertEquals("erwerben", viewModel.state.value.sourceInputs.single().text)
+        assertEquals("buy", viewModel.state.value.targetInputs.single().text)
+    }
+
+    @Test
+    fun `a side never drops below one entry`() = runTest {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+
+        viewModel.onTextChanged(WordSide.SOURCE, 0, "go")
+        viewModel.removeMeaning(WordSide.SOURCE, 0)
+
+        // The card stays, and so does what was typed in it.
+        assertEquals("go", viewModel.state.value.sourceInputs.single().text)
+    }
+
+    @Test
+    fun `sides of different lengths each store their own alternatives`() = runTest {
+        val words = FakeWordRepository()
+        val viewModel = viewModel(words = words)
+        advanceUntilIdle()
+
+        viewModel.addMeaning(WordSide.SOURCE)
+        viewModel.onTextChanged(WordSide.SOURCE, 0, "kaufen")
+        viewModel.onTextChanged(WordSide.SOURCE, 1, "erwerben")
+        viewModel.onTextChanged(WordSide.TARGET, 0, "buy")
+        viewModel.save()
+        advanceUntilIdle()
+
+        assertEquals("""["kaufen","erwerben"]""", words.savedWord?.word)
+        assertEquals("""["buy"]""", words.savedWord?.translation)
     }
 
     @Test
@@ -139,7 +226,7 @@ class CreateWordViewModelTest {
 
         viewModel.onTextChanged(WordSide.SOURCE, 0, "go")
         viewModel.onTextChanged(WordSide.TARGET, 0, "gehen")
-        viewModel.addMeaning()
+        viewModel.addMeaning(WordSide.SOURCE)
         viewModel.save()
         advanceUntilIdle()
 
