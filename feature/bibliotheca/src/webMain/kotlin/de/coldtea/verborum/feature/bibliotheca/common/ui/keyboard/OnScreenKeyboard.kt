@@ -57,7 +57,9 @@ internal fun LanguageKeyboardPopup(
     controller: KeyboardController,
     modifier: Modifier = Modifier,
 ) {
-    val layout = keyboardLayoutFor(languageCode) ?: return
+    // Keyed on the field being typed into, not just the card: a Chinese word is bopomofo while its
+    // reading is pinyin.
+    val layout = keyboardLayoutFor(languageCode, controller.focusedField()?.fieldKey) ?: return
 
     Popup(
         popupPositionProvider = remember { KeyboardPositionProvider() },
@@ -129,6 +131,9 @@ private fun OnScreenKeyboard(
                         isActive = isShifted,
                         onClick = { isShifted = !isShifted },
                     )
+                }
+                layout.punctuation.forEach { key ->
+                    Key(label = key.lower, onClick = { controller.type(key.lower) })
                 }
                 Key(label = "space", isWide = true, onClick = { controller.type(" ") })
                 IconKey(

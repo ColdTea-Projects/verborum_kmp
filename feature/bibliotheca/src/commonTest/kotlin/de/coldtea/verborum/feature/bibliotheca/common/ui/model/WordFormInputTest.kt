@@ -84,12 +84,35 @@ class WordFormInputTest {
         assertEquals(listOf(FieldKey.PAST, FieldKey.PARTICIPLE), WordGrammar.fieldsFor("en", WordType.VERB))
         assertEquals(listOf("haben", "sein"), WordGrammar.auxiliaryOptions("de"))
 
-        // A Japanese noun has no gender and no plural, but does take a counter word.
-        assertEquals(listOf(FieldKey.MEASURE), WordGrammar.fieldsFor("ja", WordType.NOUN))
+        // A Japanese noun has no gender and no plural, but does take a counter word — and, like
+        // every word in a script that does not spell out its own pronunciation, a reading.
+        assertEquals(
+            listOf(FieldKey.READING, FieldKey.MEASURE),
+            WordGrammar.fieldsFor("ja", WordType.NOUN),
+        )
         assertEquals(emptyList(), WordGrammar.genderOptions("ja"))
 
         // Adverbs carry nothing beyond the word itself, in any language.
         assertEquals(emptyList(), WordGrammar.fieldsFor("de", WordType.ADVERB))
+    }
+
+    @Test
+    fun `a word in a script that hides its pronunciation carries a reading`() {
+        // Whatever the part of speech: an interjection needs its reading as much as a noun does.
+        WordType.entries.forEach { type ->
+            assertTrue(
+                FieldKey.READING in WordGrammar.fieldsFor("zh", type),
+                "zh/$type has no reading",
+            )
+            assertTrue(
+                FieldKey.READING in WordGrammar.fieldsFor("ja", type),
+                "ja/$type has no reading",
+            )
+        }
+
+        // An alphabet spells itself out, so there is nothing to add.
+        assertTrue(FieldKey.READING !in WordGrammar.fieldsFor("de", WordType.NOUN))
+        assertTrue(FieldKey.READING !in WordGrammar.fieldsFor("ru", WordType.NOUN))
     }
 
     @Test

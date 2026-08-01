@@ -59,7 +59,10 @@ internal object WordGrammar {
     fun fieldsFor(languageCode: String, wordType: WordType): List<FieldKey> {
         val code = languageCode.lowercase()
 
-        return when (wordType) {
+        // A word in a non-alphabetic script is unreadable without one, whatever its part of speech.
+        val reading = if (code in readingLanguages) listOf(FieldKey.READING) else emptyList()
+
+        return reading + when (wordType) {
             WordType.NOUN -> buildList {
                 if (code !in noPluralLanguages) add(FieldKey.PLURAL)
                 if (code in rootLanguages) add(FieldKey.ROOT)
@@ -133,6 +136,9 @@ internal object WordGrammar {
         "tr", "az" -> listOf(FieldKey.PAST)
         else -> listOf(FieldKey.PAST)
     }
+
+    /** Scripts that do not spell out their own pronunciation: pinyin, kana, romanisation. */
+    private val readingLanguages = setOf("zh", "ja")
 
     /** Languages whose script or grammar makes a written plural form unhelpful here. */
     private val noPluralLanguages = setOf("ja", "zh", "ko")

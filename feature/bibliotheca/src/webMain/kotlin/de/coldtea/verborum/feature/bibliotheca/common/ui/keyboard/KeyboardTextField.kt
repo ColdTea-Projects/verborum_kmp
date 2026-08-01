@@ -37,6 +37,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 
 /**
  * A text field the on-screen keyboard can type into.
@@ -47,6 +48,10 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
  *
  * Enter moves to the next field from *either* keyboard: `onPreviewKeyEvent` catches the physical
  * one, and the on-screen Enter calls the same method on the controller.
+ *
+ * The keyboard is the restriction, and it holds whatever the text came from: a character this
+ * language's keyboard cannot type is dropped on its way in, whether it was typed on the physical
+ * keyboard or pasted.
  */
 @Composable
 internal fun KeyboardTextField(
@@ -57,6 +62,7 @@ internal fun KeyboardTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    fieldKey: FieldKey? = null,
     placeholder: String = "",
 ) {
     val controller = LocalKeyboardController.current
@@ -66,11 +72,13 @@ internal fun KeyboardTextField(
     // Arabic and Persian are written right to left: the caret starts on the right, and the text
     // grows leftwards from it.
     val direction = if (isRightToLeft(languageCode)) LayoutDirection.Rtl else LayoutDirection.Ltr
+    val layout = keyboardLayoutFor(languageCode, fieldKey)
     val field = rememberKeyboardField(
         id = id,
         order = order,
         cardId = cardId,
         languageCode = languageCode,
+        fieldKey = fieldKey,
     )
 
     // The cursor lives here; the caller only ever sees the text. When the value changes underneath
@@ -83,8 +91,9 @@ internal fun KeyboardTextField(
 
     field.value = fieldValue
     field.onValueChange = { updated ->
-        fieldValue = updated
-        onValueChange(updated.text)
+        val accepted = sanitise(updated, layout)
+        fieldValue = accepted
+        onValueChange(accepted.text)
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
@@ -109,8 +118,9 @@ internal fun KeyboardTextField(
             BasicTextField(
                 value = fieldValue,
                 onValueChange = { updated ->
-                    fieldValue = updated
-                    onValueChange(updated.text)
+                    val accepted = sanitise(updated, layout)
+                    fieldValue = accepted
+                    onValueChange(accepted.text)
                 },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -138,6 +148,38 @@ internal fun KeyboardTextField(
         }
     }
     }
+}
+
+/**
+ * Everything this language's keyboard cannot type, removed.
+ *
+ * The typographic "’" is folded to "'" first rather than dropped, so *aujourd’hui* pasted from a
+ * dictionary keeps its apostrophe instead of becoming *aujourdhui* — one spelling per word, however
+ * it arrived.
+ *
+ * The caret is carried across by counting how many accepted characters preceded it, so deleting
+ * something in the middle of a word does not send the cursor to the end.
+ */
+private fun sanitise(value: TextFieldValue, layout: KeyboardLayout?): TextFieldValue {
+    if (layout == null) return value
+
+    val normalised = value.text.replace(CURLY_APOSTROPHE, PLAIN_APOSTROPHE)
+    val cursor = value.selection.end
+
+    val accepted = StringBuilder(normalised.length)
+    var acceptedBeforeCursor = 0
+
+    normalised.forEachIndexed { index, char ->
+        if (layout.accepts(char)) {
+            accepted.append(char)
+            if (index < cursor) acceptedBeforeCursor++
+        }
+    }
+
+    // Nothing to remove: keep the value as it is, selection and all.
+    if (accepted.length == normalised.length && normalised == value.text) return value
+
+    return TextFieldValue(accepted.toString(), TextRange(acceptedBeforeCursor))
 }
 
 private val FieldHeight = 48.dp

@@ -10,9 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 
 /**
  * One text field the on-screen keyboard can type into.
@@ -27,14 +27,14 @@ internal class KeyboardField(
     val order: Int,
     val cardId: String,
     val languageCode: String,
+    /** Which meta field this is, where that changes the keyboard — pinyin for a Chinese reading. */
+    val fieldKey: FieldKey?,
     val focusRequester: FocusRequester,
 ) {
     /** Set by the field itself, so the keyboard can read and rewrite what is in it. */
     var value: TextFieldValue = TextFieldValue()
     var onValueChange: (TextFieldValue) -> Unit = {}
 
-    /** Where the field sits on screen, for anchoring the keyboard near it. */
-    var bounds: Rect? = null
 }
 
 /**
@@ -133,7 +133,7 @@ internal class KeyboardController {
         val start = current.selection.min
         val end = current.selection.max
 
-        val composed = if (keyboardLayoutFor(field.languageCode)?.composesHangul == true) {
+        val composed = if (keyboardLayoutFor(field.languageCode, field.fieldKey)?.composesHangul == true) {
             HangulComposer.compose(current.text.take(start), text)
         } else {
             HangulComposer.Result(backspaces = 0, text = text)
@@ -174,6 +174,7 @@ internal fun rememberKeyboardField(
     order: Int,
     cardId: String,
     languageCode: String,
+    fieldKey: FieldKey?,
 ): KeyboardField {
     val controller = LocalKeyboardController.current
     val field = remember(id) {
@@ -182,11 +183,12 @@ internal fun rememberKeyboardField(
             order = order,
             cardId = cardId,
             languageCode = languageCode,
+            fieldKey = fieldKey,
             focusRequester = FocusRequester(),
         )
     }
 
-    DisposableEffect(controller, id, order, cardId, languageCode) {
+    DisposableEffect(controller, id, order, cardId, languageCode, fieldKey) {
         controller.register(field)
         onDispose { controller.unregister(id) }
     }

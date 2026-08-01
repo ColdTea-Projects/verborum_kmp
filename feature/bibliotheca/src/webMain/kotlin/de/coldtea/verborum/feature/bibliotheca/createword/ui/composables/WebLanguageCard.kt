@@ -172,6 +172,7 @@ internal fun WebLanguageCard(
                             languageCode = languageCode,
                             value = input.field(key),
                             onValueChange = { value -> onFieldChanged(key, value) },
+                            fieldKey = key,
                             placeholder = key.label,
                         )
                     }

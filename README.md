@@ -226,11 +226,26 @@ Fields work in `TextFieldValue` rather than a plain string so keys insert at the
 selection, instead of appending wherever the caret happens not to be. The popup is deliberately
 **not** focusable — taking focus would pull it out of the very field it types into.
 
+`docs/word-input-keyboard-webapp.md` is the spec: **the keyboard is the restriction**, so its keys
+are the app's per-language typeable-character contract. That contract is *mirrored* by the Android
+client's field filter rather than shared with it, so the two drift if either is changed alone. Every
+layout carries the same two auxiliary keys — apostrophe (`aujourd'hui`) and hyphen — and deliberately
+carries no meaning separator: those are drawn *between* meanings by the display layer, and each
+meaning is its own entry in an array, so a key for one would let it be typed *into* a surface. The
+typographic `’` is normalised to `'` on input, so a word has one spelling however it was typed. Free
+text is the exception the spec calls for — arbitrary content, handed to the browser's own keyboard
+and restricted by nothing.
+
+The keyboard is field-aware where a language needs it to be: a Chinese word is bopomofo, its
+`reading` is pinyin with the tone-marked vowels.
+
 All 19 languages have a layout, in their own national arrangement (QWERTZ for German, AZERTY for
 French, ЙЦУКЕН for Russian, right-to-left rows for Arabic and Persian). Two need saying: Korean types
 jamo and `HangulComposer` folds them into syllables as they go — `ㅎ ㅏ ㄴ` becomes `한`, and a
-following vowel carries the tail into the next syllable — while Chinese offers pinyin with tone marks
-and says so on the keyboard, because hanzi cannot be produced without a conversion dictionary.
+following vowel carries the tail into the next syllable — while Chinese types bopomofo and says on the keyboard
+that hanzi need the system input method, because they cannot be produced without a conversion
+dictionary. Latin keyboards carry the letters their language actually writes: Italian has no j, k, w,
+x or y, Turkish and Lithuanian no q, w or x.
 
 This is web-only; the iOS cards are untouched.
 
