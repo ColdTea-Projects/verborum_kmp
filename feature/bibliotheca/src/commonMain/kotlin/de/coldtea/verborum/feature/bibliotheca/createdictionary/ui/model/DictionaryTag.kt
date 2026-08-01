@@ -3,72 +3,92 @@ package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model
 import de.coldtea.verborum.core.localization.Strings
 
 /**
- * A selectable dictionary tag. [code] is the stable identifier that is stored and sent — it never
- * changes with the label — and [label] is what the user reads.
+ * A selectable dictionary tag.
  *
- * The catalogue below is the Android app's, code for code, so the two write the same values.
+ * [code] is the stable identifier to persist and send — it never changes with the UI language. The
+ * display label is one of two kinds, matching the Android client:
+ * - a [localized] resolver for proficiency levels and topics (follows the app language)
+ * - a [fixed] proper-noun label shown as-is in every language (framework codes like A1 / N5 /
+ *   HSK 3 and exam names like "DELE (es)")
+ *
+ * Exactly one of the two is set.
  */
-internal data class DictionaryTag(val code: String, val label: String)
+internal data class DictionaryTag(
+    val code: String,
+    private val fixed: String? = null,
+    private val localized: (Strings.() -> String)? = null,
+) {
+    fun label(strings: Strings): String = fixed ?: localized!!.invoke(strings)
+}
+
+private fun translated(code: String, label: Strings.() -> String) =
+    DictionaryTag(code = code, localized = label)
+
+private fun fixed(code: String, name: String) =
+    DictionaryTag(code = code, fixed = name)
+
+// --- Provisional tag taxonomy (UI; codes are the eventual storage keys) ---
 
 internal val LEVEL_TAGS: List<DictionaryTag> = listOf(
-    DictionaryTag("basic", "Basic"),
-    DictionaryTag("intermediate", "Intermediate"),
-    DictionaryTag("advanced", "Advanced"),
-    // Framework codes are lower-cased to match the backend's tag normalisation, so they round-trip.
-    DictionaryTag("a1", "A1"), DictionaryTag("a2", "A2"), DictionaryTag("b1", "B1"),
-    DictionaryTag("b2", "B2"), DictionaryTag("c1", "C1"), DictionaryTag("c2", "C2"),
-    DictionaryTag("n5", "N5"), DictionaryTag("n4", "N4"), DictionaryTag("n3", "N3"),
-    DictionaryTag("n2", "N2"), DictionaryTag("n1", "N1"),
-    DictionaryTag("hsk1", "HSK 1"), DictionaryTag("hsk2", "HSK 2"), DictionaryTag("hsk3", "HSK 3"),
-    DictionaryTag("hsk4", "HSK 4"), DictionaryTag("hsk5", "HSK 5"), DictionaryTag("hsk6", "HSK 6"),
-    DictionaryTag("topik1", "TOPIK 1"), DictionaryTag("topik2", "TOPIK 2"),
-    DictionaryTag("topik3", "TOPIK 3"), DictionaryTag("topik4", "TOPIK 4"),
-    DictionaryTag("topik5", "TOPIK 5"), DictionaryTag("topik6", "TOPIK 6"),
+    // General proficiency — translatable.
+    translated("basic") { tagLevelBasic },
+    translated("intermediate") { tagLevelIntermediate },
+    translated("advanced") { tagLevelAdvanced },
+    // Framework codes — fixed names. Codes are lower-cased to match the backend's tag
+    // normalisation (trimmed + lower-cased on write), so they round-trip unchanged.
+    fixed("a1", "A1"), fixed("a2", "A2"), fixed("b1", "B1"),
+    fixed("b2", "B2"), fixed("c1", "C1"), fixed("c2", "C2"),
+    fixed("n5", "N5"), fixed("n4", "N4"), fixed("n3", "N3"),
+    fixed("n2", "N2"), fixed("n1", "N1"),
+    fixed("hsk1", "HSK 1"), fixed("hsk2", "HSK 2"), fixed("hsk3", "HSK 3"),
+    fixed("hsk4", "HSK 4"), fixed("hsk5", "HSK 5"), fixed("hsk6", "HSK 6"),
+    fixed("topik1", "TOPIK 1"), fixed("topik2", "TOPIK 2"), fixed("topik3", "TOPIK 3"),
+    fixed("topik4", "TOPIK 4"), fixed("topik5", "TOPIK 5"), fixed("topik6", "TOPIK 6"),
 )
 
 internal val TOPIC_TAGS: List<DictionaryTag> = listOf(
-    DictionaryTag("food_drink", "Food & drink"),
-    DictionaryTag("home_appliances", "Home & appliances"),
-    DictionaryTag("clothing", "Clothing"),
-    DictionaryTag("family", "Family"),
-    DictionaryTag("daily_routine", "Daily routine"),
-    DictionaryTag("shopping", "Shopping"),
-    DictionaryTag("money", "Money"),
-    DictionaryTag("travel", "Travel"),
-    DictionaryTag("transport", "Transport"),
-    DictionaryTag("cars_parts", "Cars & parts"),
-    DictionaryTag("directions", "Directions"),
-    DictionaryTag("city", "City"),
-    DictionaryTag("nature_weather", "Nature & weather"),
-    DictionaryTag("animals", "Animals"),
-    DictionaryTag("plants", "Plants"),
-    DictionaryTag("body_health", "Body & health"),
-    DictionaryTag("medicine", "Medicine"),
-    DictionaryTag("emotions", "Emotions"),
-    DictionaryTag("work_office", "Work & office"),
-    DictionaryTag("business", "Business"),
-    DictionaryTag("education", "Education"),
-    DictionaryTag("it_technology", "IT & technology"),
-    DictionaryTag("law", "Law"),
-    DictionaryTag("science", "Science"),
-    DictionaryTag("sports", "Sports"),
-    DictionaryTag("music", "Music"),
-    DictionaryTag("art_film", "Art & film"),
-    DictionaryTag("culture_holidays", "Culture & holidays"),
-    DictionaryTag("news_politics", "News & politics"),
-    DictionaryTag("food_service", "Food service"),
+    translated("food_drink") { tagTopicFoodDrink },
+    translated("home_appliances") { tagTopicHomeAppliances },
+    translated("clothing") { tagTopicClothing },
+    translated("family") { tagTopicFamily },
+    translated("daily_routine") { tagTopicDailyRoutine },
+    translated("shopping") { tagTopicShopping },
+    translated("money") { tagTopicMoney },
+    translated("travel") { tagTopicTravel },
+    translated("transport") { tagTopicTransport },
+    translated("cars_parts") { tagTopicCarsParts },
+    translated("directions") { tagTopicDirections },
+    translated("city") { tagTopicCity },
+    translated("nature_weather") { tagTopicNatureWeather },
+    translated("animals") { tagTopicAnimals },
+    translated("plants") { tagTopicPlants },
+    translated("body_health") { tagTopicBodyHealth },
+    translated("medicine") { tagTopicMedicine },
+    translated("emotions") { tagTopicEmotions },
+    translated("work_office") { tagTopicWorkOffice },
+    translated("business") { tagTopicBusiness },
+    translated("education") { tagTopicEducation },
+    translated("it_technology") { tagTopicItTechnology },
+    translated("law") { tagTopicLaw },
+    translated("science") { tagTopicScience },
+    translated("sports") { tagTopicSports },
+    translated("music") { tagTopicMusic },
+    translated("art_film") { tagTopicArtFilm },
+    translated("culture_holidays") { tagTopicCultureHolidays },
+    translated("news_politics") { tagTopicNewsPolitics },
+    translated("food_service") { tagTopicFoodService },
 )
 
 internal val EXAM_TAGS: List<DictionaryTag> = listOf(
-    DictionaryTag("goethe_testdaf", "Goethe/TestDaF (de)"),
-    DictionaryTag("dele", "DELE (es)"),
-    DictionaryTag("delf_dalf", "DELF/DALF (fr)"),
-    DictionaryTag("cils", "CILS (it)"),
-    DictionaryTag("ielts_cambridge", "IELTS/Cambridge (en)"),
-    DictionaryTag("jlpt", "JLPT (ja)"),
-    DictionaryTag("hsk", "HSK (zh)"),
-    DictionaryTag("topik", "TOPIK (ko)"),
-    DictionaryTag("torfl", "TORFL (ru)"),
+    fixed("goethe_testdaf", "Goethe/TestDaF (de)"),
+    fixed("dele", "DELE (es)"),
+    fixed("delf_dalf", "DELF/DALF (fr)"),
+    fixed("cils", "CILS (it)"),
+    fixed("ielts_cambridge", "IELTS/Cambridge (en)"),
+    fixed("jlpt", "JLPT (ja)"),
+    fixed("hsk", "HSK (zh)"),
+    fixed("topik", "TOPIK (ko)"),
+    fixed("torfl", "TORFL (ru)"),
 )
 
 /**
@@ -107,4 +127,5 @@ internal val ALL_TAGS: List<DictionaryTag> = TagSection.entries.flatMap { it.tag
 private val tagsByCode: Map<String, DictionaryTag> = ALL_TAGS.associateBy(DictionaryTag::code)
 
 /** An unknown code still shows — as itself — rather than disappearing from an edited dictionary. */
-internal fun tagLabelOf(code: String): String = tagsByCode[code]?.label ?: code
+internal fun tagLabelOf(code: String, strings: Strings): String =
+    tagsByCode[code]?.label(strings) ?: code

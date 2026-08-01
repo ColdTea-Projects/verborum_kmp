@@ -1,15 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
@@ -21,26 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import de.coldtea.verborum.core.designsystem.component.ContentPane
-import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
-import de.coldtea.verborum.core.designsystem.component.WebChip
-import de.coldtea.verborum.core.designsystem.component.WebEyebrow
-import de.coldtea.verborum.core.designsystem.component.WebFieldLabel
-import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
-import de.coldtea.verborum.core.designsystem.component.WebPageTitle
-import de.coldtea.verborum.core.designsystem.component.WebPrimaryButton
-import de.coldtea.verborum.core.designsystem.component.WebSelect
+import de.coldtea.verborum.core.designsystem.component.*
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardButton
-import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardController
-import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardTextField
-import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LanguageKeyboardPopup
-import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
 import de.coldtea.verborum.core.localization.LocalStrings
 import de.coldtea.verborum.core.localization.strings
+import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.*
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
 
 /**
  * The dictionary form as a desktop page: a name, the language pair side by side, and the tag
@@ -71,47 +51,47 @@ internal actual fun CreateDictionaryContent(
     val keyboardController = remember { KeyboardController() }
 
     CompositionLocalProvider(LocalKeyboardController provides keyboardController) {
-    Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        ContentPane(maxWidth = ContentWidth.Web.dictionaryForm) {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                WebPageSpacer(Spacing.extraLarge)
+        Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            ContentPane(maxWidth = ContentWidth.Web.dictionaryForm) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    WebPageSpacer(Spacing.extraLarge)
 
-                WebPageTitle(
-                    title = if (state.isEditing) strings.editDictionaryTitle else strings.createDictionary,
-                    subtitle = strings.createDictionarySubtitle,
-                )
+                    WebPageTitle(
+                        title = if (state.isEditing) strings.editDictionaryTitle else strings.createDictionary,
+                        subtitle = strings.createDictionarySubtitle,
+                    )
 
-                WebPageSpacer()
+                    WebPageSpacer()
 
-                IdentityFields(
-                    state = state,
-                    onNameChanged = onNameChanged,
-                    onFromLanguageChanged = onFromLanguageChanged,
-                    onToLanguageChanged = onToLanguageChanged,
-                )
+                    IdentityFields(
+                        state = state,
+                        onNameChanged = onNameChanged,
+                        onFromLanguageChanged = onFromLanguageChanged,
+                        onToLanguageChanged = onToLanguageChanged,
+                    )
 
-                WebPageSpacer()
+                    WebPageSpacer()
 
-                WebFieldLabel("Tags")
-                TagChips(selectedCodes = state.tags, onToggle = onTagToggled)
+                    WebFieldLabel("Tags")
+                    TagChips(selectedCodes = state.tags, onToggle = onTagToggled)
 
-                WebPageSpacer()
+                    WebPageSpacer()
 
-                WebPrimaryButton(
-                    label = when {
-                        state.isSaving -> "Saving…"
-                        state.isEditing -> "Save Changes"
-                        else -> "Create Dictionary"
-                    },
-                    onClick = onSave,
-                    // A dictionary without a name or a direction is not something the app can store.
-                    isEnabled = state.canSave,
-                )
+                    WebPrimaryButton(
+                        label = when {
+                            state.isSaving -> "Saving…"
+                            state.isEditing -> "Save Changes"
+                            else -> "Create Dictionary"
+                        },
+                        onClick = onSave,
+                        // A dictionary without a name or a direction is not something the app can store.
+                        isEnabled = state.canSave,
+                    )
 
-                WebPageSpacer(Spacing.extraLarge)
+                    WebPageSpacer(Spacing.extraLarge)
+                }
             }
         }
-    }
     }
 }
 
@@ -306,7 +286,7 @@ private fun TagChips(selectedCodes: List<String>, onToggle: (String) -> Unit) {
             ) {
                 section.tags.forEach { tag ->
                     WebChip(
-                        label = tag.label,
+                        label = tag.label(strings),
                         isSelected = tag.code in selectedCodes,
                         onClick = { onToggle(tag.code) },
                     )

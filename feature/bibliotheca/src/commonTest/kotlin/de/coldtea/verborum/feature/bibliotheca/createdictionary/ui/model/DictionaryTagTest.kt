@@ -1,6 +1,8 @@
 package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model
 
 import de.coldtea.verborum.core.localization.EnglishStrings
+import de.coldtea.verborum.core.localization.UiLanguage
+import de.coldtea.verborum.core.localization.stringsFor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,7 +43,20 @@ class DictionaryTagTest {
     @Test
     fun `an unknown code still shows, as itself`() {
         // An edited dictionary may carry a tag a newer client added.
-        assertEquals("Basic", tagLabelOf("basic"))
-        assertEquals("something_new", tagLabelOf("something_new"))
+        assertEquals("Basic", tagLabelOf("basic", EnglishStrings))
+        assertEquals("something_new", tagLabelOf("something_new", EnglishStrings))
+    }
+
+    @Test
+    fun `level and topic labels follow the UI language, framework codes do not`() {
+        val german = stringsFor(UiLanguage.GERMAN)
+        val turkish = stringsFor(UiLanguage.TURKISH)
+
+        assertEquals("Grundstufe", tagLabelOf("basic", german))
+        assertEquals("Mittelstufe", tagLabelOf("intermediate", german))
+        assertEquals("Essen & Trinken", tagLabelOf("food_drink", german))
+        assertEquals("Yiyecek ve içecek", tagLabelOf("food_drink", turkish))
+        assertEquals("A1", tagLabelOf("a1", german))
+        assertEquals("DELE (es)", tagLabelOf("dele", turkish))
     }
 }

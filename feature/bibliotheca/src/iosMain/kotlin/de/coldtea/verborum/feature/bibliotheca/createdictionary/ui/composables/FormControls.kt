@@ -166,7 +166,7 @@ private fun TagChip(
         ),
     ) {
         Text(
-            text = tag.label,
+            text = tag.label(strings),
             style = MaterialTheme.typography.labelMedium,
             color = if (isSelected) accent else MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(horizontal = Spacing.small, vertical = Spacing.extraSmall),
