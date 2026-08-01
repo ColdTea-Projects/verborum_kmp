@@ -132,14 +132,17 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `no keyboard can type a meaning separator`() {
-        // Those are drawn *between* meanings by the display layer, and each meaning is its own entry
-        // in an array. A key for one would let it be typed into a single surface.
-        val separators = "/،・、·；;"
+    fun `no keyboard can type a meaning separator, extended keys included`() {
+        // Every separator `WordMeta` puts *between* meanings or forms. Each meaning is its own entry
+        // in an array, so a key for one would let it be typed into a single surface and read back as
+        // two. `،` and `؛` are ordinary Arabic punctuation and still excluded, for that reason.
+        val separators = "/،・、؛；·;"
 
         SupportedLanguage.entries.forEach { language ->
+            val layout = keyboardLayoutFor(language.code)
             val typeable = keysOf(language.code) +
-                keyboardLayoutFor(language.code)?.punctuation.orEmpty().map { it.lower }
+                (layout?.punctuation.orEmpty() + layout?.digits.orEmpty() + layout?.symbols.orEmpty())
+                    .map { it.lower }
 
             separators.forEach { separator ->
                 assertTrue(
@@ -149,6 +152,24 @@ class HangulComposerTest {
             }
         }
     }
+
+    @Test
+    fun `an extended keyboard adds digits in the numerals the language writes with`() {
+        // Latin numerals almost everywhere...
+        assertEquals("0123456789", digitsOf("de"))
+        assertEquals("0123456789", digitsOf("ja"))
+        // ...but not in Arabic or Persian, which have their own and do not share them.
+        assertEquals("٠١٢٣٤٥٦٧٨٩", digitsOf("ar"))
+        assertEquals("۰۱۲۳۴۵۶۷۸۹", digitsOf("fa"))
+
+        // Punctuation follows the script too.
+        val japanese = keyboardLayoutFor("ja")!!.symbols.map { it.lower }
+        assertTrue("。" in japanese && "！" in japanese)
+        assertTrue("." in keyboardLayoutFor("de")!!.symbols.map { it.lower })
+    }
+
+    private fun digitsOf(code: String): String =
+        keyboardLayoutFor(code)?.digits.orEmpty().joinToString("") { it.lower }
 
     @Test
     fun `the Chinese reading field types pinyin, while the word itself is bopomofo`() {
@@ -210,6 +231,58 @@ class HangulComposerTest {
         assertTrue("píngguǒ".all(reading::accepts))
         // ...and the word field is the other way round.
         assertTrue(!keyboardLayoutFor("zh")!!.accepts('í'))
+    }
+
+    @Test
+    fun `the extended row pairs each digit with a symbol, as a physical keyboard does`() {
+        val layout = KeyboardLayout(
+            rows = emptyList(),
+            digits = "1234567890".map { KeyCap(it.toString(), it.toString()) },
+            symbols = "!@#$%^&*()-_+=\"".map { KeyCap(it.toString(), it.toString()) },
+        )
+
+        val pairs = layout.extendedRow.map { it.lower + it.upper }
+
+        assertEquals(
+            // Ten digits take the first ten symbols; the five left over pair off with each other,
+            // and the odd one types the same character either way.
+            listOf("1!", "2@", "3#", "4$", "5%", "6^", "7&", "8*", "9(", "0)", "-_", "+=", "\"\""),
+            pairs,
+        )
+    }
+
+    @Test
+    fun `a script with fewer symbols than digits still shows every digit`() {
+        // Arabic offers seven marks against ten numerals; the last three keep their digit on both
+        // faces rather than going missing.
+        val arabic = keyboardLayoutFor("ar")!!
+
+        assertEquals(arabic.digits.size, arabic.extendedRow.size)
+        assertEquals("٠١٢٣٤٥٦٧٨٩", arabic.extendedRow.joinToString("") { it.lower })
+        assertEquals("٩", arabic.extendedRow.last().upper)
+    }
+
+    @Test
+    fun `a script without capitals still switches its digits for punctuation`() {
+        // Arabic, Persian and bopomofo have no case, so shift leaves their letters alone. It is
+        // still what reaches the punctuation on an extended keyboard, so it must not be hidden.
+        setOf("ar", "fa", "zh").forEach { code ->
+            val layout = keyboardLayoutFor(code)!!
+
+            assertTrue(!layout.hasCase, "$code should have no case")
+            assertTrue(
+                layout.rows.flatten().all { it.lower == it.upper },
+                "$code letters should not change with shift",
+            )
+            assertTrue(
+                layout.extendedRow.any { it.lower != it.upper },
+                "$code has nothing to reach with shift on an extended keyboard",
+            )
+        }
+
+        // The cased scripts are unaffected: shift is still capitals there.
+        assertTrue(keyboardLayoutFor("de")!!.hasCase)
+        assertEquals("A", keyboardLayoutFor("de")!!.rows.flatten().first { it.lower == "a" }.upper)
     }
 
     /** Every character the keyboard for [code] can type. */

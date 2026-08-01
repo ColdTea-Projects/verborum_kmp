@@ -20,17 +20,24 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
  * [order] rather than registration order decides what "the next field" means: composition order is
  * not something a screen should have to rely on, and the word form knows perfectly well that its
  * source column comes before its target column.
+ *
+ * Only [id] and [cardId] identify the field. Everything else is a `var` refreshed on each
+ * composition, because **re-registering a field forgets which one had focus** — and a field whose
+ * language can change (the dictionary name, which follows the keyboard the user picked) would
+ * otherwise unregister itself the moment that language changed, closing the keyboard mid-use.
  */
 @Stable
 internal class KeyboardField(
     val id: String,
-    val order: Int,
     val cardId: String,
-    val languageCode: String,
-    /** Which meta field this is, where that changes the keyboard — pinyin for a Chinese reading. */
-    val fieldKey: FieldKey?,
     val focusRequester: FocusRequester,
 ) {
+    var order: Int = 0
+    var languageCode: String = ""
+
+    /** Which meta field this is, where that changes the keyboard — pinyin for a Chinese reading. */
+    var fieldKey: FieldKey? = null
+
     /** Set by the field itself, so the keyboard can read and rewrite what is in it. */
     var value: TextFieldValue = TextFieldValue()
     var onValueChange: (TextFieldValue) -> Unit = {}
@@ -63,6 +70,19 @@ internal class KeyboardController {
 
     var isOpen: Boolean by mutableStateOf(false)
         private set
+
+    /**
+     * The keyboard the user picked, where a field offers a choice of two.
+     *
+     * Null means "whichever the keyboard opened on". It is cleared whenever the keyboard opens, so a
+     * language chosen on one card cannot follow the user to the next.
+     */
+    var keyboardLanguage: String? by mutableStateOf(null)
+        private set
+
+    fun selectLanguage(languageCode: String) {
+        keyboardLanguage = languageCode
+    }
 
     /** True while the keyboard is showing and the focused field belongs to this card. */
     fun isOpenFor(cardId: String): Boolean = isOpen && focusedField()?.cardId == cardId
@@ -100,6 +120,8 @@ internal class KeyboardController {
         val target = focusedField()?.takeIf { it.cardId == cardId }
             ?: fields.filter { it.cardId == cardId }.minByOrNull { it.order }
 
+        keyboardLanguage = null
+
         target?.let { field ->
             focusedFieldId = field.id
             // Pressing the button moved focus onto the button; put it back, so the caret is in the
@@ -112,6 +134,7 @@ internal class KeyboardController {
 
     fun close() {
         isOpen = false
+        keyboardLanguage = null
     }
 
     /** Enter, from either keyboard: move on to the next field in the form, wrapping at the end. */
@@ -133,7 +156,10 @@ internal class KeyboardController {
         val start = current.selection.min
         val end = current.selection.max
 
-        val composed = if (keyboardLayoutFor(field.languageCode, field.fieldKey)?.composesHangul == true) {
+        // The layout that is showing decides, not the field: someone who switched a name field to
+        // the Korean keyboard expects their jamo to compose into syllables.
+        val language = keyboardLanguage ?: field.languageCode
+        val composed = if (keyboardLayoutFor(language, field.fieldKey)?.composesHangul == true) {
             HangulComposer.compose(current.text.take(start), text)
         } else {
             HangulComposer.Result(backspaces = 0, text = text)
@@ -177,18 +203,17 @@ internal fun rememberKeyboardField(
     fieldKey: FieldKey?,
 ): KeyboardField {
     val controller = LocalKeyboardController.current
-    val field = remember(id) {
-        KeyboardField(
-            id = id,
-            order = order,
-            cardId = cardId,
-            languageCode = languageCode,
-            fieldKey = fieldKey,
-            focusRequester = FocusRequester(),
-        )
+    val field = remember(id, cardId) {
+        KeyboardField(id = id, cardId = cardId, focusRequester = FocusRequester())
     }
 
-    DisposableEffect(controller, id, order, cardId, languageCode, fieldKey) {
+    // Written every composition rather than keyed into the effect below: changing one of these must
+    // not re-register the field, or the keyboard loses track of what it was typing into.
+    field.order = order
+    field.languageCode = languageCode
+    field.fieldKey = fieldKey
+
+    DisposableEffect(controller, id, cardId) {
         controller.register(field)
         onDispose { controller.unregister(id) }
     }

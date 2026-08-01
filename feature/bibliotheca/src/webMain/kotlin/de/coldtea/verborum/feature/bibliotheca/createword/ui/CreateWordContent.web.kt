@@ -3,14 +3,13 @@ package de.coldtea.verborum.feature.bibliotheca.createword.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.ErrorState
@@ -121,36 +121,56 @@ internal actual fun CreateWordContent(
 
                         WebPageSpacer()
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-                        ) {
-                            MeaningColumn(
-                                side = WordSide.SOURCE,
-                                languageCode = dictionary.fromLang,
-                                accentColor = MaterialTheme.colorScheme.primary,
-                                inputs = state.sourceInputs,
-                                wordType = state.wordType,
-                                onTextChanged = onTextChanged,
-                                onGenderChanged = onGenderChanged,
-                                onFieldChanged = onFieldChanged,
-                                onAddMeaning = onAddMeaning,
-                                onRemoveMeaning = onRemoveMeaning,
-                                modifier = Modifier.weight(1f),
-                            )
-                            MeaningColumn(
-                                side = WordSide.TARGET,
-                                languageCode = dictionary.toLang,
-                                accentColor = MaterialTheme.colorScheme.secondary,
-                                inputs = state.targetInputs,
-                                wordType = state.wordType,
-                                onTextChanged = onTextChanged,
-                                onGenderChanged = onGenderChanged,
-                                onFieldChanged = onFieldChanged,
-                                onAddMeaning = onAddMeaning,
-                                onRemoveMeaning = onRemoveMeaning,
-                                modifier = Modifier.weight(1f),
-                            )
+                        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                            val source: @Composable (Modifier) -> Unit = { columnModifier ->
+                                MeaningColumn(
+                                    side = WordSide.SOURCE,
+                                    languageCode = dictionary.fromLang,
+                                    accentColor = MaterialTheme.colorScheme.primary,
+                                    inputs = state.sourceInputs,
+                                    wordType = state.wordType,
+                                    onTextChanged = onTextChanged,
+                                    onGenderChanged = onGenderChanged,
+                                    onFieldChanged = onFieldChanged,
+                                    onAddMeaning = onAddMeaning,
+                                    onRemoveMeaning = onRemoveMeaning,
+                                    modifier = columnModifier,
+                                )
+                            }
+                            val target: @Composable (Modifier) -> Unit = { columnModifier ->
+                                MeaningColumn(
+                                    side = WordSide.TARGET,
+                                    languageCode = dictionary.toLang,
+                                    accentColor = MaterialTheme.colorScheme.secondary,
+                                    inputs = state.targetInputs,
+                                    wordType = state.wordType,
+                                    onTextChanged = onTextChanged,
+                                    onGenderChanged = onGenderChanged,
+                                    onFieldChanged = onFieldChanged,
+                                    onAddMeaning = onAddMeaning,
+                                    onRemoveMeaning = onRemoveMeaning,
+                                    modifier = columnModifier,
+                                )
+                            }
+
+                            // Side by side while both halves stay readable, stacked when they would not. Nothing
+                            // else about the form changes with the width: each language keeps its own alternatives
+                            // and its own add button either way.
+                            if (maxWidth >= SideBySide) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                                ) {
+                                    source(Modifier.weight(1f))
+                                    target(Modifier.weight(1f))
+                                }
+                            } else {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    source(Modifier.fillMaxWidth())
+                                    WebPageSpacer()
+                                    target(Modifier.fillMaxWidth())
+                                }
+                            }
                         }
 
                         WebPageSpacer()
@@ -233,3 +253,6 @@ private fun MeaningColumn(
         WebTextAction(label = "+ Add another meaning", onClick = { onAddMeaning(side) })
     }
 }
+
+/** Below this a language card cannot hold its label, its word field and its grammar fields. */
+private val SideBySide = 640.dp

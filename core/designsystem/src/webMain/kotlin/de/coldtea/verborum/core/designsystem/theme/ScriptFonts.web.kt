@@ -69,6 +69,32 @@ fun fontFamilyForLanguage(languageCode: String): FontFamily? =
         else -> null
     }
 
+/**
+ * The family that can draw [text], falling back to [fallbackLanguageCode] while it is still empty.
+ *
+ * Content rather than language, because a field's language does not always describe what is in it: a
+ * dictionary called "German Basics" may be typed with the Arabic keyboard open, and the Arabic face
+ * carries no Latin whatsoever — every letter would be an empty box. Reading the script off the text
+ * is exact for the single-script strings this app stores.
+ */
+@Composable
+fun fontFamilyForText(text: String, fallbackLanguageCode: String = ""): FontFamily? =
+    fontFamilyForLanguage(scriptCodeOf(text) ?: fallbackLanguageCode)
+
+/**
+ * The language code whose face can draw [text], or null where the default already can.
+ *
+ * Kana settles Japanese before the shared Han range is consulted, since a Japanese sentence written
+ * mostly in kanji would otherwise be drawn with Chinese letterforms.
+ */
+fun scriptCodeOf(text: String): String? = when {
+    text.any { it.code in 0x3040..0x30FF } -> "ja"
+    text.any { it.code in 0xAC00..0xD7A3 || it.code in 0x3130..0x318F } -> "ko"
+    text.any { it.code in 0x4E00..0x9FFF || it.code in 0x3400..0x4DBF || it.code in 0x3105..0x312F } -> "zh"
+    text.any { it.code in 0x0600..0x06FF } -> "ar"
+    else -> null
+}
+
 @Composable
 private fun notoSans(): FontFamily = FontFamily(
     Font(Res.font.noto_sans_regular, FontWeight.Normal),

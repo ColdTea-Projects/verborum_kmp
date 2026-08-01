@@ -35,7 +35,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
-import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
+import de.coldtea.verborum.core.designsystem.theme.scriptCodeOf
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 
@@ -64,15 +65,18 @@ internal fun KeyboardTextField(
     modifier: Modifier = Modifier,
     fieldKey: FieldKey? = null,
     placeholder: String = "",
+    /**
+     * False where the keyboard is an aid rather than a rule.
+     *
+     * The restriction exists for word surfaces, whose characters are a per-language contract. A
+     * dictionary's *name* is a label the user writes in whatever language they think in — filtering
+     * "German Basics" against a Japanese keyboard would erase all of it.
+     */
+    restrictToKeyboard: Boolean = true,
 ) {
     val controller = LocalKeyboardController.current
-    // What is typed here is in the card's language, so it is drawn in that language's face — the
-    // canvas has no system font to fall back on for Arabic or the kana.
-    val scriptFamily = fontFamilyForLanguage(languageCode)
-    // Arabic and Persian are written right to left: the caret starts on the right, and the text
-    // grows leftwards from it.
-    val direction = if (isRightToLeft(languageCode)) LayoutDirection.Rtl else LayoutDirection.Ltr
     val layout = keyboardLayoutFor(languageCode, fieldKey)
+    val restrictTo = layout.takeIf { restrictToKeyboard }
     val field = rememberKeyboardField(
         id = id,
         order = order,
@@ -89,9 +93,18 @@ internal fun KeyboardTextField(
         fieldValue = TextFieldValue(value, TextRange(value.length))
     }
 
+    // Drawn in the script of whatever is actually in the field, falling back to the field's own
+    // language while it is empty. The canvas has no system font to fall back on, and a face for one
+    // script carries nothing of another — the Arabic one has no Latin at all.
+    val script = scriptCodeOf(fieldValue.text) ?: languageCode
+    val scriptFamily = fontFamilyForText(fieldValue.text, languageCode)
+    // Arabic and Persian are written right to left: the caret starts on the right, and the text
+    // grows leftwards from it.
+    val direction = if (isRightToLeft(script)) LayoutDirection.Rtl else LayoutDirection.Ltr
+
     field.value = fieldValue
     field.onValueChange = { updated ->
-        val accepted = sanitise(updated, layout)
+        val accepted = sanitise(updated, restrictTo)
         fieldValue = accepted
         onValueChange(accepted.text)
     }
@@ -118,7 +131,7 @@ internal fun KeyboardTextField(
             BasicTextField(
                 value = fieldValue,
                 onValueChange = { updated ->
-                    val accepted = sanitise(updated, layout)
+                    val accepted = sanitise(updated, restrictTo)
                     fieldValue = accepted
                     onValueChange(accepted.text)
                 },
@@ -161,9 +174,13 @@ internal fun KeyboardTextField(
  * something in the middle of a word does not send the cursor to the end.
  */
 private fun sanitise(value: TextFieldValue, layout: KeyboardLayout?): TextFieldValue {
-    if (layout == null) return value
-
     val normalised = value.text.replace(CURLY_APOSTROPHE, PLAIN_APOSTROPHE)
+
+    // One spelling per word applies everywhere; the character restriction does not.
+    if (layout == null) {
+        return if (normalised == value.text) value else value.copy(text = normalised)
+    }
+
     val cursor = value.selection.end
 
     val accepted = StringBuilder(normalised.length)

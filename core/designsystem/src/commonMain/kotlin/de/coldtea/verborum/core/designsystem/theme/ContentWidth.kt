@@ -40,8 +40,11 @@ object ContentWidth {
         /** The word form, whose two language cards sit side by side. */
         val wordForm = 900.dp
 
-        /** The dictionary form — a single column of fields. */
-        val dictionaryForm = 560.dp
+        /**
+         * The dictionary form. Wide enough for the name and both language selects to sit abreast;
+         * the form itself drops them back to a column when the window cannot spare the width.
+         */
+        val dictionaryForm = 900.dp
 
         /** The test: one question card, read straight down. */
         val test = 640.dp

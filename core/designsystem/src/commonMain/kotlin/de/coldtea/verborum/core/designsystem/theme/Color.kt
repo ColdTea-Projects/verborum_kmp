@@ -26,3 +26,28 @@ object VerborumColors {
     val DarkGold = Color(0xFFE6C547)
     val DarkBorder = Color(0xFF333333)
 }
+
+/**
+ * The on-screen keyboard's own palette.
+ *
+ * It keeps one dark treatment in both themes, the way an operating system's keyboard does: the panel
+ * floats over the page as *chrome* rather than content, and a keyboard that changed colour with the
+ * page would read as part of the form underneath it. Defined here rather than in the feature so the
+ * values stay in one place with the rest of the palette.
+ */
+object KeyboardColors {
+    val panel = VerborumColors.DarkSurface
+    val key = VerborumColors.DarkSurfaceAlt
+
+    /** A hairline a shade lighter than the key, so each one reads as its own cap. */
+    val keyBorder = VerborumColors.DarkBorder
+    val keyText = VerborumColors.DarkText
+    val mutedText = VerborumColors.DarkTextSecondary
+
+    /** Enter, and the selected language tab. */
+    val accent = VerborumColors.LightAccent
+
+    /** Shift, which is a mode and wants a colour of its own rather than the accent's. */
+    val shift = VerborumColors.LightGold
+    val onAccent = VerborumColors.LightBackground
+}

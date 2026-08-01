@@ -30,7 +30,12 @@ internal data class KeyboardLayout(
     val rows: List<List<KeyCap>>,
     val isRtl: Boolean = false,
     val composesHangul: Boolean = false,
-    val hasShift: Boolean = true,
+    /**
+     * Whether the script distinguishes capitals. False for Arabic, Persian and bopomofo, whose
+     * letters look the same shifted or not — the shift key still appears on an extended keyboard,
+     * where it reaches the punctuation.
+     */
+    val hasCase: Boolean = true,
     val note: String? = null,
     /**
      * The non-letter keys every language gets, beyond space.
@@ -53,6 +58,20 @@ internal data class KeyboardLayout(
      * the keys.
      */
     val scriptRanges: List<CharRange> = emptyList(),
+    /**
+     * Digits, in the numerals the language writes with — Arabic and Persian do not use the Latin
+     * ones. Shown only on an extended keyboard.
+     */
+    val digits: List<KeyCap> = LATIN_DIGITS,
+    /**
+     * Punctuation beyond the apostrophe and hyphen, in the forms the script uses. Reached through
+     * shift on the extended row — see [extendedRow].
+     *
+     * No meaning separator appears here either. `،` and `؛` are ordinary Arabic punctuation, but
+     * they are also what the display layer puts *between* meanings, so a key for one would let it be
+     * typed into a value and read back as two.
+     */
+    val symbols: List<KeyCap> = COMMON_SYMBOLS,
 ) {
     /**
      * Whether [char] may appear in a field using this keyboard.
@@ -64,6 +83,25 @@ internal data class KeyboardLayout(
         char == ' ' ||
             char in typeable ||
             scriptRanges.any { range -> char in range }
+
+    /**
+     * The single row an extended keyboard adds: digits unshifted, punctuation shifted.
+     *
+     * Paired the way a physical keyboard pairs them — `1!`, `2@`, `3#` — so one row carries both and
+     * shift reveals the second, exactly as it reveals a capital. Symbols past the tenth have no
+     * digit left to sit under, so they pair off with each other (`-_`, `+=`); an odd one out types
+     * the same character either way.
+     */
+    val extendedRow: List<KeyCap> by lazy {
+        val paired = digits.mapIndexed { index, digit ->
+            KeyCap(digit.lower, symbols.getOrNull(index)?.lower ?: digit.lower)
+        }
+        val leftover = symbols.drop(digits.size).chunked(2).map { pair ->
+            KeyCap(pair.first().lower, pair.getOrNull(1)?.lower ?: pair.first().lower)
+        }
+
+        paired + leftover
+    }
 
     private val typeable: Set<Char> by lazy {
         buildSet {
@@ -87,6 +125,18 @@ private val KANJI = '\u4E00'..'\u9FFF'
 private val KANJI_EXTENDED = '\u3400'..'\u4DBF'
 private val HANGUL_SYLLABLES = '\uAC00'..'\uD7A3'
 private val HANGUL_JAMO = '\u3130'..'\u318F'
+
+private val LATIN_DIGITS = "0123456789".toKeys()
+
+/**
+ * Kept clear of every separator in `WordMeta`: `/` `،` `・` `、` `؛` `；` `·`.
+ *
+ * A script's own set must also stay within what its typeface carries — the Arabic face has no Latin
+ * at all, so `?`, `(` and `)` are simply absent there rather than drawn as empty boxes.
+ */
+private val COMMON_SYMBOLS = ".,!?:()&@#%+=".toKeys()
+
+private fun String.toKeys(): List<KeyCap> = map { KeyCap(it.toString(), it.toString()) }
 
 private val DEFAULT_PUNCTUATION = listOf(
     KeyCap(PLAIN_APOSTROPHE.toString(), PLAIN_APOSTROPHE.toString()),
@@ -166,10 +216,12 @@ private fun baseLayoutFor(languageCode: String): KeyboardLayout? =
                 unshifted("أإآّ"),
             ),
             isRtl = true,
-            hasShift = false,
+            hasCase = false,
             // The whole Arabic block, so harakat and the letterforms a word is written with are
             // accepted even where no key types them.
             scriptRanges = listOf(ARABIC),
+            digits = "٠١٢٣٤٥٦٧٨٩".toKeys(),
+            symbols = "؟«»٪.!:".toKeys(),
         )
         "fa" -> KeyboardLayout(
             rows = listOf(
@@ -179,8 +231,10 @@ private fun baseLayoutFor(languageCode: String): KeyboardLayout? =
                 unshifted("آأؤئء"),
             ),
             isRtl = true,
-            hasShift = false,
+            hasCase = false,
             scriptRanges = listOf(ARABIC),
+            digits = "۰۱۲۳۴۵۶۷۸۹".toKeys(),
+            symbols = "؟«»٪.!:".toKeys(),
         )
 
         // Hiragana unshifted, katakana shifted — the two kana syllabaries map one to one.
@@ -198,6 +252,7 @@ private fun baseLayoutFor(languageCode: String): KeyboardLayout? =
             // Japanese is written with kanji as well as kana, and no on-screen keyboard can offer
             // those — they come from the system input method.
             scriptRanges = listOf(HIRAGANA, KATAKANA, KANJI, KANJI_EXTENDED),
+            symbols = "。！？（）".toKeys(),
         )
 
         // Jamo, composed into syllables as they are typed.
@@ -222,10 +277,11 @@ private fun baseLayoutFor(languageCode: String): KeyboardLayout? =
                 unshifted("ㄇㄋㄎㄑㄕㄘㄨㄜㄠㄤ"),
                 unshifted("ㄈㄌㄏㄒㄖㄙㄩㄝㄡㄥ"),
             ),
-            hasShift = false,
+            hasCase = false,
             note = "Bopomofo — use your system input method to convert to characters.",
             // A Chinese word is hanzi; bopomofo is only how it is spelled out.
             scriptRanges = listOf(BOPOMOFO, KANJI, KANJI_EXTENDED),
+            symbols = "。！？（）".toKeys(),
         )
 
         else -> null

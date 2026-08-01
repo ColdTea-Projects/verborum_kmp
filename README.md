@@ -224,8 +224,11 @@ Choosing by language is deterministic — and it is what keeps the app light, be
 resource only when something composes it. The three CJK faces are 17MB of the 18MB and never load for
 someone studying only European languages; the initial download is the 1.2MB Noto Sans.
 
-Anywhere a string's language is known — the keyboards, the word form's fields, the detail screen's
-word list, the practice cards — that language's family is applied. Keys that are actions rather than
+Anywhere a string's language is known — the keyboards, the detail screen's word list, the practice
+cards — that language's family is applied. **Text fields go by content instead**, via
+`fontFamilyForText`: a field's language does not always describe what is in it, and a face for one
+script carries nothing of another — the Arabic one has no Latin whatsoever, so a dictionary named
+"German Basics" typed with the Arabic keyboard open would be a row of empty boxes. Keys that are actions rather than
 characters (shift, backspace, enter) are vector icons for the same reason: a symbol the face lacks
 would be another empty box.
 
@@ -237,6 +240,12 @@ Every word card carries a key in its corner. Pressing it opens a keyboard for **
 language**, anchored to the card: beside it when the window has room, underneath it when not, always
 clamped inside the window. Opening it on a card whose fields are all idle focuses the card's first
 field first — a keyboard with nowhere to type would be a dead panel.
+
+The panel itself is deliberately **dark in both themes**, from `KeyboardColors` in
+`core:designsystem`. It floats over the page as chrome rather than content, the way an operating
+system's keyboard does, and one that changed colour with the page would read as part of the form
+underneath it. Rows are centred on each other — seven letters against ten — so the keyboard reads as
+one block; enter carries the accent, and shift its own gold, outlined while off and filled while on.
 
 `KeyboardController` owns the whole thing: the registered fields in an explicit `order`, which one
 has focus, and whether the keyboard is showing. The keyboard follows the focus, never the reverse,
@@ -261,6 +270,25 @@ and restricted by nothing.
 
 The keyboard is field-aware where a language needs it to be: a Chinese word is bopomofo, its
 `reading` is pinyin with the tone-marked vowels.
+
+An **extended** keyboard adds one row: digits unshifted, punctuation shifted, paired the way a
+physical keyboard pairs them — `1!`, `2@`, `3#`. Symbols past the tenth have no digit left to sit
+under and pair off with each other (`-_`, `+=`). Shift is a mode rather than a one-shot, switching
+every face at once — letters to capitals, digits to punctuation — since dropping it after one key
+would put the punctuation out of reach. It appears wherever it changes something, which includes the
+scripts that have no capitals at all: Arabic, Persian and bopomofo leave their letters alone under
+shift, but it is still how they reach their punctuation. The forms follow the script: Arabic and Persian get their own
+numerals, Japanese and Chinese their own full-width marks. No separator appears
+even there — `،` and `؛` are ordinary Arabic punctuation, but they are also what the display layer
+puts *between* meanings, so a key for one would let it be typed into a value and read back as two.
+
+A field that could reasonably be written in either half of a pair gets **both** keyboards, switched
+from the header — the dictionary name, which might be "Deutsch für Anfänger" or "German Basics".
+Given one language the header is only a title. The keys, the writing direction, the script the field
+draws in and the Korean composer all follow whichever language is picked. Both extras belong on a field that is *not* restricted to its
+keyboard's characters, and for the same reason: the filter follows the field's own base layout, so a
+second language — or a digit — would type something the field then discards. The dictionary name has
+both; the word cards have neither, one language and letters only.
 
 All 19 languages have a layout, in their own national arrangement (QWERTZ for German, AZERTY for
 French, ЙЦУКЕН for Russian, right-to-left rows for Arabic and Persian). Two need saying: Korean types

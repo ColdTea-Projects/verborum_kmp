@@ -43,6 +43,9 @@ object Dimens {
 
     val elevationCard = 4.dp
 
+    /** A panel floating clear of the page — the on-screen keyboard. */
+    val elevationFloating = 12.dp
+
     /** The barely-there lift the web cards carry, where the border does most of the separating. */
     val elevationCardSubtle = 1.dp
     val tonalElevationCard = 2.dp

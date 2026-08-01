@@ -1,7 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -39,13 +40,25 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
+import de.coldtea.verborum.core.designsystem.theme.KeyboardColors
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 
 /**
- * The floating keyboard for one card's language.
+ * The floating keyboard, for one language or for a choice of two.
+ *
+ * [language2] is for a field that could reasonably be typed in either language of a pair — a
+ * dictionary's name, which might be written in the language being learned or the one it is being
+ * learned from. Given one language the header is just a title, as before; given two it becomes a
+ * switch, and the keys, the writing direction and the script all follow whichever is picked.
+ *
+ * [isExtendedKeyboard] adds the digits and punctuation a label needs but a word does not.
+ *
+ * Both extras belong on a field that is **not** restricted to its keyboard's characters, and for the
+ * same reason: the filter follows the field's own base layout, so a second language — or a digit —
+ * would type something the field then throws away. The two screens set them together.
  *
  * Declared inside the card it belongs to, so the popup anchors to that card without anyone having to
  * measure anything. It is deliberately **not** focusable: taking focus would pull it out of the text
@@ -53,10 +66,17 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
  */
 @Composable
 internal fun LanguageKeyboardPopup(
-    languageCode: String,
+    language1: String,
     controller: KeyboardController,
     modifier: Modifier = Modifier,
+    language2: String? = null,
+    isExtendedKeyboard: Boolean = false,
 ) {
+    // A language chosen here is only honoured while it is still one of the two on offer.
+    val languageCode = controller.keyboardLanguage
+        ?.takeIf { it == language1 || it == language2 }
+        ?: language1
+
     // Keyed on the field being typed into, not just the card: a Chinese word is bopomofo while its
     // reading is pinyin.
     val layout = keyboardLayoutFor(languageCode, controller.focusedField()?.fieldKey) ?: return
@@ -68,7 +88,10 @@ internal fun LanguageKeyboardPopup(
     ) {
         OnScreenKeyboard(
             languageCode = languageCode,
+            alternative = language2?.takeIf { it != language1 },
+            primary = language1,
             layout = layout,
+            isExtended = isExtendedKeyboard,
             controller = controller,
             modifier = modifier,
         )
@@ -78,7 +101,10 @@ internal fun LanguageKeyboardPopup(
 @Composable
 private fun OnScreenKeyboard(
     languageCode: String,
+    primary: String,
+    alternative: String?,
     layout: KeyboardLayout,
+    isExtended: Boolean,
     controller: KeyboardController,
     modifier: Modifier = Modifier,
 ) {
@@ -94,48 +120,85 @@ private fun OnScreenKeyboard(
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
     Surface(
         modifier = modifier.widthIn(max = KeyboardMaxWidth),
-        shape = Shapes.large,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.outline),
-        shadowElevation = Dimens.elevationCard,
+        shape = Shapes.extraLarge,
+        color = KeyboardColors.panel,
+        shadowElevation = Dimens.elevationFloating,
     ) {
         Column(
-            modifier = Modifier.padding(Spacing.small),
-            verticalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
+            modifier = Modifier.padding(Spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(KeyGap),
+            // Rows are of unequal length — seven letters against ten — so they are centred on each
+            // other rather than left-aligned, which is how a keyboard reads as one block.
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Header(languageCode = languageCode, onClose = controller::close)
+            Header(
+                languageCode = languageCode,
+                primary = primary,
+                alternative = alternative,
+                onSelect = controller::selectLanguage,
+                onClose = controller::close,
+            )
 
             layout.rows.forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(KeyGap, Alignment.CenterHorizontally)) {
                     row.forEach { key ->
                         Key(
                             label = key.text(isShifted),
                             fontFamily = scriptFamily,
-                            onClick = {
-                                controller.type(key.text(isShifted))
-                                // Shift is a one-shot, as on every soft keyboard.
-                                isShifted = false
-                            },
+                            // Shift stays on until it is pressed again: it is a mode, switching
+                            // every face at once — letters to capitals, digits to punctuation — so
+                            // dropping it after one key would make the punctuation unreachable in
+                            // any quantity.
+                            onClick = { controller.type(key.text(isShifted)) },
                         )
                     }
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall)) {
+            if (isExtended) {
+                // One row, not two: the digits carry the punctuation on their shifted face.
+                Row(horizontalArrangement = Arrangement.spacedBy(KeyGap, Alignment.CenterHorizontally)) {
+                    layout.extendedRow.forEach { key ->
+                        Key(
+                            label = key.text(isShifted),
+                            fontFamily = scriptFamily,
+                            onClick = { controller.type(key.text(isShifted)) },
+                        )
+                    }
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(KeyGap, Alignment.CenterHorizontally)) {
                 // Icons rather than "⇧⌫↵": those are symbols the bundled face need not carry, and
                 // a missing glyph on a canvas is an empty box rather than a fallback.
-                if (layout.hasShift) {
+                // Shown wherever it changes something. A script without capitals still needs it on
+                // an extended keyboard, because that is how the punctuation is reached — the letters
+                // simply stay as they are and only the digits change face.
+                if (layout.hasCase || isExtended) {
                     IconKey(
                         icon = VerborumIcons.ShiftUp,
-                        description = "Shift",
-                        isActive = isShifted,
+                        description = if (layout.hasCase) "Shift" else "Symbols",
+                        // A mode, so it is a colour of its own rather than the accent: outlined
+                        // while off, filled while on, and unmistakable either way.
+                        color = if (isShifted) KeyboardColors.shift else Color.Transparent,
+                        contentColor = if (isShifted) KeyboardColors.panel else KeyboardColors.shift,
+                        borderColor = KeyboardColors.shift,
                         onClick = { isShifted = !isShifted },
                     )
                 }
                 layout.punctuation.forEach { key ->
-                    Key(label = key.lower, onClick = { controller.type(key.lower) })
+                    Key(
+                        label = key.lower,
+                        fontFamily = scriptFamily,
+                        onClick = { controller.type(key.lower) },
+                    )
                 }
-                Key(label = "space", isWide = true, onClick = { controller.type(" ") })
+                Key(
+                    label = "space",
+                    isWide = true,
+                    isMuted = true,
+                    onClick = { controller.type(" ") },
+                )
                 IconKey(
                     icon = VerborumIcons.Backspace,
                     description = "Backspace",
@@ -145,6 +208,10 @@ private fun OnScreenKeyboard(
                     icon = VerborumIcons.EnterKey,
                     description = "Next field",
                     isWide = true,
+                    // The one key that does something to the form rather than to the text.
+                    color = KeyboardColors.accent,
+                    contentColor = KeyboardColors.onAccent,
+                    borderColor = KeyboardColors.accent,
                     // Enter means the same thing on both keyboards: on to the next field.
                     onClick = controller::moveToNextField,
                 )
@@ -154,7 +221,7 @@ private fun OnScreenKeyboard(
                 Text(
                     text = note,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = KeyboardColors.mutedText,
                     modifier = Modifier.fillMaxWidth().padding(Spacing.extraSmall),
                 )
             }
@@ -163,28 +230,74 @@ private fun OnScreenKeyboard(
     }
 }
 
+/** Names the keyboard's language, or lets the user pick between two. */
 @Composable
-private fun Header(languageCode: String, onClose: () -> Unit) {
+private fun Header(
+    languageCode: String,
+    primary: String,
+    alternative: String?,
+    onSelect: (String) -> Unit,
+    onClose: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.extraSmall),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (alternative == null) {
+            Text(
+                text = SupportedLanguage.displayNameOf(languageCode),
+                style = MaterialTheme.typography.titleSmall,
+                color = KeyboardColors.mutedText,
+            )
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(KeyGap, Alignment.CenterHorizontally)) {
+                listOf(primary, alternative).forEach { option ->
+                    LanguageTab(
+                        languageCode = option,
+                        isSelected = option == languageCode,
+                        onClick = { onSelect(option) },
+                    )
+                }
+            }
+        }
+
+        Surface(
+            onClick = onClose,
+            modifier = Modifier.size(CloseSize).pointerHoverIcon(PointerIcon.Hand),
+            shape = CircleShape,
+            color = KeyboardColors.key,
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = VerborumIcons.Close,
+                    contentDescription = "Close keyboard",
+                    tint = KeyboardColors.mutedText,
+                    modifier = Modifier.size(Dimens.iconSmall),
+                )
+            }
+        }
+    }
+}
+
+/** One of the two languages the keyboard can switch between. */
+@Composable
+private fun LanguageTab(languageCode: String, isSelected: Boolean, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        shape = Shapes.pill,
+        color = if (isSelected) KeyboardColors.accent else Color.Transparent,
+        border = BorderStroke(
+            width = Dimens.border,
+            color = if (isSelected) KeyboardColors.accent else KeyboardColors.mutedText,
+        ),
+    ) {
         Text(
             text = SupportedLanguage.displayNameOf(languageCode),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Icon(
-            imageVector = VerborumIcons.Close,
-            contentDescription = "Close keyboard",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .pointerHoverIcon(PointerIcon.Hand)
-                .clickable(onClick = onClose)
-                .padding(Spacing.extraSmall)
-                .size(Dimens.iconSmall),
+            style = MaterialTheme.typography.titleSmall,
+            color = if (isSelected) KeyboardColors.onAccent else KeyboardColors.mutedText,
+            modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
         )
     }
 }
@@ -194,19 +307,15 @@ private fun Key(
     label: String,
     onClick: () -> Unit,
     isWide: Boolean = false,
-    isActive: Boolean = false,
+    isMuted: Boolean = false,
     fontFamily: FontFamily? = null,
 ) {
-    KeyShell(isWide = isWide, isActive = isActive, onClick = onClick) {
+    KeyShell(isWide = isWide, onClick = onClick) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
             fontFamily = fontFamily,
-            color = if (isActive) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            color = if (isMuted) KeyboardColors.mutedText else KeyboardColors.keyText,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = Spacing.extraSmall),
         )
@@ -220,17 +329,15 @@ private fun IconKey(
     description: String,
     onClick: () -> Unit,
     isWide: Boolean = false,
-    isActive: Boolean = false,
+    color: Color = KeyboardColors.key,
+    contentColor: Color = KeyboardColors.keyText,
+    borderColor: Color = KeyboardColors.keyBorder,
 ) {
-    KeyShell(isWide = isWide, isActive = isActive, onClick = onClick) {
+    KeyShell(isWide = isWide, onClick = onClick, color = color, borderColor = borderColor) {
         Icon(
             imageVector = icon,
             contentDescription = description,
-            tint = if (isActive) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            tint = contentColor,
             modifier = Modifier.size(Dimens.iconMedium),
         )
     }
@@ -239,8 +346,9 @@ private fun IconKey(
 @Composable
 private fun KeyShell(
     isWide: Boolean,
-    isActive: Boolean,
     onClick: () -> Unit,
+    color: Color = KeyboardColors.key,
+    borderColor: Color = KeyboardColors.keyBorder,
     content: @Composable () -> Unit,
 ) {
     Surface(
@@ -248,13 +356,9 @@ private fun KeyShell(
         modifier = Modifier
             .defaultMinSize(minWidth = if (isWide) WideKeyWidth else KeyWidth, minHeight = KeyHeight)
             .pointerHoverIcon(PointerIcon.Hand),
-        shape = Shapes.small,
-        color = if (isActive) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            MaterialTheme.colorScheme.background
-        },
-        border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.outline),
+        shape = Shapes.medium,
+        color = color,
+        border = BorderStroke(Dimens.border, borderColor),
     ) {
         Box(contentAlignment = Alignment.Center) { content() }
     }
@@ -291,9 +395,14 @@ private class KeyboardPositionProvider : PopupPositionProvider {
     }
 }
 
-private const val Gap = 12
+private const val Gap = 6
 
-private val KeyWidth = 36.dp
-private val WideKeyWidth = 76.dp
-private val KeyHeight = 40.dp
-private val KeyboardMaxWidth = 560.dp
+/** Sized for a pointer rather than a fingertip, so a whole alphabet fits without scrolling. */
+private val KeyWidth = 34.dp
+private val WideKeyWidth = 96.dp
+private val KeyHeight = 38.dp
+private val KeyGap = 2.dp
+private val CloseSize = 32.dp
+
+/** Room for the widest row in the app — Japanese, at fifteen keys. */
+private val KeyboardMaxWidth = 640.dp
