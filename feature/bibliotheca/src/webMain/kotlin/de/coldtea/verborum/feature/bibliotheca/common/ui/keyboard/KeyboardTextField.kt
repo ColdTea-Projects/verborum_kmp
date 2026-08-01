@@ -2,12 +2,17 @@ package de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +29,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -65,6 +71,7 @@ internal fun KeyboardTextField(
     modifier: Modifier = Modifier,
     fieldKey: FieldKey? = null,
     placeholder: String = "",
+    leadingIcon: ImageVector? = null,
     /**
      * False where the keyboard is an aid rather than a rule.
      *
@@ -116,10 +123,21 @@ internal fun KeyboardTextField(
         color = MaterialTheme.colorScheme.background,
         border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.outline),
     ) {
-        Box(
+        Row(
             modifier = Modifier.padding(horizontal = Spacing.medium),
-            contentAlignment = Alignment.CenterStart,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            leadingIcon?.let { icon ->
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(Dimens.iconSmall),
+                )
+                Spacer(modifier = Modifier.width(Spacing.small))
+            }
+
+            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
             if (fieldValue.text.isEmpty()) {
                 Text(
                     text = placeholder,
@@ -158,6 +176,7 @@ internal fun KeyboardTextField(
                         }
                     },
             )
+            }
         }
     }
     }

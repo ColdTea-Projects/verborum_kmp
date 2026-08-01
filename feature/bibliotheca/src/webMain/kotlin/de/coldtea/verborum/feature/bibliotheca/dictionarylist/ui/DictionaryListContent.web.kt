@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,8 @@ import de.coldtea.verborum.core.designsystem.component.WebPageTitle
 import de.coldtea.verborum.core.designsystem.component.WebPrimaryButton
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardController
+import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.WebDictionaryCard
@@ -71,6 +74,7 @@ internal actual fun DictionaryListContent(
     val gridState = rememberLazyGridState()
 
     var confirmDeleteFor by remember { mutableStateOf<DictionaryUi?>(null) }
+    val keyboardController = remember { KeyboardController() }
 
     confirmDeleteFor?.let { dictionary ->
         DeleteDictionaryDialog(
@@ -83,6 +87,7 @@ internal actual fun DictionaryListContent(
         )
     }
 
+    CompositionLocalProvider(LocalKeyboardController provides keyboardController) {
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         ContentPane(maxWidth = ContentWidth.Web.list) {
             WebPageSpacer(Spacing.extraLarge)
@@ -126,6 +131,7 @@ internal actual fun DictionaryListContent(
                 modifier = Modifier.padding(vertical = Spacing.large),
             )
         }
+    }
     }
 }
 
