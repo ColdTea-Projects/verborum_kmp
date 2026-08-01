@@ -1,5 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model
 
+import de.coldtea.verborum.core.localization.Strings
+
 /**
  * A selectable dictionary tag. [code] is the stable identifier that is stored and sent — it never
  * changes with the label — and [label] is what the user reads.
@@ -69,8 +71,38 @@ internal val EXAM_TAGS: List<DictionaryTag> = listOf(
     DictionaryTag("torfl", "TORFL (ru)"),
 )
 
+/**
+ * The three groups the tags are offered in, in the order the picker shows them.
+ *
+ * The taxonomy is the Android app's, section for section and code for code — the tags are a
+ * cross-client contract, and a dictionary tagged on one client has to read the same on the others.
+ */
+internal enum class TagSection {
+    LEVEL,
+    TOPIC,
+    EXAM,
+    ;
+
+    /**
+     * Looked up rather than held in the constructor: an entry that captured its list would be
+     * initialised while this file's own properties still were, and read them as null.
+     */
+    val tags: List<DictionaryTag>
+        get() = when (this) {
+            LEVEL -> LEVEL_TAGS
+            TOPIC -> TOPIC_TAGS
+            EXAM -> EXAM_TAGS
+        }
+
+    fun title(strings: Strings): String = when (this) {
+        LEVEL -> strings.tagSectionLevel
+        TOPIC -> strings.tagSectionTopic
+        EXAM -> strings.tagSectionExam
+    }
+}
+
 /** Every known tag, and the lookup that turns a stored code back into something readable. */
-internal val ALL_TAGS: List<DictionaryTag> = LEVEL_TAGS + TOPIC_TAGS + EXAM_TAGS
+internal val ALL_TAGS: List<DictionaryTag> = TagSection.entries.flatMap { it.tags }
 
 private val tagsByCode: Map<String, DictionaryTag> = ALL_TAGS.associateBy(DictionaryTag::code)
 

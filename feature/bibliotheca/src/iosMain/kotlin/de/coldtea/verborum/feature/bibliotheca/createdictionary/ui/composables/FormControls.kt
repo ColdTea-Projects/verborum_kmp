@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.composables
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.ALL_TAGS
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.DictionaryTag
 import de.coldtea.verborum.core.localization.strings
 
@@ -87,7 +88,12 @@ internal fun LanguageDropdown(
     }
 }
 
-/** The tag catalogue as toggleable chips; selected codes are what gets stored. */
+/**
+ * The tag catalogue as toggleable chips, in its three groups.
+ *
+ * Level, topic and exam are different questions — how far along, about what, and for which
+ * certificate — and fifty chips in one undifferentiated block is a wall rather than a choice.
+ */
 @Composable
 internal fun TagSelector(
     selectedCodes: List<String>,
@@ -106,20 +112,34 @@ internal fun TagSelector(
             modifier = Modifier.fillMaxWidth().heightIn(max = TagListMaxHeight),
             verticalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
         ) {
-            items(ALL_TAGS.chunked(TagsPerRow)) { row ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
-                ) {
-                    row.forEach { tag ->
-                        TagChip(
-                            tag = tag,
-                            isSelected = tag.code in selectedCodes,
-                            onClick = { onToggle(tag.code) },
-                            modifier = Modifier.weight(1f),
-                        )
+            TagSection.entries.forEach { section ->
+                item {
+                    Text(
+                        text = section.title(strings),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(vertical = Spacing.extraSmall),
+                    )
+                }
+
+                items(section.tags.chunked(TagsPerRow)) { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
+                    ) {
+                        row.forEach { tag ->
+                            TagChip(
+                                tag = tag,
+                                isSelected = tag.code in selectedCodes,
+                                onClick = { onToggle(tag.code) },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        repeat(TagsPerRow - row.size) { Column(modifier = Modifier.weight(1f)) {} }
                     }
-                    repeat(TagsPerRow - row.size) { Column(modifier = Modifier.weight(1f)) {} }
                 }
             }
         }

@@ -134,7 +134,11 @@ back through the observed words.
 
 ### The two forms — dictionary and word
 
-`createdictionary` is a name, two language dropdowns and the tag catalogue (level / topic / exam).
+`createdictionary` is a name, two language dropdowns and the tag catalogue, offered under three
+headings — **Level, Topic and Exam**, as `TagSection`. The taxonomy is the Android app's, section for
+section and code for code: tags are a cross-client contract, so a dictionary tagged on one client has
+to read the same on the others, and the codes stay lower-cased to survive the backend's
+trim-and-lowercase unchanged.
 A new dictionary gets its id client-side, so the row can appear in the list before the server has
 answered; saving a new one opens it, saving an edit returns where it came from.
 

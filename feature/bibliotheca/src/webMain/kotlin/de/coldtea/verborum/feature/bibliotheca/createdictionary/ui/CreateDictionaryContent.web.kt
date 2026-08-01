@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.component.ContentPane
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.WebChip
+import de.coldtea.verborum.core.designsystem.component.WebEyebrow
 import de.coldtea.verborum.core.designsystem.component.WebFieldLabel
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.component.WebPageTitle
@@ -37,7 +38,8 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardTextFi
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LanguageKeyboardPopup
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.ALL_TAGS
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
+import de.coldtea.verborum.core.localization.LocalStrings
 import de.coldtea.verborum.core.localization.strings
 
 /**
@@ -278,21 +280,38 @@ private fun LanguageField(
     }
 }
 
-/** The whole tag catalogue, wrapping across the full width of the fields above it. */
+/**
+ * The tag catalogue, in its three groups.
+ *
+ * Level, topic and exam are different questions — how far along, about what, and for which
+ * certificate — and fifty chips in one undifferentiated block is a wall rather than a choice.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TagChips(selectedCodes: List<String>, onToggle: (String) -> Unit) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
-        verticalArrangement = Arrangement.spacedBy(Spacing.small),
-    ) {
-        ALL_TAGS.forEach { tag ->
-            WebChip(
-                label = tag.label,
-                isSelected = tag.code in selectedCodes,
-                onClick = { onToggle(tag.code) },
-            )
+    val strings = LocalStrings.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TagSection.entries.forEachIndexed { index, section ->
+            if (index != 0) WebPageSpacer(Spacing.medium)
+
+            WebEyebrow(section.title(strings))
+
+            WebPageSpacer(Spacing.small)
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                verticalArrangement = Arrangement.spacedBy(Spacing.small),
+            ) {
+                section.tags.forEach { tag ->
+                    WebChip(
+                        label = tag.label,
+                        isSelected = tag.code in selectedCodes,
+                        onClick = { onToggle(tag.code) },
+                    )
+                }
+            }
         }
     }
 }
