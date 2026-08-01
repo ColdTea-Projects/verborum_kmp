@@ -147,7 +147,8 @@ to give all eleven types a chip of their own and drops the "Other" bucket entire
 no `type` at all, which is what makes a word saved before sub-types existed edit as free text —
 though it still *displays* as no part of speech, since it never claimed one.
 
-What the form asks for beyond that is decided by `WordGrammar` per **language and word type** — a German noun offers *der/die/das* and a plural, a
+What the form asks for beyond that is decided by `WordGrammar` per **language and word type** — a
+German noun offers *der/die/das* and a plural, a
 German verb offers past / participle / *haben*-or-*sein*, a Japanese noun offers a counter and no
 gender at all, an adverb offers nothing beyond the word itself. A word can hold several
 alternatives per language, and **the two sides are independent**: *kaufen* and *erwerben* can both
@@ -167,8 +168,10 @@ each field, and the Japanese verb/adjective class pickers.
 
 ### Two designs, one app
 
-Every screen the browser shows follows `docs/design_handoff_verborum_web/` — a desktop reinterpretation
-of the app — while iOS keeps the Android design it was built from. The split is always the same shape:
+The browser gets a desktop app — a persistent sidebar, pages that title themselves, content laid out
+across a wide window — while iOS keeps the Android design it was built from. The two are different by
+intent, and the code in `webMain` and `iosMain` is the design: there is no separate spec to consult.
+The split is always the same shape:
 the view model, the state and the callbacks are shared in `commonMain`, and only a `@Composable
 expect fun …Content(…)` forks. Both actuals render the same state and call the same lambdas, so no
 behaviour can drift between the two.
@@ -186,6 +189,26 @@ behaviour can drift between the two.
 The web pages are built from one set of parts in `core:designsystem/webMain` — `WebPageTitle`,
 `WebBackLink`, `WebChip`, `WebPrimaryButton`, `WebPanel`, `WebSelect`, `WebTextField`. A page that
 needs furniture the others do not have belongs there too, not in the feature.
+
+The web navigation follows the **window**, not the platform: at 700dp and wider it is the 240dp
+sidebar, and below that — a phone, or a browser dragged narrow — the same destinations become a
+bottom bar of glyphs over small labels, since a sidebar there would leave nothing to read. Pages take
+the smaller gutter below 600dp for the same reason. Which one shows is decided from the destination,
+not from what a screen registered: only the tour goes without.
+
+Both platforms declare their chrome the same way, with `RegisterTopBar`. On iOS that draws the top
+bar; on web it fills `WebTopBar` — a slim strip above the page carrying the way back, outside the
+page's scroll so a screen can always be left without scrolling up to find a link. Screens name what
+back leads to through `backLabel` ("Back to dictionaries", "Exit test"), which iOS ignores in favour
+of a bare chevron. The arrow is hidden only where there is genuinely nothing behind — the first
+screen after signing in.
+
+Onboarding is the one destination that goes without navigation entirely — it owns the window and
+carries its own way out.
+
+`Forum` and `Options` have no page design of their own yet, so the web shell draws their heading from
+what they registered — see the branch in `VerborumAppScaffold.web.kt`. Give either a real page and
+that branch goes.
 
 ### Fonts: the canvas has none
 
@@ -242,42 +265,19 @@ The keyboard is field-aware where a language needs it to be: a Chinese word is b
 All 19 languages have a layout, in their own national arrangement (QWERTZ for German, AZERTY for
 French, ЙЦУКЕН for Russian, right-to-left rows for Arabic and Persian). Two need saying: Korean types
 jamo and `HangulComposer` folds them into syllables as they go — `ㅎ ㅏ ㄴ` becomes `한`, and a
-following vowel carries the tail into the next syllable — while Chinese types bopomofo and says on the keyboard
-that hanzi need the system input method, because they cannot be produced without a conversion
-dictionary. Latin keyboards carry the letters their language actually writes: Italian has no j, k, w,
+following vowel carries the tail into the next syllable — while Chinese types bopomofo and says on
+the keyboard that hanzi need the system input method, because they cannot be produced without a
+conversion dictionary. Latin keyboards carry the letters their language actually writes: Italian has
+no j, k, w,
 x or y, Turkish and Lithuanian no q, w or x.
 
 This is web-only; the iOS cards are untouched.
 
-Two deliberate deviations from the handoff. **Type**: it asks for Lora and Work Sans; rather than ship
-font binaries the two `display*` slots carry `FontFamily.Serif`, so the platform's serif stands in for
-Lora, and no other slot changed — which is why the iOS screens look exactly as they did. **Filters**:
-the handoff's list has only a search box and a sort menu, but the app also filters by language pair,
-so those two menus join the same row rather than being dropped.
+### Self practice — the screen that forked first
 
-The web navigation follows the **window**, not the platform: at 700dp and wider it is the 240dp
-sidebar, and below that — a phone, or a browser dragged narrow — the same destinations become a
-bottom bar of glyphs over small labels, since a sidebar there would leave nothing to read. Pages take
-the smaller gutter below 600dp for the same reason. Which one shows is decided from the destination,
-not from what a screen registered: only the tour goes without.
-
-Both platforms declare their chrome the same way, with `RegisterTopBar`. On iOS that draws the top
-bar; on web it fills `WebTopBar` — a slim strip above the page carrying the way back, outside the
-page's scroll so a screen can always be left without scrolling up to find a link. Screens name what
-back leads to through `backLabel` ("Back to dictionaries", "Exit test"), which iOS ignores in favour
-of a bare chevron. The arrow is hidden only where there is genuinely nothing behind — the first
-screen after signing in.
-
-Onboarding is the one destination that goes without navigation entirely — it owns the window and
-carries its own way out.
-
-`Forum` and `Options` are not in the handoff. Until they get pages of their own, the web shell draws
-their page heading from what they registered — see the branch in `VerborumAppScaffold.web.kt`.
-
-### Self practice — the one screen the handoff skips
-
-The handoff deliberately leaves this screen out, so both platforms keep the designs they already had.
-`selfpractice` shares everything about a *session* — deck order, direction, which cards are open, how
+This one was forked before the web redesign and is unaffected by it: both platforms keep the designs
+they already had. `selfpractice` shares everything about a *session* — deck order, direction, which
+cards are open, how
 an answer moves the level — in `SelfPracticeViewModel`. Only the presentation forks, through an
 `expect`/`actual` `SelfPracticeContent`:
 

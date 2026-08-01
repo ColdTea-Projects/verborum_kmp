@@ -7,7 +7,10 @@ description: Making the Compose Multiplatform iOS app feel native — safe areas
 
 `MainViewController()` wraps `App()` in `ComposeUIViewController`; `ContentView.swift` hosts it via
 `UIViewControllerRepresentable`. Deployment target **iOS 18.2**, device family **1,2** (iPhone +
-iPad). The same `App()` composable serves web — differences are adaptive layout, not forked screens.
+iPad). The same `App()` composable serves web, but the library's screens fork per platform: iOS keeps
+the Android design while web is laid out as a desktop app. A fork is an `expect`/`actual` on the
+screen's content composable with the view model shared. **Web work must not change the iOS actual** —
+that is the whole point of the split, and the iOS actuals are the Android design's only record here.
 
 ## Safe areas — the first thing to get right
 

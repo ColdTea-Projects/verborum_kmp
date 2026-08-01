@@ -83,7 +83,7 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   no new public API.
 - **A slice forks its UI per platform** — `expect`/`actual` on the content composable, with
   `iosMain`/`webMain` actuals. This is the norm in `feature:bibliotheca`, not the exception: the web
-  app follows `docs/design_handoff_verborum_web/` and iOS follows the Android design, so the two
+  app is laid out as a desktop app and iOS keeps the Android design, so the two
   differ by intent. The split is always the same:
 
   ```
@@ -111,7 +111,7 @@ feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
   from the destination, and only the onboarding graph goes without. Do not gate navigation on what a
   screen registered — a screen that forgets would silently lose it.
 
-  `selfpractice` is the one screen the handoff leaves out, so both platforms keep what they had.
+  `selfpractice` forked before the web redesign and is unaffected by it.
 - A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat
   `data`/`di`/`ui` layout until a second screen arrives; the slice folders are what a second screen
   introduces.

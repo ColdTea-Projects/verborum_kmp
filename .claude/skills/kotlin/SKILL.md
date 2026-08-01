@@ -111,3 +111,7 @@ a feature.
 - A `data class` with `var` fields used as screen state
 - Duplicated logic that a `core:*` module already provides (`Outcome.map`, `StateViews`, `Spacing`)
 - Copy-pasted platform code in `jsMain` **and** `wasmJsMain` that belongs in `webMain`
+- A local function whose name an import could also supply. **An explicit import outranks a same-file
+  top-level declaration**, so adding one silently rebinds every call in the file to the imported
+  version — and if the two differ only in defaulted parameters, it compiles and misbehaves at
+  runtime. Either name the local one distinctly, or delete it and use the library's.

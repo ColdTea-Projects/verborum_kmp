@@ -50,7 +50,11 @@ Skip a skill only when it is genuinely irrelevant to the change in front of you.
 ## Boundaries
 
 - Never add an Android target, a JVM-only API, `runBlocking`, or `Dispatchers.IO` to shared code.
-- Never fork a shared screen into a web-only copy — adapt with `BoxWithConstraints` breakpoints.
+- Fork a screen **only through `expect`/`actual` on its content composable**, never by copying a
+  screen. The library's screens are forked by design — web is a desktop app, iOS keeps the Android
+  design — but the view model, the state and the callback signatures stay shared, so behaviour
+  cannot drift. Match the nearest existing web screen; that code is the design. Everything else
+  adapts with `BoxWithConstraints` breakpoints instead.
 - Never hardcode a colour, text style or `.dp` in a feature; use `colorScheme`, `typography`,
   `Spacing`.
 - Never widen a token's exposure (see `webapp-security` on `localStorage`) without flagging it.

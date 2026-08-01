@@ -8,7 +8,12 @@ description: Designing and implementing the Compose Multiplatform web UI (Kotlin
 The web app is **Compose Multiplatform rendering to a canvas**, not DOM. `main()` calls
 `initKoin()` then `ComposeViewport { App() }`; `composeApp.js` is loaded by
 `composeApp/src/webMain/resources/index.html`, styled by `styles.css`. The same `App()` composable
-serves iOS — so web-specific behaviour is expressed as adaptive layout, never as a forked screen.
+serves iOS, but the library's screens deliberately **fork**: the browser gets a desktop app — a
+persistent sidebar, pages that title themselves, content across a wide window — while iOS keeps the
+Android design. A fork is always an `expect`/`actual` on the screen's content composable with the
+view model shared, never a copied screen. **The code in `webMain` is the design**; read the nearest
+existing web screen before adding one, and match it. Anything without a web design of its own adapts
+by layout instead.
 
 ## What canvas rendering means for you
 
@@ -21,6 +26,9 @@ serves iOS — so web-specific behaviour is expressed as adaptive layout, never 
   surfaces so the app does not feel like a phone app in a browser.
 - SEO and deep-link previews are not available from the canvas; anything that must be crawlable
   belongs in the host page.
+- **There are no system fonts.** A glyph the bundled typeface does not carry renders as an empty
+  box — there is no fallback to fall back to. This bit the app once already: Arabic, kana and even
+  "↵" were invisible. See *Fonts* below.
 
 ## Responsive layout
 
@@ -68,7 +76,45 @@ Wasm/JS payloads are large; first paint is the weak point of this stack.
   `composeApp/build/dist/wasmJs/productionExecutable/`.
 - Bundle fonts as Compose resources in `core:designsystem` rather than fetching from a CDN — a
   third-party font request is both a latency and a privacy problem, and the CSP forbids it.
+
+### Fonts — the canvas has none
+
+`core:designsystem/composeResources/font` carries Noto Sans (Latin, Greek, Cyrillic) plus a face
+each for Arabic, Japanese, Korean and Chinese. `verborumTypography()` is `expect`/`actual`: the web
+actual builds the scale from Noto Sans, and the iOS actual returns the plain `Typography`, because
+iOS draws with system fonts that already cover every script.
+
+They are **separate families picked per language** by `fontFamilyForLanguage(code)`, never one family
+with a fallback list. Compose resolves a `FontFamily` by weight and style, *not* by which face holds
+a glyph, so a list is not a fallback chain — it would compile, look right, and still render boxes.
+Choosing by language is deterministic, and it is what keeps the app light: Compose fetches a resource
+only when something composes it, so the three CJK faces (17MB of 18MB) never load for a user studying
+European languages.
+
+Apply the family anywhere a string's language is known — word fields, word lists, practice cards,
+keyboards. For a symbol the face may not carry (`⇧`, `⌫`, `↵`), use a vector icon instead: an icon
+cannot go missing.
 - Do not add DOM manipulation to make something appear faster; it will fight the canvas.
+
+## Word entry is the app's own keyboard
+
+`feature/bibliotheca/.../common/ui/keyboard` ships an on-screen keyboard per language, and
+`docs/word-input-keyboard-webapp.md` is its spec. The rule that governs everything there: **the
+keyboard is the restriction** — a character is enterable only if a key types it, and the field
+filters anything else out, from the physical keyboard and from a paste alike.
+
+Consequences worth knowing before touching it:
+
+- The key set is a **contract mirrored by the Android client's field filter**, not shared code.
+  Adding a key here that Android rejects produces words one client can write and the other cannot.
+- Meaning separators (`/`, `،`, `・`, `、`) are never keys. They are drawn *between* meanings, and
+  each meaning is its own entry in a JSON array; a key for one would let it be typed *into* a
+  surface.
+- Where a keyboard is **phonetic rather than complete** — Korean jamo composing into syllables,
+  Chinese bopomofo standing in for hanzi, Japanese kana alongside kanji — the accepted set is the
+  script's Unicode range, not the key caps. Restricting those to their keys makes the language
+  impossible to write.
+- Latin layouts carry the letters the language actually writes (Italian has no j, k, w, x, y).
 
 ## Browser integration
 
@@ -98,7 +144,9 @@ Check the browser console for Kotlin exceptions — on web they surface there, n
 - [ ] Reading widths capped; no phone-only bottom bar at expanded width
 - [ ] Host page: real title/lang/theme-color, dark-mode-aware pre-load spinner
 - [ ] Hover cursors on clickable elements; keyboard Esc/Enter/focus handled
-- [ ] Fonts bundled, not fetched
+- [ ] Fonts bundled, not fetched; any language-specific text uses `fontFamilyForLanguage`
+- [ ] No nested scrollables — a `verticalScroll` inside a `verticalScroll` is measured against an
+      unbounded height and throws at runtime, which no compile will catch
 - [ ] Runs on both `wasmJs` and `js`; console free of exceptions
-- [ ] No web-only fork of a shared screen, unless the *design itself* differs per platform by
-      decision — `selfpractice` is the one such case: shared view model, `expect`/`actual` content
+- [ ] A fork is `expect`/`actual` on the content composable with the view model shared — never a
+      copied screen, and never a change to the iOS actual
