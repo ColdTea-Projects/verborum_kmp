@@ -3,13 +3,23 @@ package de.coldtea.verborum.feature.options.ui
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.UiLanguage
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal data class OptionsState(val isSigningOut: Boolean = false)
 
 internal class OptionsViewModel(
     private val authService: AuthService,
+    private val languageSettings: LanguageSettings,
 ) : BaseViewModel<OptionsState, Nothing>(OptionsState()) {
+
+    /** What the interface is speaking now — the device's language until someone chooses otherwise. */
+    val language: StateFlow<UiLanguage> = languageSettings.language
+
+    fun chooseLanguage(language: UiLanguage) = languageSettings.choose(language)
+
 
     /**
      * Ends the session. No navigation follows on purpose: clearing the tokens flips

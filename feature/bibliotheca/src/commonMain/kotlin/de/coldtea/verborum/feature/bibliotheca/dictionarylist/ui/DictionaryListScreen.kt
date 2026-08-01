@@ -12,6 +12,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumTopBarAction
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import org.koin.compose.viewmodel.koinViewModel
+import de.coldtea.verborum.core.localization.strings
 
 /** The library: every dictionary the signed-in user owns. The bibliotheca tab's root screen. */
 @Composable
@@ -29,12 +30,12 @@ internal fun DictionaryListScreen(
 
     // A tab root: no back button. The magnifier reveals the search and filter area.
     RegisterTopBar(
-        title = "Bibliotheca",
-        subtitle = "Your dictionaries",
+        title = strings.bibliotheca,
+        subtitle = strings.yourDictionariesSubtitle,
         showBackButton = false,
         action = VerborumTopBarAction(
             icon = VerborumIcons.Search,
-            contentDescription = "Search dictionaries",
+            contentDescription = strings.searchDictionariesAction,
             onClick = viewModel::toggleSearch,
         ),
     )

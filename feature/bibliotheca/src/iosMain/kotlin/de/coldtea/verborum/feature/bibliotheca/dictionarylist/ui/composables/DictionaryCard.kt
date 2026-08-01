@@ -31,6 +31,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
+import de.coldtea.verborum.core.localization.strings
 
 /** One dictionary: badge, name, its language direction, age, and an overflow for edit/delete. */
 @Composable
@@ -101,7 +102,7 @@ internal fun DictionaryCard(
                 IconButton(onClick = { onMenuClick(dictionary) }) {
                     Icon(
                         imageVector = VerborumIcons.MoreVertical,
-                        contentDescription = "More options",
+                        contentDescription = strings.moreOptions,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(Dimens.iconLarge),
                     )

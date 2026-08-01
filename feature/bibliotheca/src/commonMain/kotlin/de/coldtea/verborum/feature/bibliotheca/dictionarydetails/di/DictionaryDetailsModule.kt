@@ -13,6 +13,7 @@ import org.koin.dsl.module
 internal val dictionaryDetailsModule: Module = module {
     viewModel { parameters ->
         DictionaryDetailsViewModel(
+            languageSettings = get(),
             dictionaryId = parameters.get(),
             dictionaryService = get(),
             wordService = get(),

@@ -8,6 +8,8 @@ kotlin {
             // The offline banner reads connectivity from core:common. No core:common type appears
             // in this module's own API, so it stays an implementation dependency.
             implementation(project(":core:common"))
+            // Every shared surface says something: "Retry", "Back", the offline banner.
+            api(project(":core:localization"))
         }
     }
 }

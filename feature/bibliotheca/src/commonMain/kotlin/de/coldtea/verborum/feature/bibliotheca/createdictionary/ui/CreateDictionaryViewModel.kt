@@ -2,6 +2,9 @@ package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui
 
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.Strings
+import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.common.TimeProvider
@@ -33,11 +36,16 @@ internal data class CreateDictionaryUiState(
 internal data class DictionarySaved(val dictionaryId: String, val wasEditing: Boolean)
 
 internal class CreateDictionaryViewModel(
+    private val languageSettings: LanguageSettings,
     private val dictionaryId: String?,
     private val dictionaryService: DictionaryService,
     private val activeUser: ActiveUserUseCase,
     private val time: TimeProvider = SystemTimeProvider,
 ) : BaseViewModel<CreateDictionaryUiState, Nothing>(CreateDictionaryUiState()) {
+
+    /** Read fresh each time: the language can change while this screen is open. */
+    private val strings: Strings get() = stringsFor(languageSettings.language.value)
+
 
     // Replays one, unlike the other screens: the prefill failure is emitted from `init`, before the
     // screen has had a chance to subscribe, and a dropped message would leave a silently blank form.
@@ -62,7 +70,7 @@ internal class CreateDictionaryViewModel(
             if (dictionary == null) {
                 // The form stays usable as a blank create form rather than blocking on a row the
                 // store does not have.
-                _messages.emit("That dictionary could not be loaded.")
+                _messages.emit(strings.dictionaryLoadFailed)
                 return@launch
             }
 
@@ -123,7 +131,7 @@ internal class CreateDictionaryViewModel(
             if (outcome is Outcome.Success) {
                 _saved.emit(DictionarySaved(dictionary.dictionaryId, wasEditing = existing != null))
             } else {
-                _messages.emit("That dictionary could not be saved.")
+                _messages.emit(strings.dictionarySaveFailed)
             }
         }
     }

@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
@@ -54,6 +55,8 @@ class DictionaryDetailsViewModelTest {
         val wordRepository = FakeWordRepository(initial = words, deleteResult = deleteResult)
 
         val viewModel = DictionaryDetailsViewModel(
+
+            languageSettings = testLanguageSettings(),
             dictionaryId = dictionaryId,
             dictionaryService = DictionaryService(
                 observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaryRepository),

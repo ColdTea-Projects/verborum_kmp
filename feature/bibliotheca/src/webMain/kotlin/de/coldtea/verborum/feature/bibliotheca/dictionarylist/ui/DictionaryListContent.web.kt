@@ -38,6 +38,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.Web
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The library as a desktop page: the title, one row of filters, and every dictionary as a card in a
@@ -87,8 +88,8 @@ internal actual fun DictionaryListContent(
             WebPageSpacer(Spacing.extraLarge)
 
             WebPageTitle(
-                title = "Your Dictionaries",
-                subtitle = "Every language pair you're building, in one place.",
+                title = strings.yourDictionaries,
+                subtitle = strings.yourDictionariesSubtitle,
             )
 
             WebPageSpacer()
@@ -120,7 +121,7 @@ internal actual fun DictionaryListContent(
             )
 
             WebPrimaryButton(
-                label = "Create Dictionary",
+                label = strings.createDictionary,
                 onClick = onCreateDictionaryClick,
                 modifier = Modifier.padding(vertical = Spacing.large),
             )
@@ -151,7 +152,7 @@ private fun DictionaryGrid(
         }
 
         DictionaryListState.Failed -> ErrorState(
-            message = "Your dictionaries could not be loaded.",
+            message = strings.dictionariesFailed,
             modifier = modifier,
             onRetry = onRetry,
         )
@@ -164,7 +165,7 @@ private fun DictionaryGrid(
                 contentAlignment = Alignment.TopStart,
             ) {
                 Text(
-                    text = "No dictionaries match your search.",
+                    text = strings.noDictionariesMatchSearch,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Start,

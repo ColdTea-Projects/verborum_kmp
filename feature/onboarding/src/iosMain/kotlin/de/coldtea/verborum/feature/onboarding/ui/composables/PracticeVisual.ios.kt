@@ -51,8 +51,8 @@ internal actual fun PracticeVisual(modifier: Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            MockCaption(practiceCopy.leftHint)
-            MockCaption(practiceCopy.rightHint)
+            MockCaption(practiceCopy().leftHint)
+            MockCaption(practiceCopy().rightHint)
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.strings
 
 /** The one loading indicator every screen uses while its first payload arrives. */
 @Composable
@@ -48,7 +49,7 @@ fun ErrorState(
                 onClick = onRetry,
                 modifier = Modifier.padding(top = Spacing.medium),
             ) {
-                Text("Retry")
+                Text(strings.retry)
             }
         }
     }

@@ -27,6 +27,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * One language side of one meaning: the word itself, its gender where the language marks one, and
@@ -71,7 +72,7 @@ internal fun LanguageInputCard(
             OutlinedTextField(
                 value = input.text,
                 onValueChange = onTextChanged,
-                label = { Text("Word") },
+                label = { Text(strings.word) },
                 singleLine = true,
                 shape = Shapes.medium,
                 modifier = Modifier.fillMaxWidth(),

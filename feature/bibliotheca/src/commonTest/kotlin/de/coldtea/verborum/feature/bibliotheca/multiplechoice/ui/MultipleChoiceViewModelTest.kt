@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
@@ -49,6 +50,8 @@ class MultipleChoiceViewModelTest {
         )
 
         val viewModel = MultipleChoiceViewModel(
+
+            languageSettings = testLanguageSettings(),
             dictionaryId = dictionaryId,
             wordService = WordService(repository = wordRepository),
             observeLanguagePairWords = ObserveLanguagePairWordsUseCase(dictionaries, wordRepository),

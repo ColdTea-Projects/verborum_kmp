@@ -32,6 +32,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model.PracticeWordUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Web: a card that flips on click — the prompt on the front, the answer and the two grading buttons
@@ -167,14 +168,14 @@ private fun CardBack(word: PracticeWordUi, onCorrect: () -> Unit, onWrong: () ->
             horizontalArrangement = Arrangement.spacedBy(Spacing.small),
         ) {
             GradeButton(
-                text = "Wrong",
+                text = strings.wrong,
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 onClick = onWrong,
                 modifier = Modifier.weight(1f),
             )
             GradeButton(
-                text = "Correct",
+                text = strings.correct,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = onCorrect,

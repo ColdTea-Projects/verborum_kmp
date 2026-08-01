@@ -38,6 +38,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LanguageKeyboa
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.ALL_TAGS
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The dictionary form as a desktop page: a name, the language pair side by side, and the tag
@@ -60,9 +61,9 @@ internal actual fun CreateDictionaryContent(
     // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
     // that wants no chrome at all, and would lose the sidebar with it.
     RegisterTopBar(
-        title = if (state.isEditing) "Edit dictionary" else "New dictionary",
+        title = if (state.isEditing) strings.editDictionaryTitle else strings.newDictionary,
         showBackButton = true,
-        backLabel = "Back to dictionaries",
+        backLabel = strings.backToDictionaries,
     )
 
     val keyboardController = remember { KeyboardController() }
@@ -74,8 +75,8 @@ internal actual fun CreateDictionaryContent(
                 WebPageSpacer(Spacing.extraLarge)
 
                 WebPageTitle(
-                    title = if (state.isEditing) "Edit Dictionary" else "Create Dictionary",
-                    subtitle = "Name it, choose a language pair, and tag it for easy filtering.",
+                    title = if (state.isEditing) strings.editDictionaryTitle else strings.createDictionary,
+                    subtitle = strings.createDictionarySubtitle,
                 )
 
                 WebPageSpacer()
@@ -148,7 +149,7 @@ private fun IdentityFields(
         }
         val from: @Composable (Modifier) -> Unit = { fieldModifier ->
             LanguageField(
-                label = "From language",
+                label = strings.fromLanguage,
                 selected = state.fromLanguage,
                 // A dictionary's words are written in its pair, so changing it later would leave
                 // every one of them mislabelled.
@@ -159,7 +160,7 @@ private fun IdentityFields(
         }
         val to: @Composable (Modifier) -> Unit = { fieldModifier ->
             LanguageField(
-                label = "To language",
+                label = strings.toLanguage,
                 selected = state.toLanguage,
                 isEnabled = !state.isEditing,
                 onSelect = onToLanguageChanged,
@@ -235,7 +236,7 @@ private fun NameField(
             languageCode = activeLanguage,
             value = name,
             onValueChange = onNameChanged,
-            placeholder = "e.g. German Basics",
+            placeholder = strings.dictionaryNameHint,
             restrictToKeyboard = false,
         )
 
@@ -263,7 +264,7 @@ private fun LanguageField(
     Column(modifier = modifier) {
         WebFieldLabel(label)
 
-        WebSelect(label = selected?.displayName ?: "Select…", isEnabled = isEnabled) { dismiss ->
+        WebSelect(label = selected?.displayName ?: strings.select, isEnabled = isEnabled) { dismiss ->
             SupportedLanguage.entries.forEach { language ->
                 DropdownMenuItem(
                     text = { Text(language.displayName) },

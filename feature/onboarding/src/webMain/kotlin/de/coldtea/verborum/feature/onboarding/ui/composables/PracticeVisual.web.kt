@@ -150,13 +150,13 @@ private fun CardBack(translation: String) {
             horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
         ) {
             GradeChip(
-                text = practiceCopy.leftHint,
+                text = practiceCopy().leftHint,
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.weight(1f),
             )
             GradeChip(
-                text = practiceCopy.rightHint,
+                text = practiceCopy().rightHint,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.weight(1f),

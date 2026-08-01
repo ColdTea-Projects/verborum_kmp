@@ -210,6 +210,30 @@ carries its own way out.
 what they registered — see the branch in `VerborumAppScaffold.web.kt`. Give either a real page and
 that branch goes.
 
+### Language
+
+`core:localization` holds every word the app says, as one `Strings` interface whose **property
+defaults are the English text**. A language overrides only what it has translated, so a partial
+translation falls back to English string by string — nothing is ever blank, and adding a key needs no
+change to the other eighteen files. `UiLanguage` lists the languages the *interface* speaks, kept
+separate from `SupportedLanguage`, which is what a dictionary can be *about*: same codes today,
+different questions, and opposite sides of the module graph.
+
+All nineteen are translated; a test asserts every language in the picker has a catalogue and that
+none of them is quietly returning English. Composables read `strings.back` through a composition local, shaped like `MaterialTheme.colorScheme`.
+View models cannot read a local, so they take `LanguageSettings` and resolve through a property
+getter — the language can change while a screen is open.
+
+The default is **the device's own language**, from `navigator.language` on web and
+`NSLocale.preferredLanguages` on iOS, with an explicit choice in Options overriding it and persisting.
+Geolocating the IP was considered and rejected: an address says *where* someone is, not what they
+read — wrong for travellers, wrong behind a VPN — and it would mean sending the user's address to a
+third party on first launch, which the CSP forbids and the platform makes unnecessary.
+
+Each language is listed in the picker under its **own** name — "Deutsch", not "German" — which is
+what the person looking for it will recognise, and which saves translating nineteen language names
+nineteen times.
+
 ### Fonts: the canvas has none
 
 Compose renders the web app to a **canvas**, and a canvas has no system fonts behind it. Anything the

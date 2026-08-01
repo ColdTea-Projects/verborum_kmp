@@ -1,6 +1,7 @@
 package de.coldtea.verborum.di
 
 import de.coldtea.verborum.core.auth.AuthConfig
+import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.auth.AuthSession
 import de.coldtea.verborum.core.auth.AuthorizationLauncher
@@ -33,6 +34,8 @@ import org.koin.dsl.module
 
 /** Wiring for `core:*`. Feature wiring lives in each feature's own Koin module. */
 val coreModule: Module = module {
+    single { LanguageSettings() }
+
     single<ApiConfig> { defaultApiConfig() }
     single<AuthConfig> { defaultAuthConfig() }
     single<TokenStorage> { createTokenStorage() }

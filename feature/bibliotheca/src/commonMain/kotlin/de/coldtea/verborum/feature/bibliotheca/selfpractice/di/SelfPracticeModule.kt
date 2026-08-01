@@ -9,6 +9,7 @@ import org.koin.dsl.module
 internal val selfPracticeModule: Module = module {
     viewModel { parameters ->
         SelfPracticeViewModel(
+            languageSettings = get(),
             dictionaryId = parameters.get(),
             dictionaryService = get(),
             wordService = get(),

@@ -9,6 +9,7 @@ import org.koin.dsl.module
 internal val multipleChoiceModule: Module = module {
     viewModel { parameters ->
         MultipleChoiceViewModel(
+            languageSettings = get(),
             dictionaryId = parameters.get(),
             wordService = get(),
             observeLanguagePairWords = get(),

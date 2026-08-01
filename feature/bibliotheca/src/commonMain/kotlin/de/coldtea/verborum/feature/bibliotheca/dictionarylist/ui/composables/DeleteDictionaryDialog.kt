@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Confirmation for the destructive delete. Both platforms expect a deliberate second step here, and
@@ -18,15 +19,15 @@ internal fun DeleteDictionaryDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete dictionary") },
-        text = { Text("“$dictionaryName” and all of its words will be deleted.") },
+        title = { Text(strings.deleteDictionary) },
+        text = { Text(strings.deleteDictionaryWarning(dictionaryName)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(text = "Delete", color = MaterialTheme.colorScheme.error)
+                Text(text = strings.delete, color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(strings.cancel) }
         },
     )
 }

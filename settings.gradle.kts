@@ -33,6 +33,7 @@ include(":composeApp")
 
 include(":core:common")
 include(":core:designsystem")
+include(":core:localization")
 include(":core:network")
 include(":core:auth")
 include(":core:database")

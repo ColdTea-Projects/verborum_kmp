@@ -30,6 +30,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumBrandMark
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import org.koin.compose.viewmodel.koinViewModel
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The login wall the app shell shows whenever no one is signed in. Signing in and creating an
@@ -85,7 +86,7 @@ internal fun LoginContent(
             Spacer(modifier = Modifier.height(Spacing.small))
 
             Text(
-                text = "Your dictionaries, on every device.",
+                text = strings.signInTagline,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -106,7 +107,7 @@ internal fun LoginContent(
                         .fillMaxWidth()
                         .pointerHoverIcon(PointerIcon.Hand),
                 ) {
-                    Text("Sign in")
+                    Text(strings.signIn)
                 }
 
                 Spacer(modifier = Modifier.height(Spacing.small))
@@ -118,7 +119,7 @@ internal fun LoginContent(
                         .fillMaxWidth()
                         .pointerHoverIcon(PointerIcon.Hand),
                 ) {
-                    Text("Create account")
+                    Text(strings.createAccount)
                 }
 
                 state.failureMessage?.let { message ->

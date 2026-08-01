@@ -11,6 +11,7 @@ import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model.PracticeWordUi
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Practising a dictionary. Everything about *what* a session is — order, direction, which cards are
@@ -33,14 +34,14 @@ internal fun SelfPracticeScreen(
 
     when (val practice = state.practice) {
         SelfPracticeState.Loading -> {
-            RegisterTopBar(title = "Self practice")
+            RegisterTopBar(title = strings.selfPractice)
             LoadingState(modifier)
         }
 
         SelfPracticeState.Failed -> {
-            RegisterTopBar(title = "Self practice")
+            RegisterTopBar(title = strings.selfPractice)
             ErrorState(
-                message = "This practice session could not be loaded.",
+                message = strings.practiceFailed,
                 modifier = modifier,
                 onRetry = viewModel::retry,
             )
@@ -49,7 +50,7 @@ internal fun SelfPracticeScreen(
         is SelfPracticeState.Success -> {
             RegisterTopBar(
                 title = practice.dictionaryName,
-                subtitle = if (state.isReversed) "Translation first" else "Word first",
+                subtitle = if (state.isReversed) strings.translationFirst else strings.wordFirst,
                 showBackButton = true,
             )
 

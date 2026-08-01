@@ -9,6 +9,7 @@ import org.koin.dsl.module
 internal val createDictionaryModule: Module = module {
     viewModel { parameters ->
         CreateDictionaryViewModel(
+            languageSettings = get(),
             dictionaryId = parameters.getOrNull(),
             dictionaryService = get(),
             activeUser = get(),

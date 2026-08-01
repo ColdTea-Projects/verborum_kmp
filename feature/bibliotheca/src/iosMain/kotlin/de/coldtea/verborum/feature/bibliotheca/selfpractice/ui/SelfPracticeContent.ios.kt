@@ -20,6 +20,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.composables.ExpandableWordCard
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model.PracticeWordUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * iOS: the Android app's design, deliberately unchanged — one column of expandable cards over a
@@ -66,7 +67,7 @@ internal actual fun SelfPracticeContent(
                 .padding(vertical = Spacing.medium)
                 .height(Dimens.buttonHeight),
         ) {
-            Text(text = "Switch sides", style = MaterialTheme.typography.titleSmall)
+            Text(text = strings.switchSides, style = MaterialTheme.typography.titleSmall)
         }
     }
 }

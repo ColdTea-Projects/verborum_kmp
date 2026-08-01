@@ -38,6 +38,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * One dictionary as a grid card: a gold monogram, the name, its direction, and how much of it there
@@ -139,7 +140,7 @@ private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
         ) {
             Icon(
                 imageVector = VerborumIcons.MoreVertical,
-                contentDescription = "More options",
+                contentDescription = strings.moreOptions,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(Dimens.iconMedium),
             )
@@ -147,7 +148,7 @@ private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
 
         DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
             DropdownMenuItem(
-                text = { Text("Edit") },
+                text = { Text(strings.edit) },
                 onClick = {
                     isExpanded = false
                     onEdit()
@@ -156,7 +157,7 @@ private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
             DropdownMenuItem(
                 text = {
                     // Destructive action — flagged in the error colour.
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(strings.delete, color = MaterialTheme.colorScheme.error)
                 },
                 onClick = {
                     isExpanded = false

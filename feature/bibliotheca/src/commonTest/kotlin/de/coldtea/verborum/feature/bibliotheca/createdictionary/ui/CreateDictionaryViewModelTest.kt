@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -152,6 +153,7 @@ class CreateDictionaryViewModelTest {
         repository: FakeDictionaryRepository,
         dictionaryId: String?,
     ) = CreateDictionaryViewModel(
+        languageSettings = testLanguageSettings(),
         dictionaryId = dictionaryId,
         dictionaryService = DictionaryService(
             observeDictionariesUseCase = ObserveDictionariesUseCase(repository),

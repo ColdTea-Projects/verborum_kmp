@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.strings
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 
 /** The question, its progress through the test, and the four answers to choose between. */
@@ -63,7 +64,7 @@ internal fun QuestionCard(
             }
 
             Text(
-                text = "What is “${question.choice.question.prompt}”?",
+                text = strings.askForm(question.choice.question.prompt),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )

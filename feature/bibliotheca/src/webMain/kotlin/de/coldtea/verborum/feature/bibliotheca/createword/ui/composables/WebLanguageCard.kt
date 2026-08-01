@@ -34,6 +34,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * One language side of one meaning, as a card with a coloured bar down its leading edge — crimson
@@ -119,7 +120,7 @@ internal fun WebLanguageCard(
                     languageCode = languageCode,
                     value = input.text,
                     onValueChange = onTextChanged,
-                    placeholder = "Word",
+                    placeholder = strings.word,
                 )
 
                 fields.forEach { key ->

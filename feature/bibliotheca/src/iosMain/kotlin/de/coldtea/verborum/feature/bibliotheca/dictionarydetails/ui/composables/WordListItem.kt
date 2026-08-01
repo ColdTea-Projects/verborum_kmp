@@ -26,6 +26,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
+import de.coldtea.verborum.core.localization.strings
 
 /** One word: its practice progress, the word and translation, and edit/delete. */
 @Composable
@@ -84,7 +85,7 @@ internal fun WordListItem(
                     ) {
                         Icon(
                             imageVector = VerborumIcons.Edit,
-                            contentDescription = "Edit word",
+                            contentDescription = strings.editWordTitle,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(Dimens.iconMedium),
                         )
@@ -95,7 +96,7 @@ internal fun WordListItem(
                     ) {
                         Icon(
                             imageVector = VerborumIcons.Delete,
-                            contentDescription = "Delete word",
+                            contentDescription = strings.deleteWord,
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(Dimens.iconMedium),
                         )

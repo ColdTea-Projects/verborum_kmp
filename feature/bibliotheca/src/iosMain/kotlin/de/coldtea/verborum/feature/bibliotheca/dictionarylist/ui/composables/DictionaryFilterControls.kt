@@ -28,6 +28,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
+import de.coldtea.verborum.core.localization.strings
 
 /** The search field revealed by the top bar's magnifier. */
 @Composable
@@ -42,7 +43,7 @@ internal fun DictionarySearchField(
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
         shape = Shapes.large,
-        placeholder = { Text("Search dictionaries") },
+        placeholder = { Text(strings.searchDictionariesAction) },
         leadingIcon = {
             Icon(
                 imageVector = VerborumIcons.Search,
@@ -54,7 +55,7 @@ internal fun DictionarySearchField(
             if (query.isNotEmpty()) {
                 Icon(
                     imageVector = VerborumIcons.Close,
-                    contentDescription = "Clear search",
+                    contentDescription = strings.clearSearch,
                     modifier = Modifier
                         .size(Dimens.iconMedium)
                         .pointerHoverIcon(PointerIcon.Hand)
@@ -89,13 +90,13 @@ internal fun DictionaryFilterBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilterChip(
-            text = "From: ${fromLanguage?.displayName ?: ANY_LANGUAGE}",
+            text = "${strings.fromLanguage}: ${fromLanguage?.displayName ?: strings.anyLanguage}",
             onClick = onFromClick,
             trailingIcon = VerborumIcons.ChevronDown,
             isHighlighted = fromLanguage != null,
         )
         FilterChip(
-            text = "To: ${toLanguage?.displayName ?: ANY_LANGUAGE}",
+            text = "${strings.toLanguage}: ${toLanguage?.displayName ?: strings.anyLanguage}",
             onClick = onToClick,
             trailingIcon = VerborumIcons.ChevronDown,
             isHighlighted = toLanguage != null,
@@ -107,7 +108,7 @@ internal fun DictionaryFilterBar(
             trailingIcon = VerborumIcons.ChevronDown,
         )
         FilterChip(
-            text = "Clear",
+            text = strings.clear,
             onClick = onClearClick,
             leadingIcon = VerborumIcons.Close,
         )

@@ -20,6 +20,8 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respondOk
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.LanguageStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -117,7 +119,13 @@ private fun viewModel(storage: TokenStorage): Pair<OptionsViewModel, AuthSession
         pendingStore = NoOpPendingStore,
     )
 
-    return OptionsViewModel(service) to session
+    return OptionsViewModel(
+        authService = service,
+        languageSettings = LanguageSettings(
+            storage = NoLanguageStored,
+            platformLanguage = { "en" },
+        ),
+    ) to session
 }
 
 /** Counts clears, which is how a duplicated sign-out would show up. */
@@ -146,4 +154,11 @@ private object NoOpLauncher : AuthorizationLauncher {
 private object NoOpPendingStore : PendingAuthorizationStore {
     override fun save(pending: PendingAuthorization) = Unit
     override fun consume(): PendingAuthorization? = null
+}
+
+/** No stored choice and a fixed device language, so the test reads the same on every machine. */
+private object NoLanguageStored : LanguageStorage {
+    override fun read(): String? = null
+    override fun write(code: String) = Unit
+    override fun clear() = Unit
 }

@@ -45,6 +45,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The floating keyboard, for one language or for a choice of two.
@@ -177,7 +178,7 @@ private fun OnScreenKeyboard(
                 if (layout.hasCase || isExtended) {
                     IconKey(
                         icon = VerborumIcons.ShiftUp,
-                        description = if (layout.hasCase) "Shift" else "Symbols",
+                        description = if (layout.hasCase) strings.shift else strings.symbols,
                         // A mode, so it is a colour of its own rather than the accent: outlined
                         // while off, filled while on, and unmistakable either way.
                         color = if (isShifted) KeyboardColors.shift else Color.Transparent,
@@ -194,19 +195,19 @@ private fun OnScreenKeyboard(
                     )
                 }
                 Key(
-                    label = "space",
+                    label = strings.space,
                     isWide = true,
                     isMuted = true,
                     onClick = { controller.type(" ") },
                 )
                 IconKey(
                     icon = VerborumIcons.Backspace,
-                    description = "Backspace",
+                    description = strings.backspace,
                     onClick = controller::backspace,
                 )
                 IconKey(
                     icon = VerborumIcons.EnterKey,
-                    description = "Next field",
+                    description = strings.nextField,
                     isWide = true,
                     // The one key that does something to the form rather than to the text.
                     color = KeyboardColors.accent,
@@ -271,7 +272,7 @@ private fun Header(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = VerborumIcons.Close,
-                    contentDescription = "Close keyboard",
+                    contentDescription = strings.closeKeyboard,
                     tint = KeyboardColors.mutedText,
                     modifier = Modifier.size(Dimens.iconSmall),
                 )

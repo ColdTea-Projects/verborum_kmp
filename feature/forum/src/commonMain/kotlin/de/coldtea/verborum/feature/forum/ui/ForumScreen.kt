@@ -23,6 +23,7 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.forum.data.Listing
 import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
+import de.coldtea.verborum.core.localization.strings
 
 @Composable
 fun ForumScreen(
@@ -32,7 +33,7 @@ fun ForumScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // A tab root: title and subtitle only, no back button.
-    RegisterTopBar(title = "Forum", subtitle = "Coming soon", showBackButton = false)
+    RegisterTopBar(title = strings.forum, subtitle = strings.comingSoon, showBackButton = false)
 
     // There is no listing detail yet, so a tap is acknowledged on the shared snackbar rather than
     // silently dropped.
@@ -49,7 +50,7 @@ fun ForumScreen(
     when {
         state.isLoading -> LoadingState(modifier)
         state.error != null -> ErrorState(
-            message = "The forum could not be loaded.",
+            message = strings.forumFailed,
             modifier = modifier,
             onRetry = viewModel::load,
         )

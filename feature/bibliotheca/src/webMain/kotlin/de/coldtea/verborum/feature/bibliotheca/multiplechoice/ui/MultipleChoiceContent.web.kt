@@ -28,6 +28,7 @@ import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.Web
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebTestResult
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
+import de.coldtea.verborum.core.localization.strings
 
 /** The test as a desktop page: one question card, read straight down, on a narrow measure. */
 @Composable
@@ -43,26 +44,24 @@ internal actual fun MultipleChoiceContent(
 ) {
     when (val test = state.test) {
         TestState.Loading -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             LoadingState(modifier)
         }
 
         TestState.Failed -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             ErrorState(
-                message = "This test could not be loaded.",
+                message = strings.testFailed,
                 modifier = modifier,
                 onRetry = onRetry,
             )
         }
 
         TestState.NotEnoughWords -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             Box(modifier = modifier.fillMaxSize().padding(Spacing.large), Alignment.Center) {
                 Text(
-                    text = "A test needs at least $REQUIRED_WORDS_FOR_TEST different words to " +
-                        "choose between. Add a few more, here or in another dictionary of the " +
-                        "same language pair.",
+                    text = strings.notEnoughWords(REQUIRED_WORDS_FOR_TEST),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -71,7 +70,7 @@ internal actual fun MultipleChoiceContent(
         }
 
         is TestState.Question -> {
-            RegisterTopBar(title = "Test", showBackButton = true, backLabel = "Exit test")
+            RegisterTopBar(title = strings.test, showBackButton = true, backLabel = strings.exitTest)
 
             TestPage(modifier = modifier) {
                 WebQuestionCard(
@@ -92,7 +91,7 @@ internal actual fun MultipleChoiceContent(
                 WebPageSpacer()
 
                 WebPrimaryButton(
-                    label = "Check Answer",
+                    label = strings.checkAnswer,
                     onClick = onCheckAnswer,
                     isEnabled = state.selectedAnswer.isNotEmpty() && !state.isAnswered,
                 )
@@ -100,7 +99,7 @@ internal actual fun MultipleChoiceContent(
                 WebPageSpacer(Spacing.medium)
 
                 WebPrimaryButton(
-                    label = "Next Question",
+                    label = strings.nextQuestion,
                     onClick = onNextQuestion,
                     isEnabled = state.isAnswered,
                 )
@@ -109,9 +108,9 @@ internal actual fun MultipleChoiceContent(
 
         is TestState.Completed -> {
             RegisterTopBar(
-                title = "Test complete",
+                title = strings.testComplete,
                 showBackButton = true,
-                backLabel = "Exit test",
+                backLabel = strings.exitTest,
             )
 
             TestPage(modifier = modifier) {

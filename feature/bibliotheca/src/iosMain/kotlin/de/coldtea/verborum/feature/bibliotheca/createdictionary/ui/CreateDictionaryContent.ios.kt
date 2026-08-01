@@ -24,6 +24,7 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.composables.LanguageDropdown
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.composables.TagSelector
+import de.coldtea.verborum.core.localization.strings
 
 @Composable
 internal actual fun CreateDictionaryContent(
@@ -36,7 +37,7 @@ internal actual fun CreateDictionaryContent(
     modifier: Modifier,
 ) {
     RegisterTopBar(
-        title = if (state.isEditing) "Edit dictionary" else "New dictionary",
+        title = if (state.isEditing) strings.editDictionaryTitle else strings.newDictionary,
         showBackButton = true,
     )
 
@@ -47,7 +48,7 @@ internal actual fun CreateDictionaryContent(
             OutlinedTextField(
                 value = state.name,
                 onValueChange = onNameChanged,
-                label = { Text("Name") },
+                label = { Text(strings.dictionaryName) },
                 singleLine = true,
                 shape = Shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
@@ -56,7 +57,7 @@ internal actual fun CreateDictionaryContent(
             Spacer(modifier = Modifier.height(Spacing.medium))
 
             LanguageDropdown(
-                label = "From language",
+                label = strings.fromLanguage,
                 selected = state.fromLanguage,
                 onSelect = onFromLanguageChanged,
             )
@@ -64,7 +65,7 @@ internal actual fun CreateDictionaryContent(
             Spacer(modifier = Modifier.height(Spacing.medium))
 
             LanguageDropdown(
-                label = "To language",
+                label = strings.toLanguage,
                 selected = state.toLanguage,
                 onSelect = onToLanguageChanged,
             )

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.strings
 
 /** An optional icon button a screen can place on the right of the shared top bar. */
 data class VerborumTopBarAction(
@@ -160,7 +161,7 @@ fun VerborumTopBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = VerborumIcons.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = strings.back,
                     tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.size(TopBarIconSize),
                 )

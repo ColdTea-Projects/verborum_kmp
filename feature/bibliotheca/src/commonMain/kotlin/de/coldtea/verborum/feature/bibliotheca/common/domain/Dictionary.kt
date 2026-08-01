@@ -1,5 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.common.domain
 
+
 /**
  * A dictionary as the app reasons about it: the API's shape mapped onto app types, with timestamps
  * as epoch millis rather than ISO-8601 strings.

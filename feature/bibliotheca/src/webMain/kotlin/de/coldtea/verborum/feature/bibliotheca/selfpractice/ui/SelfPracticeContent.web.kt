@@ -28,6 +28,7 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.composables.FlipWordCard
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.composables.preferredColumnSpan
 import de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model.PracticeWordUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Web: a grid of flip cards using the **whole** width, unlike every other screen here — a practice
@@ -90,7 +91,7 @@ internal actual fun SelfPracticeContent(
                 .height(Dimens.buttonHeight)
                 .pointerHoverIcon(PointerIcon.Hand),
         ) {
-            Text(text = "Switch sides", style = MaterialTheme.typography.titleSmall)
+            Text(text = strings.switchSides, style = MaterialTheme.typography.titleSmall)
         }
     }
 }

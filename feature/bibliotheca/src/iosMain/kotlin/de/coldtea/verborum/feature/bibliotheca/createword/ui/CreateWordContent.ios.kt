@@ -47,6 +47,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.defaultType
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.LanguageInputCard
+import de.coldtea.verborum.core.localization.strings
 
 @Composable
 internal actual fun CreateWordContent(
@@ -62,7 +63,7 @@ internal actual fun CreateWordContent(
     modifier: Modifier,
 ) {
     RegisterTopBar(
-        title = if (state.isEditing) "Edit word" else "New word",
+        title = if (state.isEditing) strings.editWordTitle else strings.newWord,
         subtitle = state.dictionary?.name,
         showBackButton = true,
     )
@@ -71,7 +72,7 @@ internal actual fun CreateWordContent(
 
     when {
         state.hasFailed -> ErrorState(
-            message = "This word could not be loaded.",
+            message = strings.wordLoadFailed,
             modifier = modifier,
             onRetry = onRetry,
         )
@@ -198,7 +199,7 @@ private fun OtherTypeDropdown(selected: WordType, onSelect: (WordType) -> Unit) 
             value = selected.chipLabel,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Type of word") },
+            label = { Text(strings.typeOfWord) },
             trailingIcon = {
                 Icon(
                     imageVector = VerborumIcons.ChevronDown,
@@ -261,7 +262,7 @@ private fun MeaningSection(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "MEANING ${index + 1}",
+                        text = strings.meaningNumber(index + 1).uppercase(),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -269,7 +270,7 @@ private fun MeaningSection(
                         onClick = { onRemoveMeaning(side, index) },
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
                     ) {
-                        Text(text = "Remove", color = MaterialTheme.colorScheme.error)
+                        Text(text = strings.remove, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -288,7 +289,7 @@ private fun MeaningSection(
             onClick = { onAddMeaning(side) },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
         ) {
-            Text(text = "Add another meaning")
+            Text(text = strings.addAnotherMeaning)
         }
     }
 }

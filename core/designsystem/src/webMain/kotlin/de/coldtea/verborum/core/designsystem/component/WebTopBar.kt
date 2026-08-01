@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The web app's one top bar: a slim strip above the page holding the way back.
@@ -53,7 +54,7 @@ fun WebTopBar(
         ) {
             if (canNavigateBack) {
                 WebBackLink(
-                    label = state.backLabel ?: "Back",
+                    label = state.backLabel ?: strings.back,
                     onClick = onBackClick,
                 )
             }

@@ -2,6 +2,9 @@ package de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui
 
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.Strings
+import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
@@ -30,11 +33,16 @@ internal data class MultipleChoiceUiState(
 )
 
 internal class MultipleChoiceViewModel(
+    private val languageSettings: LanguageSettings,
     private val dictionaryId: String,
     private val wordService: WordService,
     private val observeLanguagePairWords: ObserveLanguagePairWordsUseCase,
     private val syncService: SyncService,
 ) : BaseViewModel<MultipleChoiceUiState, Nothing>(MultipleChoiceUiState()) {
+
+    /** Read fresh each time: the language can change while this screen is open. */
+    private val strings: Strings get() = stringsFor(languageSettings.language.value)
+
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
 
@@ -210,7 +218,7 @@ internal class MultipleChoiceViewModel(
         viewModelScope.launch {
             if (wordService.updateLevel(wordId, baseline + delta) is Outcome.Failure) {
                 // The answer still counted towards the score; only saving the level failed.
-                _messages.emit("That answer could not be saved.")
+                _messages.emit(strings.answerSaveFailed)
             }
         }
     }

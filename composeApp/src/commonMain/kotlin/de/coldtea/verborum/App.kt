@@ -1,6 +1,7 @@
 package de.coldtea.verborum
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -10,6 +11,9 @@ import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.auth.SessionState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.theme.VerborumTheme
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.LocalStrings
+import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.feature.auth.ui.LoginScreen
 import de.coldtea.verborum.feature.onboarding.ui.OnboardingGate
 import de.coldtea.verborum.navigation.NavigationCentral
@@ -20,9 +24,18 @@ import org.koin.compose.koinInject
  * every screen lives behind a feature module's nav graph.
  */
 @Composable
-fun App(navController: NavHostController = rememberNavController()) {
-    VerborumTheme {
-        AuthGate(navController)
+fun App(
+    navController: NavHostController = rememberNavController(),
+    languageSettings: LanguageSettings = koinInject(),
+) {
+    val language by languageSettings.language.collectAsStateWithLifecycle()
+
+    // One provider for the whole tree: every screen reads its words from here, so changing the
+    // language in Options redraws the app in it without anything having to be reloaded.
+    CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
+        VerborumTheme {
+            AuthGate(navController)
+        }
     }
 }
 

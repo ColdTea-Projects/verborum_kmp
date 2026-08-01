@@ -1,0 +1,205 @@
+package de.coldtea.verborum.core.localization
+
+/**
+ * Every word the app says to the user.
+ *
+ * English lives here as the **default of each property**, and a language overrides only what it has
+ * translated. That is deliberate: a partly translated language falls back to English string by
+ * string instead of failing, so a translation can land a screen at a time and nothing is ever blank
+ * or crashes for a missing key. Adding a string here needs no change to the other eighteen files.
+ *
+ * Anything with a value in it is a function rather than a property, so a translation can put the
+ * number where its own grammar wants it.
+ */
+interface Strings {
+
+    // ---- shared chrome -------------------------------------------------------------------------
+    val appName: String get() = "Verborum"
+    val back: String get() = "Back"
+    val retry: String get() = "Retry"
+    val cancel: String get() = "Cancel"
+    val delete: String get() = "Delete"
+    val edit: String get() = "Edit"
+    val remove: String get() = "Remove"
+    val offline: String get() = "You are offline. Changes are saved locally and sync when you reconnect."
+
+    // ---- sign in -------------------------------------------------------------------------------
+    val signIn: String get() = "Sign in"
+    val createAccount: String get() = "Create account"
+    val signInTagline: String get() = "Your dictionaries, on every device."
+
+    // ---- tabs ----------------------------------------------------------------------------------
+    val bibliotheca: String get() = "Bibliotheca"
+    val forum: String get() = "Forum"
+    val options: String get() = "Options"
+    val comingSoon: String get() = "Coming soon"
+    val forumFailed: String get() = "The forum could not be loaded."
+
+    // ---- options -------------------------------------------------------------------------------
+    val yourAccount: String get() = "Your account"
+    val signOut: String get() = "Sign out"
+    val signingOut: String get() = "Signing out…"
+    val howToUseTheApp: String get() = "How to use the app"
+    val appLanguage: String get() = "App language"
+    val appLanguageSubtitle: String get() = "The language Verborum itself speaks."
+
+    // ---- dictionary list -----------------------------------------------------------------------
+    val yourDictionaries: String get() = "Your Dictionaries"
+    val yourDictionariesSubtitle: String get() = "Every language pair you're building, in one place."
+    val searchDictionaries: String get() = "Search dictionaries…"
+    val searchDictionariesAction: String get() = "Search dictionaries"
+    val clearSearch: String get() = "Clear search"
+    val clear: String get() = "Clear"
+    val sortBy: String get() = "Sort by"
+    val anyLanguage: String get() = "Any"
+    val moreOptions: String get() = "More options"
+    val createDictionary: String get() = "Create Dictionary"
+    val noDictionariesMatchSearch: String get() = "No dictionaries match your search."
+    val noDictionaryMatchesFilters: String get() = "No dictionary matches those filters."
+    val dictionariesFailed: String get() = "Your dictionaries could not be loaded."
+    val refreshFailed: String get() = "Could not refresh. Showing what was loaded earlier."
+    val dictionaryDeleteFailed: String get() = "That dictionary could not be deleted. It is back in your list."
+
+    // ---- dictionary detail ---------------------------------------------------------------------
+    val dictionary: String get() = "Dictionary"
+    val backToDictionaries: String get() = "Back to dictionaries"
+    val test: String get() = "Test"
+    val selfPractice: String get() = "Self Practice"
+    val wordList: String get() = "Word list"
+    val words: String get() = "Words"
+    val addWord: String get() = "+ Add Word"
+    val deleteDictionary: String get() = "Delete Dictionary"
+    val deleteWord: String get() = "Delete word"
+    val noWordsYet: String get() = "No words yet. Add the first one below."
+    val dictionaryFailed: String get() = "This dictionary could not be loaded."
+    val wordDeleteFailed: String get() = "That word could not be deleted. It is back in the list."
+    fun deleteDictionaryWarning(name: String): String = "“$name” and all of its words will be deleted."
+    fun wordCount(count: Int): String = if (count == 1) "1 word" else "$count words"
+
+    // ---- dictionary form -----------------------------------------------------------------------
+    val newDictionary: String get() = "New dictionary"
+    val editDictionaryTitle: String get() = "Edit Dictionary"
+    val createDictionarySubtitle: String get() = "Name it, choose a language pair, and tag it for easy filtering."
+    val dictionaryName: String get() = "Dictionary name"
+    val dictionaryNameHint: String get() = "e.g. German Basics"
+    val fromLanguage: String get() = "From language"
+    val toLanguage: String get() = "To language"
+    val select: String get() = "Select…"
+    val tags: String get() = "Tags"
+    val saveChanges: String get() = "Save Changes"
+    val saving: String get() = "Saving…"
+    val dictionarySaveFailed: String get() = "That dictionary could not be saved."
+    val dictionaryLoadFailed: String get() = "That dictionary could not be loaded."
+
+    // ---- word form -----------------------------------------------------------------------------
+    val newWord: String get() = "New word"
+    val editWordTitle: String get() = "Edit Word"
+    val addWordTitle: String get() = "Add Word"
+    val saveWord: String get() = "Save Word"
+    val wordType: String get() = "Word type"
+    val typeOfWord: String get() = "Type of word"
+    val word: String get() = "Word"
+    val gender: String get() = "Gender"
+    val addAnotherMeaning: String get() = "+ Add another meaning"
+    val wordSaveFailed: String get() = "That word could not be saved."
+    val wordLoadFailed: String get() = "This word could not be loaded."
+    fun meaningNumber(index: Int): String = "Meaning $index"
+    fun backTo(name: String): String = "Back to $name"
+
+    // ---- practice ------------------------------------------------------------------------------
+    val wordFirst: String get() = "Word first"
+    val translationFirst: String get() = "Translation first"
+    val switchSides: String get() = "Switch sides"
+    val correct: String get() = "Correct"
+    val wrong: String get() = "Wrong"
+    val practiceFailed: String get() = "This practice session could not be loaded."
+
+    // ---- test ----------------------------------------------------------------------------------
+    val exitTest: String get() = "Exit test"
+    val testComplete: String get() = "Test complete"
+    val checkAnswer: String get() = "Check Answer"
+    val nextQuestion: String get() = "Next Question"
+    val testFailed: String get() = "This test could not be loaded."
+    val answerSaveFailed: String get() = "That answer could not be saved."
+    val wellDone: String get() = "Well done!"
+    val keepPracticing: String get() = "Keep practicing"
+    val passedMessage: String get() = "You have a strong grasp of these words. Great job!"
+    val failedMessage: String get() = "Review the words and try again to improve your score."
+    val incorrect: String get() = "Incorrect"
+    val backToDictionary: String get() = "Back to Dictionary"
+    val tryAgain: String get() = "Try Again"
+    fun questionProgress(index: Int, total: Int): String = "Question $index of $total"
+    fun askMeaning(word: String): String = "What does “$word” mean?"
+    fun askForm(word: String): String = "What is “$word”?"
+    fun correctAnswerWas(answer: String): String = "Not quite — the answer is “$answer”."
+    fun notEnoughWords(required: Int): String =
+        "A test needs at least $required different words to choose between."
+    fun scoreOf(correct: Int, total: Int): String = "$correct of $total"
+
+    // ---- onboarding ----------------------------------------------------------------------------
+    val onboardingWelcomeTitle: String get() = "Welcome to Verborum"
+    val onboardingLibraryTitle: String get() = "Build your library"
+    val onboardingTestTitle: String get() = "Test yourself"
+    val onboardingPracticeSwipeTitle: String get() = "Practice with a swipe"
+    val onboardingPracticeFlipTitle: String get() = "Practice with a flip"
+    val iAmDone: String get() = "I am done"
+
+    // ---- keyboard ------------------------------------------------------------------------------
+    val closeKeyboard: String get() = "Close keyboard"
+    val space: String get() = "space"
+    val shift: String get() = "Shift"
+    val symbols: String get() = "Symbols"
+    val backspace: String get() = "Backspace"
+    val nextField: String get() = "Next field"
+    val keyboardUnavailable: String get() = "Keyboard unavailable — choose a language first"
+    val bopomofoNote: String get() = "Bopomofo — use your system input method to convert to characters."
+    val pinyinNote: String get() = "Pinyin only — use your system input method for characters."
+    fun showKeyboard(language: String): String = "Show the $language keyboard"
+    fun hideKeyboard(language: String): String = "Hide the $language keyboard"
+
+    // ---- parts of speech -----------------------------------------------------------------------
+    val noun: String get() = "noun"
+    val verb: String get() = "verb"
+    val adjective: String get() = "adjective"
+    val adverb: String get() = "adverb"
+    val other: String get() = "other"
+    val freeText: String get() = "free text"
+    val preposition: String get() = "preposition"
+    val pronoun: String get() = "pronoun"
+    val numeral: String get() = "numeral"
+    val conjunction: String get() = "conjunction"
+    val interjection: String get() = "interjection"
+    val article: String get() = "article"
+
+    // ---- grammatical forms ---------------------------------------------------------------------
+    val reading: String get() = "Reading"
+    val plural: String get() = "Plural"
+    val feminine: String get() = "Feminine"
+    val comparative: String get() = "Comparative"
+    val superlative: String get() = "Superlative"
+    val present: String get() = "Present"
+    val past: String get() = "Past"
+    val pastForm: String get() = "Past form"
+    val participle: String get() = "Participle"
+    val auxiliary: String get() = "Auxiliary"
+    val aspect: String get() = "Aspect"
+    val root: String get() = "Root"
+    val stem: String get() = "Stem"
+    val measure: String get() = "Measure"
+    val wordClass: String get() = "Class"
+    val polite: String get() = "Polite"
+
+    // ---- gender --------------------------------------------------------------------------------
+    val masculine: String get() = "masculine"
+    val neuter: String get() = "neuter"
+    val common: String get() = "common"
+
+    // ---- sort ----------------------------------------------------------------------------------
+    val sortNameAsc: String get() = "Name A–Z"
+    val sortNameDesc: String get() = "Name Z–A"
+    val sortNewest: String get() = "Newest first"
+    val sortOldest: String get() = "Oldest first"
+}
+
+/** The base language, and the fallback every other one degrades to. */
+object EnglishStrings : Strings

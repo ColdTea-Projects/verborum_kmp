@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.common.observeConnectivity
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Tracks whether the app currently has usable internet, for the offline banner. Starts out `true`
@@ -42,7 +43,7 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "You are offline. Changes are saved locally and sync when you reconnect.",
+                text = strings.offline,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )

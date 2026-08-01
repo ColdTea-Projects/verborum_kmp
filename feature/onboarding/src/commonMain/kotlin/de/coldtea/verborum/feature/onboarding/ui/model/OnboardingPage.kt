@@ -1,5 +1,8 @@
 package de.coldtea.verborum.feature.onboarding.ui.model
 
+import androidx.compose.runtime.Composable
+import de.coldtea.verborum.core.localization.strings
+
 /** A panel's words. */
 internal data class OnboardingCopy(val title: String, val description: String)
 
@@ -15,7 +18,8 @@ internal data class PracticeCopy(
     val rightHint: String,
 )
 
-internal expect val practiceCopy: PracticeCopy
+@Composable
+internal expect fun practiceCopy(): PracticeCopy
 
 /**
  * The tour, panel by panel. Same four panels as the Android app, and the same copy where the app
@@ -28,34 +32,34 @@ internal enum class OnboardingPage {
     PRACTICE,
     ;
 
-    val title: String get() = copy.title
+    val title: String @Composable get() = copy.title
 
-    val description: String get() = copy.description
+    val description: String @Composable get() = copy.description
 
     val isLast: Boolean get() = ordinal == entries.lastIndex
 
     // A getter rather than constructor arguments: PRACTICE reads a platform value, and evaluating it
     // lazily keeps the enum from depending on when that property is initialised.
     private val copy: OnboardingCopy
-        get() = when (this) {
+        @Composable get() = when (this) {
             INTRO -> OnboardingCopy(
-                title = "Welcome to Verborum",
+                title = strings.onboardingWelcomeTitle,
                 description = "Your personal vocabulary library. Build dictionaries, collect words " +
                     "and make them stick.",
             )
 
             LIBRARY -> OnboardingCopy(
-                title = "Build your library",
+                title = strings.onboardingLibraryTitle,
                 description = "Create a dictionary for any language pair, then add words together " +
                     "with their grammar — articles, plurals, verb forms and more.",
             )
 
             TEST -> OnboardingCopy(
-                title = "Test yourself",
+                title = strings.onboardingTestTitle,
                 description = "Take multiple-choice tests on your words. Every form you entered " +
                     "gets its own question, and correct answers raise a word's level.",
             )
 
-            PRACTICE -> practiceCopy.panel
+            PRACTICE -> practiceCopy().panel
         }
 }

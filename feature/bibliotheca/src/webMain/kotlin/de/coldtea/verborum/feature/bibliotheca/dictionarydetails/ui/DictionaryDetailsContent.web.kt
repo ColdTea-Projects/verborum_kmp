@@ -36,6 +36,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * One dictionary as a desktop page: the two practice modes as tiles, then every word in a bordered
@@ -62,14 +63,14 @@ internal actual fun DictionaryDetailsContent(
 ) {
     when (val details = state.details) {
         DictionaryDetailsState.Loading -> {
-            RegisterTopBar(title = "Dictionary")
+            RegisterTopBar(title = strings.dictionary)
             LoadingState(modifier)
         }
 
         DictionaryDetailsState.Failed -> {
-            RegisterTopBar(title = "Dictionary")
+            RegisterTopBar(title = strings.dictionary)
             ErrorState(
-                message = "This dictionary could not be loaded.",
+                message = strings.dictionaryFailed,
                 modifier = modifier,
                 onRetry = onRetry,
             )
@@ -82,7 +83,7 @@ internal actual fun DictionaryDetailsContent(
             RegisterTopBar(
                 title = details.name,
                 showBackButton = true,
-                backLabel = "Back to dictionaries",
+                backLabel = strings.backToDictionaries,
             )
 
             var showDeleteDialog by remember { mutableStateOf(false) }
@@ -140,12 +141,12 @@ internal actual fun DictionaryDetailsContent(
 
                         WebPageSpacer()
 
-                        WebOutlinedButton(label = "+ Add Word", onClick = onCreateWordClick)
+                        WebOutlinedButton(label = strings.addWord, onClick = onCreateWordClick)
 
                         WebPageSpacer(Spacing.medium)
 
                         WebPrimaryButton(
-                            label = "Delete Dictionary",
+                            label = strings.deleteDictionary,
                             onClick = { showDeleteDialog = true },
                         )
 
@@ -171,7 +172,7 @@ private fun PracticeTiles(
         horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         WebPracticeTile(
-            label = "Test",
+            label = strings.test,
             icon = VerborumIcons.Check,
             containerColor = MaterialTheme.colorScheme.primary,
             isEnabled = canTest,
@@ -180,7 +181,7 @@ private fun PracticeTiles(
             modifier = Modifier.weight(1f),
         )
         WebPracticeTile(
-            label = "Self Practice",
+            label = strings.selfPractice,
             icon = VerborumIcons.Play,
             containerColor = MaterialTheme.colorScheme.secondary,
             isEnabled = canSelfPractice,
@@ -204,7 +205,7 @@ private fun WordListPanel(
 
         if (words.isEmpty()) {
             Text(
-                text = "No words yet. Add the first one below.",
+                text = strings.noWordsYet,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

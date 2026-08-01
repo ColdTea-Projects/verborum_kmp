@@ -8,6 +8,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
@@ -65,6 +66,8 @@ class DictionaryListViewModelTest {
         val wordRepository = FakeWordRepository(initial = words)
 
         return DictionaryListViewModel(
+
+            languageSettings = testLanguageSettings(),
             dictionaryService = DictionaryService(
                 observeDictionariesUseCase = ObserveDictionariesUseCase(repository),
                 observeDictionaryUseCase = ObserveDictionaryUseCase(repository),

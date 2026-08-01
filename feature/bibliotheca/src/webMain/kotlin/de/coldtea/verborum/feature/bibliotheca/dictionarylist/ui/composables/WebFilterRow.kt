@@ -38,6 +38,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Search, language filters and sort order in one row above the grid.
@@ -86,7 +87,7 @@ internal fun WebFilterRow(
 
         // Only earns its place when something is actually filtered.
         if (hasActiveFilters) {
-            WebTextAction(label = "Clear", onClick = onClearFilters)
+            WebTextAction(label = strings.clear, onClick = onClearFilters)
         }
     }
 }
@@ -118,7 +119,7 @@ private fun SearchField(
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                 if (query.isEmpty()) {
                     Text(
-                        text = "Search dictionaries…",
+                        text = strings.searchDictionaries,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

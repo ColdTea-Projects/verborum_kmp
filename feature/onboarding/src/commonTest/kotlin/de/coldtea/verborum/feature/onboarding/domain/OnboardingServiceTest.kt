@@ -46,8 +46,8 @@ class OnboardingServiceTest {
         assertEquals(4, OnboardingPage.entries.size)
         assertTrue(OnboardingPage.entries.last().isLast)
         assertFalse(OnboardingPage.entries.first().isLast)
-        // Every page says something: a blank page would be a silent gap in the tour.
-        assertTrue(OnboardingPage.entries.all { it.title.isNotBlank() && it.description.isNotBlank() })
+        // A page's words now come from the string catalogue and are read inside composition, so
+        // "every page says something" is asserted there — see UiLanguageTest.
     }
 }
 

@@ -2,6 +2,9 @@ package de.coldtea.verborum.feature.bibliotheca.createword.ui
 
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.Strings
+import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.common.TimeProvider
@@ -56,12 +59,17 @@ internal data class CreateWordUiState(
 }
 
 internal class CreateWordViewModel(
+    private val languageSettings: LanguageSettings,
     private val dictionaryId: String,
     private val wordId: String?,
     private val dictionaryService: DictionaryService,
     private val wordService: WordService,
     private val time: TimeProvider = SystemTimeProvider,
 ) : BaseViewModel<CreateWordUiState, Nothing>(CreateWordUiState()) {
+
+    /** Read fresh each time: the language can change while this screen is open. */
+    private val strings: Strings get() = stringsFor(languageSettings.language.value)
+
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages.asSharedFlow()
@@ -191,7 +199,7 @@ internal class CreateWordViewModel(
             if (outcome is Outcome.Success) {
                 _saved.emit(existing != null)
             } else {
-                _messages.emit("That word could not be saved.")
+                _messages.emit(strings.wordSaveFailed)
             }
         }
     }

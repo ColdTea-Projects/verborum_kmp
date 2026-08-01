@@ -42,6 +42,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WordListItem
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
+import de.coldtea.verborum.core.localization.strings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,14 +61,14 @@ internal actual fun DictionaryDetailsContent(
 ) {
     when (val details = state.details) {
         DictionaryDetailsState.Loading -> {
-            RegisterTopBar(title = "Dictionary")
+            RegisterTopBar(title = strings.dictionary)
             LoadingState(modifier)
         }
 
         DictionaryDetailsState.Failed -> {
-            RegisterTopBar(title = "Dictionary")
+            RegisterTopBar(title = strings.dictionary)
             ErrorState(
-                message = "This dictionary could not be loaded.",
+                message = strings.dictionaryFailed,
                 modifier = modifier,
                 onRetry = onRetry,
             )
@@ -124,7 +125,7 @@ internal actual fun DictionaryDetailsContent(
                         item {
                             Spacer(modifier = Modifier.height(Spacing.medium))
                             Text(
-                                text = "WORDS",
+                                text = strings.words,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -133,7 +134,7 @@ internal actual fun DictionaryDetailsContent(
                         if (details.words.isEmpty()) {
                             item {
                                 Text(
-                                    text = "No words yet. Add the first one below.",
+                                    text = strings.noWordsYet,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = Spacing.medium),
@@ -166,7 +167,7 @@ internal actual fun DictionaryDetailsContent(
                             modifier = Modifier.size(Dimens.iconSmall),
                         )
                         Spacer(modifier = Modifier.width(Spacing.small))
-                        Text(text = "Add word", style = MaterialTheme.typography.titleSmall)
+                        Text(text = strings.addWordTitle, style = MaterialTheme.typography.titleSmall)
                     }
 
                     Button(
@@ -190,7 +191,7 @@ internal actual fun DictionaryDetailsContent(
                         )
                         Spacer(modifier = Modifier.width(Spacing.small))
                         Text(
-                            text = "Delete dictionary",
+                            text = strings.deleteDictionary,
                             style = MaterialTheme.typography.titleSmall,
                         )
                     }
@@ -213,7 +214,7 @@ private fun PracticeModes(
         horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         PracticeModeButton(
-            text = "Test",
+            text = strings.test,
             icon = VerborumIcons.Check,
             containerColor = MaterialTheme.colorScheme.primary,
             isEnabled = canTest,
@@ -222,7 +223,7 @@ private fun PracticeModes(
             modifier = Modifier.weight(1f),
         )
         PracticeModeButton(
-            text = "Self practice",
+            text = strings.selfPractice,
             icon = VerborumIcons.Book,
             containerColor = MaterialTheme.colorScheme.secondary,
             isEnabled = canSelfPractice,

@@ -59,6 +59,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.Dictionar
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
+import de.coldtea.verborum.core.localization.strings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,14 +115,14 @@ internal actual fun DictionaryListContent(
 
     when (openSheet) {
         FilterSheet.From -> LanguageSheet(
-            title = "From language",
+            title = strings.fromLanguage,
             selected = state.filters.fromLanguage,
             onSelect = onFromLanguageChanged,
             onDismiss = { openSheet = null },
         )
 
         FilterSheet.To -> LanguageSheet(
-            title = "To language",
+            title = strings.toLanguage,
             selected = state.filters.toLanguage,
             onSelect = onToLanguageChanged,
             onDismiss = { openSheet = null },
@@ -190,7 +191,7 @@ internal actual fun DictionaryListContent(
                     modifier = Modifier.size(Dimens.iconSmall),
                 )
                 Spacer(modifier = Modifier.width(Spacing.small))
-                Text(text = "Create dictionary", style = MaterialTheme.typography.titleSmall)
+                Text(text = strings.createDictionary, style = MaterialTheme.typography.titleSmall)
             }
         }
     }
@@ -216,7 +217,7 @@ private fun DictionaryList(
         }
 
         DictionaryListState.Failed -> ErrorState(
-            message = "Your dictionaries could not be loaded.",
+            message = strings.dictionariesFailed,
             modifier = modifier,
             onRetry = onRetry,
         )
@@ -229,7 +230,7 @@ private fun DictionaryList(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "No dictionary matches those filters.",
+                    text = strings.noDictionaryMatchesFilters,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -270,7 +271,7 @@ private fun LanguageSheet(
     val options = buildList {
         add(
             SelectionOption(
-                label = "$ANY_LANGUAGE language",
+                label = strings.anyLanguage,
                 isSelected = selected == null,
                 onSelect = { onSelect(null) },
             ),
@@ -296,7 +297,7 @@ private fun SortSheet(
     onDismiss: () -> Unit,
 ) {
     SelectionBottomSheet(
-        title = "Sort by",
+        title = strings.sortBy,
         options = DictionarySort.entries.map { sort ->
             SelectionOption(
                 label = sort.label,
@@ -319,14 +320,14 @@ private fun DictionaryOptionsSheet(
         Column(modifier = Modifier.padding(bottom = Spacing.large)) {
             DictionaryOptionRow(
                 icon = VerborumIcons.Edit,
-                text = "Edit",
+                text = strings.edit,
                 // Neutral action — reads like normal content.
                 color = MaterialTheme.colorScheme.onBackground,
                 onClick = onEdit,
             )
             DictionaryOptionRow(
                 icon = VerborumIcons.Delete,
-                text = "Delete",
+                text = strings.delete,
                 // Destructive action — flagged in the error colour.
                 color = MaterialTheme.colorScheme.error,
                 onClick = onDelete,

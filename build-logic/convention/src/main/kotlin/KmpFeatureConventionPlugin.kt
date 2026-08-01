@@ -17,6 +17,7 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
             sourceSets.getByName("commonMain").dependencies {
                 api(project(":core:common"))
                 api(project(":core:designsystem"))
+                api(project(":core:localization"))
 
                 implementation(libs.library("navigation-compose"))
                 implementation(libs.library("koin-core"))

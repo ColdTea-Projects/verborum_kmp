@@ -38,6 +38,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.WebLanguageCard
+import de.coldtea.verborum.core.localization.strings
 
 /** Room for more alternatives, and more fields per card, than any language actually asks for. */
 private const val CARD_STRIDE = 100
@@ -72,15 +73,15 @@ internal actual fun CreateWordContent(
     // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
     // that wants no chrome at all, and would lose the sidebar with it.
     RegisterTopBar(
-        title = if (state.isEditing) "Edit word" else "New word",
+        title = if (state.isEditing) strings.editWordTitle else strings.newWord,
         subtitle = dictionary?.name,
         showBackButton = true,
-        backLabel = dictionary?.let { "Back to ${it.name}" } ?: "Back",
+        backLabel = dictionary?.let { "Back to ${it.name}" } ?: strings.back,
     )
 
     when {
         state.hasFailed -> ErrorState(
-            message = "This word could not be loaded.",
+            message = strings.wordLoadFailed,
             modifier = modifier,
             onRetry = onRetry,
         )
@@ -96,7 +97,7 @@ internal actual fun CreateWordContent(
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         WebPageSpacer(Spacing.extraLarge)
 
-                        WebPageTitle(title = if (state.isEditing) "Edit Word" else "Add Word")
+                        WebPageTitle(title = if (state.isEditing) strings.editWordTitle else strings.addWordTitle)
 
                         WebPageSpacer()
 
@@ -225,7 +226,7 @@ private fun MeaningColumn(
                 ) {
                     WebEyebrow("Meaning ${index + 1}")
                     WebTextAction(
-                        label = "Remove",
+                        label = strings.remove,
                         onClick = { onRemoveMeaning(side, index) },
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -250,7 +251,7 @@ private fun MeaningColumn(
 
         WebPageSpacer(Spacing.small)
 
-        WebTextAction(label = "+ Add another meaning", onClick = { onAddMeaning(side) })
+        WebTextAction(label = strings.addAnotherMeaning, onClick = { onAddMeaning(side) })
     }
 }
 

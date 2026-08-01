@@ -35,6 +35,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.onboarding.ui.composables.OnboardingVisual
 import de.coldtea.verborum.feature.onboarding.ui.model.OnboardingPage
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * iOS: the Android design — one panel at a time, swiped through, with the done button appearing on
@@ -112,7 +113,7 @@ private fun OnboardingPageContent(page: OnboardingPage, onDone: () -> Unit) {
                 shape = Shapes.large,
                 modifier = Modifier.fillMaxWidth().height(Dimens.buttonHeight),
             ) {
-                Text(text = "I am done", style = MaterialTheme.typography.titleSmall)
+                Text(text = strings.iAmDone, style = MaterialTheme.typography.titleSmall)
             }
         }
 

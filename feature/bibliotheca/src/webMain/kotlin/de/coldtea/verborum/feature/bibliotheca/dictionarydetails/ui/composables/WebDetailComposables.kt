@@ -28,6 +28,7 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * A practice mode as a large coloured tile: glyph over label.
@@ -126,9 +127,9 @@ internal fun WebWordRow(
                     }
                 }
 
-                WebTextAction(label = "Edit", onClick = { onEditClick(word.wordId) })
+                WebTextAction(label = strings.edit, onClick = { onEditClick(word.wordId) })
                 WebTextAction(
-                    label = "Delete",
+                    label = strings.delete,
                     onClick = { onDeleteClick(word.wordId) },
                     // Destructive action — flagged in the error colour.
                     color = MaterialTheme.colorScheme.error,

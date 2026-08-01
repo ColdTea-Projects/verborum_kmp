@@ -36,6 +36,7 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.ALL_TAGS
 import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.DictionaryTag
+import de.coldtea.verborum.core.localization.strings
 
 /** Picks one of the supported languages. Read-only text field plus a menu, so typing cannot stray. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +96,7 @@ internal fun TagSelector(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "TAGS",
+            text = strings.tags,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

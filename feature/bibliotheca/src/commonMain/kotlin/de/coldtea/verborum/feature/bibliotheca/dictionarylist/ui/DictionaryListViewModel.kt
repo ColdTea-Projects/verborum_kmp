@@ -2,6 +2,9 @@ package de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui
 
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.localization.LanguageSettings
+import de.coldtea.verborum.core.localization.Strings
+import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
@@ -33,10 +36,15 @@ internal sealed interface DictionaryListEffect {
 }
 
 internal class DictionaryListViewModel(
+    private val languageSettings: LanguageSettings,
     private val dictionaryService: DictionaryService,
     private val wordService: WordService,
     private val syncService: SyncService,
 ) : BaseViewModel<DictionaryListUiState, DictionaryListEffect>(DictionaryListUiState()) {
+
+    /** Read fresh each time: the language can change while this screen is open. */
+    private val strings: Strings get() = stringsFor(languageSettings.language.value)
+
 
     private val filters = MutableStateFlow(DictionaryFilterState())
 
@@ -110,7 +118,7 @@ internal class DictionaryListViewModel(
 
             // With rows still on screen the failure is not obvious, so it is said out loud.
             if (hasFailed && currentState.listState.hasRows()) {
-                _messages.emit("Could not refresh. Showing what was loaded earlier.")
+                _messages.emit(strings.refreshFailed)
             }
         }
     }
@@ -140,7 +148,7 @@ internal class DictionaryListViewModel(
     fun deleteDictionary(dictionaryId: String) {
         viewModelScope.launch {
             if (dictionaryService.deleteDictionary(dictionaryId) is Outcome.Failure) {
-                _messages.emit("That dictionary could not be deleted. It is back in your list.")
+                _messages.emit(strings.dictionaryDeleteFailed)
             }
         }
     }

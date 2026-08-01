@@ -32,6 +32,7 @@ import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.Que
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.TestResult
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
+import de.coldtea.verborum.core.localization.strings
 
 @Composable
 internal actual fun MultipleChoiceContent(
@@ -46,26 +47,24 @@ internal actual fun MultipleChoiceContent(
 ) {
     when (val test = state.test) {
         TestState.Loading -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             LoadingState(modifier)
         }
 
         TestState.Failed -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             ErrorState(
-                message = "This test could not be loaded.",
+                message = strings.testFailed,
                 modifier = modifier,
                 onRetry = onRetry,
             )
         }
 
         TestState.NotEnoughWords -> {
-            RegisterTopBar(title = "Test")
+            RegisterTopBar(title = strings.test)
             Box(modifier = modifier.fillMaxSize().padding(Spacing.large), Alignment.Center) {
                 Text(
-                    text = "A test needs at least $REQUIRED_WORDS_FOR_TEST different words to " +
-                        "choose between. Add a few more, here or in another dictionary of the " +
-                        "same language pair.",
+                    text = strings.notEnoughWords(REQUIRED_WORDS_FOR_TEST),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -75,7 +74,7 @@ internal actual fun MultipleChoiceContent(
 
         is TestState.Question -> {
             RegisterTopBar(
-                title = "Test",
+                title = strings.test,
                 subtitle = "Question ${test.index} of ${test.total}",
                 showBackButton = true,
             )
@@ -92,7 +91,7 @@ internal actual fun MultipleChoiceContent(
         }
 
         is TestState.Completed -> {
-            RegisterTopBar(title = "Test complete", showBackButton = true)
+            RegisterTopBar(title = strings.testComplete, showBackButton = true)
 
             ContentColumn(modifier = modifier) {
                 Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
@@ -152,7 +151,7 @@ private fun QuestionStep(
                 .height(Dimens.buttonHeight)
                 .pointerHoverIcon(PointerIcon.Hand),
         ) {
-            Text(text = "Check", style = MaterialTheme.typography.titleSmall)
+            Text(text = strings.checkAnswer, style = MaterialTheme.typography.titleSmall)
         }
 
         Spacer(modifier = Modifier.height(Spacing.small))
@@ -167,7 +166,7 @@ private fun QuestionStep(
                 .height(Dimens.buttonHeight)
                 .pointerHoverIcon(PointerIcon.Hand),
         ) {
-            Text(text = "Next question", style = MaterialTheme.typography.titleSmall)
+            Text(text = strings.nextQuestion, style = MaterialTheme.typography.titleSmall)
         }
     }
 }
