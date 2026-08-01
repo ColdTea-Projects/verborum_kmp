@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -63,7 +64,8 @@ internal fun WebDictionaryCard(
         border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.surfaceVariant),
         shadowElevation = Dimens.elevationCardSubtle,
     ) {
-        Box {
+        // fillMaxSize so a stretched grid cell paints the card (and accent bar) to the row height.
+        Box(modifier = Modifier.fillMaxSize()) {
             // The gold edge stripe that marks a library row.
             Box(
                 modifier = Modifier
@@ -194,7 +196,7 @@ internal fun WebDictionaryCardSkeleton(modifier: Modifier = Modifier) {
         border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(Spacing.large),
+            modifier = Modifier.fillMaxSize().padding(Spacing.large),
             horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             SkeletonBlock(modifier = Modifier.size(Dimens.iconBadge))
