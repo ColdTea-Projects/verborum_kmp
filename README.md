@@ -226,6 +226,8 @@ getter — the language can change while a screen is open.
 
 The default is **the device's own language**, from `navigator.language` on web and
 `NSLocale.preferredLanguages` on iOS, with an explicit choice in Options overriding it and persisting.
+"System language" heads the picker and hands the choice back — it keeps *following* the device rather
+than freezing today's answer, so changing the phone's language changes the app's.
 Geolocating the IP was considered and rejected: an address says *where* someone is, not what they
 read — wrong for travellers, wrong behind a VPN — and it would mean sending the user's address to a
 third party on first launch, which the CSP forbids and the platform makes unnecessary.

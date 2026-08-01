@@ -22,6 +22,7 @@ internal object RussianStrings : Strings {
     override val howToUseTheApp = "Как пользоваться приложением"
     override val appLanguage = "Язык приложения"
     override val appLanguageSubtitle = "Язык, на котором говорит сам Verborum."
+    override val systemLanguage = "Язык системы"
     override val yourDictionaries = "Ваши словари"
     override val yourDictionariesSubtitle = "Все языковые пары, над которыми вы работаете, в одном месте."
     override val searchDictionaries = "Поиск по словарям…"

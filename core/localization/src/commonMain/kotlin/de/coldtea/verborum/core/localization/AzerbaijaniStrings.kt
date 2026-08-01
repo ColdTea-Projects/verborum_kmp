@@ -22,6 +22,7 @@ internal object AzerbaijaniStrings : Strings {
     override val howToUseTheApp = "Tətbiqdən necə istifadə etməli"
     override val appLanguage = "Tətbiq dili"
     override val appLanguageSubtitle = "Verborumun özünün danışdığı dil."
+    override val systemLanguage = "Sistem dili"
     override val yourDictionaries = "Lüğətləriniz"
     override val yourDictionariesSubtitle = "Qurduğunuz hər dil cütü bir yerdə."
     override val searchDictionaries = "Lüğətlərdə axtar…"

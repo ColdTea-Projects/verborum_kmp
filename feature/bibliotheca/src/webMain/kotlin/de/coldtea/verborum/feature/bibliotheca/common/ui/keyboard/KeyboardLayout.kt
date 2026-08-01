@@ -156,7 +156,8 @@ internal fun keyboardLayoutFor(
     fieldKey: FieldKey? = null,
 ): KeyboardLayout? {
     // A Chinese word is hanzi, but its reading is pinyin — two different keyboards for one language,
-    // which is why the field and not just the language decides.
+    // which is why the field and not just the language decides. Japanese needs no such swap: a
+    // Japanese reading is written in kana, which its ordinary keyboard already types.
     if (languageCode.lowercase() == "zh" && fieldKey == FieldKey.READING) return pinyin()
 
     return baseLayoutFor(languageCode)

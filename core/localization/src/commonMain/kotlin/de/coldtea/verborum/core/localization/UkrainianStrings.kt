@@ -22,6 +22,7 @@ internal object UkrainianStrings : Strings {
     override val howToUseTheApp = "Як користуватися застосунком"
     override val appLanguage = "Мова застосунку"
     override val appLanguageSubtitle = "Мова, якою говорить сам Verborum."
+    override val systemLanguage = "Мова системи"
     override val yourDictionaries = "Ваші словники"
     override val yourDictionariesSubtitle = "Усі мовні пари, які ви створюєте, в одному місці."
     override val searchDictionaries = "Пошук словників…"

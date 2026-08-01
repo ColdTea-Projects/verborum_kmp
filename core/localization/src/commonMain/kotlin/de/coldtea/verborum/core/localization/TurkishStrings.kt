@@ -22,6 +22,7 @@ internal object TurkishStrings : Strings {
     override val howToUseTheApp = "Uygulama nasıl kullanılır"
     override val appLanguage = "Uygulama dili"
     override val appLanguageSubtitle = "Verborum'un kendi konuştuğu dil."
+    override val systemLanguage = "Sistem dili"
     override val yourDictionaries = "Sözlükleriniz"
     override val yourDictionariesSubtitle = "Oluşturduğunuz her dil çifti, tek bir yerde."
     override val searchDictionaries = "Sözlüklerde ara…"

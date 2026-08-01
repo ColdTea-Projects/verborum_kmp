@@ -22,17 +22,24 @@ class LanguageSettings(
 
     val language: StateFlow<UiLanguage> = _language.asStateFlow()
 
-    /** Null while the app is following the device, which is the state a fresh install is in. */
-    val chosen: UiLanguage? get() = UiLanguage.fromTag(storage.read())
+    private val _chosen = MutableStateFlow(UiLanguage.fromTag(storage.read()))
+
+    /**
+     * The language explicitly picked, or null while the app is following the device — which is the
+     * state a fresh install is in, and the one the picker shows as "system language".
+     */
+    val chosen: StateFlow<UiLanguage?> = _chosen.asStateFlow()
 
     fun choose(language: UiLanguage) {
         storage.write(language.code)
+        _chosen.value = language
         _language.value = language
     }
 
     /** Hands the interface back to the device's own setting. */
     fun followDevice() {
         storage.clear()
+        _chosen.value = null
         _language.value = resolve()
     }
 
@@ -62,6 +69,14 @@ internal expect fun platformLanguageTag(): String?
 
 /** The strings the tree renders with. Defaults to English so a preview needs no provider. */
 val LocalStrings = staticCompositionLocalOf<Strings> { EnglishStrings }
+
+/**
+ * The language the interface is in — the one the user demonstrably reads.
+ *
+ * Separate from [LocalStrings] because some screens need the *code*, not the words: a pronunciation
+ * note is written in whatever script its reader can read, which is this one.
+ */
+val LocalUiLanguage = staticCompositionLocalOf { UiLanguage.Default }
 
 /** The strings for a language, falling back to English for anything it has not translated yet. */
 fun stringsFor(language: UiLanguage): Strings = translations[language] ?: EnglishStrings

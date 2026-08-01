@@ -22,6 +22,7 @@ internal object GreekStrings : Strings {
     override val howToUseTheApp = "Πώς λειτουργεί η εφαρμογή"
     override val appLanguage = "Γλώσσα εφαρμογής"
     override val appLanguageSubtitle = "Η γλώσσα που μιλά η ίδια η Verborum."
+    override val systemLanguage = "Γλώσσα συστήματος"
     override val yourDictionaries = "Τα λεξικά σας"
     override val yourDictionariesSubtitle = "Κάθε ζεύγος γλωσσών που χτίζετε, σε ένα μέρος."
     override val searchDictionaries = "Αναζήτηση λεξικών…"

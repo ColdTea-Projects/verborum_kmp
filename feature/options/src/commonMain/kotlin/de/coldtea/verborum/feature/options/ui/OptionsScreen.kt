@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,6 +53,7 @@ internal fun OptionsScreen(
 
     val strings = LocalStrings.current
     val language by viewModel.language.collectAsStateWithLifecycle()
+    val chosenLanguage by viewModel.chosenLanguage.collectAsStateWithLifecycle()
 
     // A tab root: title only, no back button.
     RegisterTopBar(title = strings.options, subtitle = strings.yourAccount, showBackButton = false)
@@ -59,7 +61,9 @@ internal fun OptionsScreen(
     OptionsContent(
         state = state,
         language = language,
+        chosenLanguage = chosenLanguage,
         onLanguageChosen = viewModel::chooseLanguage,
+        onFollowSystemLanguage = viewModel::followSystemLanguage,
         onSignOut = viewModel::signOut,
         onHowToUseApp = onHowToUseApp,
         modifier = modifier,
@@ -70,7 +74,10 @@ internal fun OptionsScreen(
 internal fun OptionsContent(
     state: OptionsState,
     language: UiLanguage,
+    /** Null while following the device. */
+    chosenLanguage: UiLanguage?,
     onLanguageChosen: (UiLanguage) -> Unit,
+    onFollowSystemLanguage: () -> Unit,
     onSignOut: () -> Unit,
     /**
      * Opens the welcome tour. Null where the platform has already shown it unprompted, and the row is
@@ -82,7 +89,12 @@ internal fun OptionsContent(
     val strings = LocalStrings.current
 
     ContentColumn(modifier = modifier) {
-        LanguageRow(selected = language, onChoose = onLanguageChosen)
+        LanguageRow(
+            effective = language,
+            chosen = chosenLanguage,
+            onChoose = onLanguageChosen,
+            onFollowSystem = onFollowSystemLanguage,
+        )
 
         onHowToUseApp?.let { openTour ->
             OptionRow(
@@ -151,14 +163,24 @@ private fun OptionRow(
  * they do not read.
  */
 @Composable
-private fun LanguageRow(selected: UiLanguage, onChoose: (UiLanguage) -> Unit) {
+private fun LanguageRow(
+    effective: UiLanguage,
+    chosen: UiLanguage?,
+    onChoose: (UiLanguage) -> Unit,
+    onFollowSystem: () -> Unit,
+) {
     val strings = LocalStrings.current
     var isExpanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.padding(top = Spacing.medium)) {
         OptionRow(
             icon = VerborumIcons.Storefront,
-            label = "${strings.appLanguage}: ${selected.endonym}",
+            // Following the device is named as such, with the language it currently resolves to, so
+            // the row says both what was chosen and what that means today.
+            label = when (chosen) {
+                null -> "${strings.appLanguage}: ${strings.systemLanguage} (${effective.endonym})"
+                else -> "${strings.appLanguage}: ${chosen.endonym}"
+            },
             onClick = { isExpanded = true },
         )
 
@@ -167,6 +189,26 @@ private fun LanguageRow(selected: UiLanguage, onChoose: (UiLanguage) -> Unit) {
             onDismissRequest = { isExpanded = false },
             modifier = Modifier.heightIn(max = Dimens.sheetMaxHeight),
         ) {
+            // First, and the default: hand the choice back to the device.
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = strings.systemLanguage,
+                        color = if (chosen == null) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                    )
+                },
+                onClick = {
+                    isExpanded = false
+                    onFollowSystem()
+                },
+            )
+
+            HorizontalDivider()
+
             UiLanguage.entries.forEach { language ->
                 DropdownMenuItem(
                     text = {
@@ -175,7 +217,7 @@ private fun LanguageRow(selected: UiLanguage, onChoose: (UiLanguage) -> Unit) {
                             // Its own name is written in its own script, which the default face may
                             // not carry at all.
                             fontFamily = fontFamilyForUiLanguage(language.code),
-                            color = if (language == selected) {
+                            color = if (language == chosen) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.onSurface

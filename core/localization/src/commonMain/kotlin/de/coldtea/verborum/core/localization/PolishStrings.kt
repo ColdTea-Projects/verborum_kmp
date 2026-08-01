@@ -22,6 +22,7 @@ internal object PolishStrings : Strings {
     override val howToUseTheApp = "Jak korzystać z aplikacji"
     override val appLanguage = "Język aplikacji"
     override val appLanguageSubtitle = "Język, w którym mówi samo Verborum."
+    override val systemLanguage = "Język systemu"
     override val yourDictionaries = "Twoje słowniki"
     override val yourDictionariesSubtitle = "Każda para językowa, którą tworzysz, w jednym miejscu."
     override val searchDictionaries = "Szukaj słowników…"

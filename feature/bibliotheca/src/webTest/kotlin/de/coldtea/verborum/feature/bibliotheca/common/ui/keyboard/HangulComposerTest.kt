@@ -225,12 +225,20 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `the reading field accepts pinyin where the word itself would not`() {
-        val reading = keyboardLayoutFor("zh", FieldKey.READING)!!
-
-        assertTrue("píngguǒ".all(reading::accepts))
-        // ...and the word field is the other way round.
+    fun `a reading can be written in the script of whoever will read it back`() {
+        // The Chinese reading keyboard is pinyin with its tone marks, which the word keyboard is not.
+        val chineseReading = keyboardLayoutFor("zh", FieldKey.READING)!!
+        assertTrue("píngguǒ".all(chineseReading::accepts))
         assertTrue(!keyboardLayoutFor("zh")!!.accepts('í'))
+
+        // Japanese needs no swap: a Japanese reading is kana, which its own keyboard already types.
+        assertEquals(keyboardLayoutFor("ja"), keyboardLayoutFor("ja", FieldKey.READING))
+        assertTrue("にほんご".all(keyboardLayoutFor("ja")!!::accepts))
+
+        // Neither keyboard is the only option, though: the reading field opens on the language the
+        // *user* reads, so a romanised note is always possible. The field itself is unrestricted —
+        // see WebLanguageCard.
+        assertTrue("nihongo".all(keyboardLayoutFor("en")!!::accepts))
     }
 
     @Test

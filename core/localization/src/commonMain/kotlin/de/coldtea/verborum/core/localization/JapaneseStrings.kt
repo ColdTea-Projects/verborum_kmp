@@ -22,6 +22,7 @@ internal object JapaneseStrings : Strings {
     override val howToUseTheApp = "アプリの使い方"
     override val appLanguage = "アプリの言語"
     override val appLanguageSubtitle = "Verborum 自身が話す言語です。"
+    override val systemLanguage = "システムの言語"
     override val yourDictionaries = "あなたの辞書"
     override val yourDictionariesSubtitle = "作成中のすべての言語ペアを、ひとつの場所に。"
     override val searchDictionaries = "辞書を検索…"

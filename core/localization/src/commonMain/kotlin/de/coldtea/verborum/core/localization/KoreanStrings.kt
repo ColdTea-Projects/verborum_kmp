@@ -22,6 +22,7 @@ internal object KoreanStrings : Strings {
     override val howToUseTheApp = "앱 사용법"
     override val appLanguage = "앱 언어"
     override val appLanguageSubtitle = "Verborum이 사용하는 언어입니다."
+    override val systemLanguage = "시스템 언어"
     override val yourDictionaries = "나의 사전"
     override val yourDictionariesSubtitle = "만들고 있는 모든 언어 쌍을 한곳에서."
     override val searchDictionaries = "사전 검색…"

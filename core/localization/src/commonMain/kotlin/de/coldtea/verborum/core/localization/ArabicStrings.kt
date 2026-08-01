@@ -22,6 +22,7 @@ internal object ArabicStrings : Strings {
     override val howToUseTheApp = "كيفية استخدام التطبيق"
     override val appLanguage = "لغة التطبيق"
     override val appLanguageSubtitle = "اللغة التي يتحدث بها فيربوروم نفسه."
+    override val systemLanguage = "لغة النظام"
     override val yourDictionaries = "قواميسك"
     override val yourDictionariesSubtitle = "كل زوج لغوي تبنيه، في مكان واحد."
     override val searchDictionaries = "ابحث في القواميس…"

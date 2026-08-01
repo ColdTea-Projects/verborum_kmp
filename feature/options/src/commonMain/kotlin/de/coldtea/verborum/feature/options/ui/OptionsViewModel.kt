@@ -18,7 +18,13 @@ internal class OptionsViewModel(
     /** What the interface is speaking now — the device's language until someone chooses otherwise. */
     val language: StateFlow<UiLanguage> = languageSettings.language
 
+    /** Null while the app is following the device — what the picker shows as "system language". */
+    val chosenLanguage: StateFlow<UiLanguage?> = languageSettings.chosen
+
     fun chooseLanguage(language: UiLanguage) = languageSettings.choose(language)
+
+    /** Gives the choice back to the device, so the app follows it again from now on. */
+    fun followSystemLanguage() = languageSettings.followDevice()
 
 
     /**

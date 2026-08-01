@@ -22,6 +22,7 @@ internal object ItalianStrings : Strings {
     override val howToUseTheApp = "Come usare l'app"
     override val appLanguage = "Lingua dell'app"
     override val appLanguageSubtitle = "La lingua in cui parla Verborum."
+    override val systemLanguage = "Lingua di sistema"
     override val yourDictionaries = "I tuoi dizionari"
     override val yourDictionariesSubtitle = "Ogni coppia di lingue che stai costruendo, in un unico posto."
     override val searchDictionaries = "Cerca dizionari…"

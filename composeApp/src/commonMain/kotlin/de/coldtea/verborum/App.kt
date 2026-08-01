@@ -13,6 +13,7 @@ import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.theme.VerborumTheme
 import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.localization.LocalStrings
+import de.coldtea.verborum.core.localization.LocalUiLanguage
 import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.feature.auth.ui.LoginScreen
 import de.coldtea.verborum.feature.onboarding.ui.OnboardingGate
@@ -32,7 +33,10 @@ fun App(
 
     // One provider for the whole tree: every screen reads its words from here, so changing the
     // language in Options redraws the app in it without anything having to be reloaded.
-    CompositionLocalProvider(LocalStrings provides stringsFor(language)) {
+    CompositionLocalProvider(
+        LocalStrings provides stringsFor(language),
+        LocalUiLanguage provides language,
+    ) {
         VerborumTheme {
             AuthGate(navController)
         }

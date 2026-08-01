@@ -42,6 +42,7 @@ interface Strings {
     val howToUseTheApp: String get() = "How to use the app"
     val appLanguage: String get() = "App language"
     val appLanguageSubtitle: String get() = "The language Verborum itself speaks."
+    val systemLanguage: String get() = "System language"
 
     // ---- dictionary list -----------------------------------------------------------------------
     val yourDictionaries: String get() = "Your Dictionaries"

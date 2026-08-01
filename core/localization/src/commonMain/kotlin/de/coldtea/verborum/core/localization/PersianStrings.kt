@@ -22,6 +22,7 @@ internal object PersianStrings : Strings {
     override val howToUseTheApp = "راهنمای استفاده از برنامه"
     override val appLanguage = "زبان برنامه"
     override val appLanguageSubtitle = "زبانی که خود وربوروم با آن سخن می‌گوید."
+    override val systemLanguage = "زبان سیستم"
     override val yourDictionaries = "واژه‌نامه‌های شما"
     override val yourDictionariesSubtitle = "هر جفت‌زبانی که می‌سازید، در یک جا."
     override val searchDictionaries = "جست‌وجوی واژه‌نامه‌ها…"

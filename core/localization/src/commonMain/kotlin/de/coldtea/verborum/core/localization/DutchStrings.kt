@@ -22,6 +22,7 @@ internal object DutchStrings : Strings {
     override val howToUseTheApp = "Hoe de app werkt"
     override val appLanguage = "Taal van de app"
     override val appLanguageSubtitle = "De taal die Verborum zelf spreekt."
+    override val systemLanguage = "Systeemtaal"
     override val yourDictionaries = "Je woordenboeken"
     override val yourDictionariesSubtitle = "Elk talenpaar waaraan je werkt, op één plek."
     override val searchDictionaries = "Woordenboeken zoeken…"

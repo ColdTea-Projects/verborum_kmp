@@ -83,14 +83,39 @@ class UiLanguageTest {
 
         // The device's language is the default, without anyone having to ask.
         assertEquals(UiLanguage.GERMAN, settings.language.value)
-        assertNull(settings.chosen)
+        assertNull(settings.chosen.value)
 
         settings.choose(UiLanguage.JAPANESE)
         assertEquals(UiLanguage.JAPANESE, settings.language.value)
-        assertEquals(UiLanguage.JAPANESE, settings.chosen)
+        assertEquals(UiLanguage.JAPANESE, settings.chosen.value)
 
+        // "System language" in the picker: the choice goes back to the device, and the stored one
+        // is forgotten rather than merely overridden.
         settings.followDevice()
         assertEquals(UiLanguage.GERMAN, settings.language.value)
-        assertNull(settings.chosen)
+        assertNull(settings.chosen.value)
+        assertNull(storage.read())
+    }
+
+    @Test
+    fun `following the device tracks it, rather than freezing today's answer`() {
+        var deviceTag = "fr-FR"
+        val settings = LanguageSettings(
+            storage = object : LanguageStorage {
+                private var stored: String? = "ja"
+                override fun read() = stored
+                override fun write(code: String) { stored = code }
+                override fun clear() { stored = null }
+            },
+            platformLanguage = { deviceTag },
+        )
+
+        // Starts on the stored choice, not the device.
+        assertEquals(UiLanguage.JAPANESE, settings.language.value)
+
+        deviceTag = "el-GR"
+        settings.followDevice()
+
+        assertEquals(UiLanguage.GREEK, settings.language.value)
     }
 }

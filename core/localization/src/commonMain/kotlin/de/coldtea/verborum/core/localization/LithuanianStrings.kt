@@ -22,6 +22,7 @@ internal object LithuanianStrings : Strings {
     override val howToUseTheApp = "Kaip naudotis programa"
     override val appLanguage = "Programos kalba"
     override val appLanguageSubtitle = "Kalba, kuria kalba pats Verborum."
+    override val systemLanguage = "Sistemos kalba"
     override val yourDictionaries = "Jūsų žodynai"
     override val yourDictionariesSubtitle = "Visos kalbų poros, kurias kuriate, vienoje vietoje."
     override val searchDictionaries = "Ieškoti žodynų…"

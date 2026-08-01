@@ -23,11 +23,13 @@ import de.coldtea.verborum.core.designsystem.component.WebFieldLabel
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardButton
+import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.keyboardLayoutFor
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardTextField
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LanguageKeyboardPopup
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.localization.LocalUiLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
@@ -63,6 +65,20 @@ internal fun WebLanguageCard(
     modifier: Modifier = Modifier,
 ) {
     val controller = LocalKeyboardController.current
+    val uiLanguage = LocalUiLanguage.current
+
+    // A reading is a pronunciation note, not the word itself, so it is written in the **learner's**
+    // script — the one they demonstrably read. Never the word's own: writing にほんご helps only
+    // someone who already reads kana, which is not who a reading is for.
+    val isReadingFocused = controller.focusedField()
+        ?.let { it.cardId == cardId && it.fieldKey == FieldKey.READING } == true
+
+    // The one exception, and it is not really one: where a language has a *reading* keyboard of its
+    // own it is already a romanisation — pinyin, with the tone marks a plain Latin keyboard lacks.
+    // Japanese has no such thing, so it gets no second tab rather than being offered kana.
+    val readingKeyboard = languageCode.takeIf {
+        isReadingFocused && keyboardLayoutFor(it, FieldKey.READING) != keyboardLayoutFor(it)
+    }
     val genders = if (wordType == WordType.NOUN) {
         WordGrammar.genderOptions(languageCode)
     } else {
@@ -154,6 +170,9 @@ internal fun WebLanguageCard(
                             onValueChange = { value -> onFieldChanged(key, value) },
                             fieldKey = key,
                             placeholder = key.label,
+                            // A reading is not a word surface — "nihongo" is a perfectly good note
+                            // on 日本語 — so the per-language character rule does not apply to it.
+                            restrictToKeyboard = key != FieldKey.READING,
                         )
                     }
                 }
@@ -162,7 +181,12 @@ internal fun WebLanguageCard(
     }
 
     if (controller.isOpenFor(cardId)) {
-        // One card, one language: a word surface is restricted to its own keyboard's characters.
-        LanguageKeyboardPopup(language1 = languageCode, controller = controller)
+        LanguageKeyboardPopup(
+            // One card, one language — except on a reading, which may be romanised.
+            language1 = if (isReadingFocused) uiLanguage.code else languageCode,
+            controller = controller,
+            language2 = readingKeyboard,
+            isExtendedKeyboard = isReadingFocused,
+        )
     }
 }
