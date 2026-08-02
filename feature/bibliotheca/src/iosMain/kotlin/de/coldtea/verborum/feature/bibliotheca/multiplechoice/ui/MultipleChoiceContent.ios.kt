@@ -75,7 +75,7 @@ internal actual fun MultipleChoiceContent(
         is TestState.Question -> {
             RegisterTopBar(
                 title = strings.test,
-                subtitle = "Question ${test.index} of ${test.total}",
+                subtitle = strings.questionProgress(test.index, test.total),
                 showBackButton = true,
             )
 

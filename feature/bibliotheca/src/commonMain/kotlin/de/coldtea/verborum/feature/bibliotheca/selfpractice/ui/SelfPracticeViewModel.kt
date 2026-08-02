@@ -83,7 +83,7 @@ internal class SelfPracticeViewModel(
                 } else {
                     SelfPracticeState.Success(
                         dictionaryName = dictionary.name,
-                        words = words.inPracticeOrder().map { word -> word.toPracticeUi(reversed) },
+                        words = words.inPracticeOrder().map { word -> word.toPracticeUi(reversed, strings) },
                     )
                 }
             }

@@ -67,7 +67,7 @@ internal class DictionaryDetailsViewModel(
                 } else {
                     DictionaryDetailsState.Success(
                         name = dictionary.name,
-                        languagePair = languagePairLabel(dictionary.fromLang, dictionary.toLang),
+                        languagePair = languagePairLabel(dictionary.fromLang, dictionary.toLang, strings),
                         words = words.map(Word::toUi),
                         tags = dictionary.tags,
                         canSelfPractice = words.isNotEmpty(),

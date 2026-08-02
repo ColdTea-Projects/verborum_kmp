@@ -44,20 +44,17 @@ internal enum class OnboardingPage {
         @Composable get() = when (this) {
             INTRO -> OnboardingCopy(
                 title = strings.onboardingWelcomeTitle,
-                description = "Your personal vocabulary library. Build dictionaries, collect words " +
-                    "and make them stick.",
+                description = strings.onboardingWelcomeBody,
             )
 
             LIBRARY -> OnboardingCopy(
                 title = strings.onboardingLibraryTitle,
-                description = "Create a dictionary for any language pair, then add words together " +
-                    "with their grammar — articles, plurals, verb forms and more.",
+                description = strings.onboardingLibraryBody,
             )
 
             TEST -> OnboardingCopy(
                 title = strings.onboardingTestTitle,
-                description = "Take multiple-choice tests on your words. Every form you entered " +
-                    "gets its own question, and correct answers raise a word's level.",
+                description = strings.onboardingTestBody,
             )
 
             PRACTICE -> practiceCopy().panel

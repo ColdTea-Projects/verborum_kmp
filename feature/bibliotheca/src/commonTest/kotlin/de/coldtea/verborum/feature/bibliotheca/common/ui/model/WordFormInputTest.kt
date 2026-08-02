@@ -1,5 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.common.ui.model
 
+import de.coldtea.verborum.core.localization.EnglishStrings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -160,15 +161,15 @@ class WordFormInputTest {
         // Read back it is *no* type rather than free text: a word that never claimed a part of
         // speech must not be labelled with one wherever the app shows it.
         assertNull(parseWordMeta(meta)?.wordType)
-        assertNull(wordTypeLabel(meta))
+        assertNull(wordTypeLabel(meta, EnglishStrings))
     }
 
     @Test
     fun `gender chips show the language's article where it has one`() {
-        assertEquals("der", WordGrammar.genderLabel("de", Gender.MASCULINE))
-        assertEquals("het", WordGrammar.genderLabel("nl", Gender.NEUTER))
+        assertEquals("der", WordGrammar.genderLabel("de", Gender.MASCULINE, EnglishStrings))
+        assertEquals("het", WordGrammar.genderLabel("nl", Gender.NEUTER, EnglishStrings))
         // Lithuanian marks gender but writes no article, so the chip names the gender instead.
-        assertEquals("masculine", WordGrammar.genderLabel("lt", Gender.MASCULINE))
+        assertEquals("masculine", WordGrammar.genderLabel("lt", Gender.MASCULINE, EnglishStrings))
     }
 
     @Test

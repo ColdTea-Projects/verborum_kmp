@@ -1,5 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model
 
+import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordSurfaces
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationColumns
@@ -37,14 +38,14 @@ internal data class PracticeWordUi(
 }
 
 /** [isReversed] swaps the sides: the translation is asked and the word is the answer. */
-internal fun Word.toPracticeUi(isReversed: Boolean): PracticeWordUi = PracticeWordUi(
+internal fun Word.toPracticeUi(isReversed: Boolean, strings: Strings): PracticeWordUi = PracticeWordUi(
     wordId = wordId,
     prompt = if (isReversed) translationLine() else wordLine(),
     answer = if (isReversed) wordLine() else translationLine(),
     promptColumns = if (isReversed) translationColumns() else wordColumns(),
     answerColumns = if (isReversed) wordColumns() else translationColumns(),
     // The type belongs to the word itself, so it follows the word's side.
-    typeLabel = if (isReversed) wordTypeLabel(translationMeta) else wordTypeLabel(wordMeta),
+    typeLabel = if (isReversed) wordTypeLabel(translationMeta, strings) else wordTypeLabel(wordMeta, strings),
     promptLanguageCode = WordSurfaces.languageCodeOf(if (isReversed) translationMeta else wordMeta),
     answerLanguageCode = WordSurfaces.languageCodeOf(if (isReversed) wordMeta else translationMeta),
     level = level,

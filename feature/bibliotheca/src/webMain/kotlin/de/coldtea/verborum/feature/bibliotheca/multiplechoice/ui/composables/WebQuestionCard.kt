@@ -58,7 +58,7 @@ internal fun WebQuestionCard(
             WebPageSpacer()
 
             // Which form is being asked about, when it is not the base word.
-            question.choice.question.formLabel?.let { label ->
+            question.choice.question.formLabel(strings)?.let { label ->
                 Text(
                     text = label.uppercase(),
                     style = MaterialTheme.typography.labelMedium,

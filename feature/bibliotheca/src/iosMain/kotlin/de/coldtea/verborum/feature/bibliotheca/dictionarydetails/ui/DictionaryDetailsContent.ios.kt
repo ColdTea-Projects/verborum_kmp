@@ -43,6 +43,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.tagLabelOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +81,7 @@ internal actual fun DictionaryDetailsContent(
         is DictionaryDetailsState.Success -> {
             RegisterTopBar(
                 title = details.name,
-                subtitle = "${details.languagePair} · ${wordCountLabel(details.words.size)}",
+                subtitle = "${details.languagePair} · ${strings.wordCount(details.words.size)}",
                 showBackButton = true,
             )
 
@@ -236,8 +237,10 @@ private fun PracticeModes(
 
 @Composable
 private fun TagsRow(tags: List<String>) {
+    val tagStrings = strings
+
     Text(
-        text = tags.joinToString(" · "),
+        text = tags.joinToString(" · ") { tagLabelOf(it, tagStrings) },
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = Spacing.small),

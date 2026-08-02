@@ -1,14 +1,24 @@
 package de.coldtea.verborum.feature.bibliotheca.common.ui.model
 
+import de.coldtea.verborum.core.localization.Strings
+
 /**
  * Grammatical gender. Stored in the meta as [metaCode] and shown either as the language's definite
  * article (der/die/das, el/la) or, where a language has no articles, as a plain label.
  */
-internal enum class Gender(val metaCode: String, val label: String) {
-    MASCULINE("m", "masculine"),
-    FEMININE("f", "feminine"),
-    NEUTER("n", "neuter"),
-    COMMON("c", "common"),
+internal enum class Gender(val metaCode: String) {
+    MASCULINE("m"),
+    FEMININE("f"),
+    NEUTER("n"),
+    COMMON("c"),
+    ;
+
+    fun label(strings: Strings): String = when (this) {
+        MASCULINE -> strings.masculine
+        FEMININE -> strings.feminine.lowercase()
+        NEUTER -> strings.neuter
+        COMMON -> strings.common
+    }
 }
 
 /**
@@ -49,8 +59,8 @@ internal object WordGrammar {
     }
 
     /** The article to show on a gender chip, or the gender's own name where there is none. */
-    fun genderLabel(languageCode: String, gender: Gender): String =
-        articles[languageCode.lowercase()]?.get(gender) ?: gender.label
+    fun genderLabel(languageCode: String, gender: Gender, strings: Strings): String =
+        articles[languageCode.lowercase()]?.get(gender) ?: gender.label(strings)
 
     /**
      * The grammatical forms this language asks for at this word type — the fields the form shows

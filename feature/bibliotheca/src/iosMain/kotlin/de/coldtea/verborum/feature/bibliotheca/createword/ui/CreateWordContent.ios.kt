@@ -132,9 +132,9 @@ internal actual fun CreateWordContent(
             ) {
                 Text(
                     text = when {
-                        state.isSaving -> "Saving…"
-                        state.isEditing -> "Save changes"
-                        else -> "Add word"
+                        state.isSaving -> strings.saving
+                        state.isEditing -> strings.saveChanges
+                        else -> strings.addWord
                     },
                     style = MaterialTheme.typography.titleSmall,
                 )
@@ -176,7 +176,7 @@ private fun WordTypeChips(selected: WordType, onSelect: (WordType) -> Unit) {
                 ),
             ) {
                 Text(
-                    text = category.label,
+                    text = category.label(strings),
                     style = MaterialTheme.typography.labelLarge,
                     color = if (isSelected) accent else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(
@@ -196,7 +196,7 @@ private fun OtherTypeDropdown(selected: WordType, onSelect: (WordType) -> Unit) 
 
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = selected.chipLabel,
+            value = selected.chipLabel(strings),
             onValueChange = {},
             readOnly = true,
             label = { Text(strings.typeOfWord) },
@@ -221,7 +221,7 @@ private fun OtherTypeDropdown(selected: WordType, onSelect: (WordType) -> Unit) 
         ) {
             WordType.otherTypes.forEach { type ->
                 DropdownMenuItem(
-                    text = { Text(type.chipLabel) },
+                    text = { Text(type.chipLabel(strings)) },
                     onClick = {
                         onSelect(type)
                         isExpanded = false

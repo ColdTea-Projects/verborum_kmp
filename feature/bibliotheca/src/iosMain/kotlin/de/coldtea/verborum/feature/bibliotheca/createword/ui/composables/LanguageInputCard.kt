@@ -62,7 +62,7 @@ internal fun LanguageInputCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(Spacing.medium)) {
             Text(
-                text = SupportedLanguage.displayNameOf(languageCode).uppercase(),
+                text = strings.languageName(languageCode).uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -83,7 +83,7 @@ internal fun LanguageInputCard(
 
                 ChoiceRow(
                     options = genders.map { gender ->
-                        WordGrammar.genderLabel(languageCode, gender) to gender
+                        WordGrammar.genderLabel(languageCode, gender, strings) to gender
                     },
                     selected = input.gender,
                     // Tapping the selected chip clears it: a word may simply have no gender set.
@@ -96,7 +96,7 @@ internal fun LanguageInputCard(
 
                 if (key == FieldKey.AUXILIARY && auxiliaryOptions.isNotEmpty()) {
                     Text(
-                        text = key.label,
+                        text = key.label(strings),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -110,7 +110,7 @@ internal fun LanguageInputCard(
                     OutlinedTextField(
                         value = input.field(key),
                         onValueChange = { value -> onFieldChanged(key, value) },
-                        label = { Text(key.label) },
+                        label = { Text(key.label(strings)) },
                         singleLine = true,
                         shape = Shapes.medium,
                         modifier = Modifier.fillMaxWidth(),

@@ -107,17 +107,17 @@ internal fun WebLanguageCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top,
                 ) {
-                    WebFieldLabel(SupportedLanguage.displayNameOf(languageCode))
+                    WebFieldLabel(strings.languageName(languageCode))
 
                     KeyboardButton(group = cardId, languageCode = languageCode)
                 }
 
                 if (genders.isNotEmpty()) {
-                    WebFieldLabel("Gender")
+                    WebFieldLabel(strings.gender)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                         genders.forEach { gender ->
                             WebChip(
-                                label = WordGrammar.genderLabel(languageCode, gender),
+                                label = WordGrammar.genderLabel(languageCode, gender, strings),
                                 isSelected = input.gender == gender,
                                 // Tapping the selected chip clears it: a word may have no gender.
                                 onClick = {
@@ -143,7 +143,7 @@ internal fun WebLanguageCard(
                     WebPageSpacer(Spacing.small)
 
                     if (key == FieldKey.AUXILIARY && auxiliaryOptions.isNotEmpty()) {
-                        WebFieldLabel(key.label)
+                        WebFieldLabel(key.label(strings))
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                             auxiliaryOptions.forEach { option ->
                                 WebChip(
@@ -169,7 +169,7 @@ internal fun WebLanguageCard(
                             value = input.field(key),
                             onValueChange = { value -> onFieldChanged(key, value) },
                             fieldKey = key,
-                            placeholder = key.label,
+                            placeholder = key.label(strings),
                             // A reading is not a word surface — "nihongo" is a perfectly good note
                             // on 日本語 — so the per-language character rule does not apply to it.
                             restrictToKeyboard = key != FieldKey.READING,

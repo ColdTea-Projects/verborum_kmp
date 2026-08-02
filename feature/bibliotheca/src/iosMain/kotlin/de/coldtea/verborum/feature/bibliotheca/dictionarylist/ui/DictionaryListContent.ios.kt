@@ -279,7 +279,7 @@ private fun LanguageSheet(
         SupportedLanguage.entries.forEach { language ->
             add(
                 SelectionOption(
-                    label = language.displayName,
+                    label = strings.languageName(language.code),
                     isSelected = selected == language,
                     onSelect = { onSelect(language) },
                 ),
@@ -300,7 +300,7 @@ private fun SortSheet(
         title = strings.sortBy,
         options = DictionarySort.entries.map { sort ->
             SelectionOption(
-                label = sort.label,
+                label = sort.label(strings),
                 isSelected = sort == selected,
                 onSelect = { onSelect(sort) },
             )

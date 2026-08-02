@@ -49,6 +49,36 @@ class UiLanguageTest {
     }
 
     @Test
+    fun `every language can name every language, and every translatable tag`() {
+        val codes = UiLanguage.entries.map { it.code }
+        // The 33 tags that are words rather than proper nouns; A1 and DELE are the same everywhere.
+        val translatableTags = EnglishStrings.let { english ->
+            listOf("basic", "advanced", "food_drink", "work_office", "news_politics", "food_service")
+                .onEach { requireNotNull(english.tagLabel(it)) }
+        }
+
+        translations.forEach { (language, strings) ->
+            codes.forEach { code ->
+                val name = strings.languageName(code)
+                assertTrue(name != code, "${language.code} does not name $code")
+            }
+            translatableTags.forEach { tag ->
+                assertTrue(strings.tagLabel(tag) != null, "${language.code} has no label for $tag")
+            }
+        }
+    }
+
+    @Test
+    fun `a proper noun is left alone in every language`() {
+        // Framework codes and exam names read the same everywhere, so the catalogue declines them.
+        translations.values.forEach { strings ->
+            assertNull(strings.tagLabel("a1"))
+            assertNull(strings.tagLabel("hsk3"))
+            assertNull(strings.tagLabel("dele"))
+        }
+    }
+
+    @Test
     fun `every language names itself in its own script`() {
         UiLanguage.entries.forEach { language ->
             assertTrue(language.endonym.isNotBlank(), "${language.code} has no name")

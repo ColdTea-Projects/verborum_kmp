@@ -32,7 +32,6 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import de.coldtea.verborum.core.common.RelativeTime
 import de.coldtea.verborum.core.common.SystemTimeProvider
-import de.coldtea.verborum.core.common.pluralize
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
@@ -90,7 +89,7 @@ internal fun WebDictionaryCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        text = languagePairLabel(dictionary.fromLang, dictionary.toLang),
+                        text = languagePairLabel(dictionary.fromLang, dictionary.toLang, strings),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = Spacing.extraSmall),
@@ -182,7 +181,7 @@ private fun metaLabel(dictionary: DictionaryUi): String {
     }
 
     return dictionary.wordCount
-        ?.let { count -> "${pluralize(count, "word")} · $age" }
+        ?.let { count -> "${strings.wordCount(count)} · $age" }
         ?: age
 }
 

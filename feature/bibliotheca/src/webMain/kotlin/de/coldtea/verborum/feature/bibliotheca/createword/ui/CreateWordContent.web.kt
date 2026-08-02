@@ -76,7 +76,7 @@ internal actual fun CreateWordContent(
         title = if (state.isEditing) strings.editWordTitle else strings.newWord,
         subtitle = dictionary?.name,
         showBackButton = true,
-        backLabel = dictionary?.let { "Back to ${it.name}" } ?: strings.back,
+        backLabel = dictionary?.let { strings.backTo(it.name) } ?: strings.back,
     )
 
     when {
@@ -101,7 +101,7 @@ internal actual fun CreateWordContent(
 
                         WebPageSpacer()
 
-                        WebEyebrow("Word type")
+                        WebEyebrow(strings.wordType)
 
                         WebPageSpacer(Spacing.small)
 
@@ -113,7 +113,7 @@ internal actual fun CreateWordContent(
                         ) {
                             WordType.entries.forEach { type ->
                                 WebChip(
-                                    label = type.chipLabel,
+                                    label = type.chipLabel(strings),
                                     isSelected = type == state.wordType,
                                     onClick = { onWordTypeChanged(type) },
                                 )
@@ -178,9 +178,9 @@ internal actual fun CreateWordContent(
 
                         WebPrimaryButton(
                             label = when {
-                                state.isSaving -> "Saving…"
-                                state.isEditing -> "Save Changes"
-                                else -> "Save Word"
+                                state.isSaving -> strings.saving
+                                state.isEditing -> strings.saveChanges
+                                else -> strings.saveWord
                             },
                             onClick = onSave,
                             isEnabled = state.canSave,

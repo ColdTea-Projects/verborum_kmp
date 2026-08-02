@@ -27,6 +27,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
+import de.coldtea.verborum.core.localization.strings
 
 /** How the run went: the score as a ring, what it means, and the two ways on from here. */
 @Composable
@@ -60,7 +61,7 @@ internal fun WebTestResult(
             WebPageSpacer()
 
             Text(
-                text = if (result.isPassed) "Well done!" else "Keep practicing",
+                text = if (result.isPassed) strings.wellDone else strings.keepPracticing,
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -69,9 +70,9 @@ internal fun WebTestResult(
 
             Text(
                 text = if (result.isPassed) {
-                    "You have a strong grasp of these words. Great job!"
+                    strings.passedMessage
                 } else {
-                    "Review the words and try again to improve your score."
+                    strings.failedMessage
                 },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -85,12 +86,12 @@ internal fun WebTestResult(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
                 WebOutlinedButton(
-                    label = "Back to Dictionary",
+                    label = strings.backToDictionary,
                     onClick = onBackToDictionary,
                     modifier = Modifier.weight(1f),
                 )
                 WebPrimaryButton(
-                    label = "Try Again",
+                    label = strings.tryAgain,
                     onClick = onRetakeTest,
                     modifier = Modifier.weight(1f),
                 )
@@ -104,13 +105,13 @@ internal fun WebTestResult(
             ) {
                 StatCard(
                     value = result.correctAnswers.toString(),
-                    label = "Correct",
+                    label = strings.correct,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
                     value = result.incorrectAnswers.toString(),
-                    label = "Incorrect",
+                    label = strings.incorrect,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f),
                 )
@@ -135,7 +136,7 @@ private fun ScoreRing(result: TestState.Completed, accent: Color) {
                 color = accent,
             )
             Text(
-                text = "${result.correctAnswers} of ${result.totalQuestions}",
+                text = strings.scoreOf(result.correctAnswers, result.totalQuestions),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Spacing.extraSmall),

@@ -90,19 +90,19 @@ internal fun DictionaryFilterBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilterChip(
-            text = "${strings.fromLanguage}: ${fromLanguage?.displayName ?: strings.anyLanguage}",
+            text = "${strings.fromLanguage}: ${fromLanguage?.let { strings.languageName(it.code) } ?: strings.anyLanguage}",
             onClick = onFromClick,
             trailingIcon = VerborumIcons.ChevronDown,
             isHighlighted = fromLanguage != null,
         )
         FilterChip(
-            text = "${strings.toLanguage}: ${toLanguage?.displayName ?: strings.anyLanguage}",
+            text = "${strings.toLanguage}: ${toLanguage?.let { strings.languageName(it.code) } ?: strings.anyLanguage}",
             onClick = onToClick,
             trailingIcon = VerborumIcons.ChevronDown,
             isHighlighted = toLanguage != null,
         )
         FilterChip(
-            text = sort.label,
+            text = sort.label(strings),
             onClick = onSortClick,
             leadingIcon = VerborumIcons.Sort,
             trailingIcon = VerborumIcons.ChevronDown,

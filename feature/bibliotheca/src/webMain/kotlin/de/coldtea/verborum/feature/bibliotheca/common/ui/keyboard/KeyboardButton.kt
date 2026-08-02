@@ -11,6 +11,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * Opens the on-screen keyboard for a group of fields.
@@ -43,9 +44,9 @@ internal fun KeyboardButton(
     Icon(
         imageVector = VerborumIcons.Keyboard,
         contentDescription = when {
-            !isEnabled -> "Keyboard unavailable — choose a language first"
-            isOpen -> "Hide the ${SupportedLanguage.displayNameOf(languageCode)} keyboard"
-            else -> "Show the ${SupportedLanguage.displayNameOf(languageCode)} keyboard"
+            !isEnabled -> strings.keyboardUnavailable
+            isOpen -> strings.hideKeyboard(strings.languageName(languageCode))
+            else -> strings.showKeyboard(strings.languageName(languageCode))
         },
         tint = tint,
         modifier = modifier

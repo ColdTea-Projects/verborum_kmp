@@ -79,9 +79,9 @@ internal actual fun CreateDictionaryContent(
 
                     WebPrimaryButton(
                         label = when {
-                            state.isSaving -> "Saving…"
-                            state.isEditing -> "Save Changes"
-                            else -> "Create Dictionary"
+                            state.isSaving -> strings.saving
+                            state.isEditing -> strings.saveChanges
+                            else -> strings.createDictionary
                         },
                         onClick = onSave,
                         // A dictionary without a name or a direction is not something the app can store.
@@ -246,10 +246,10 @@ private fun LanguageField(
     Column(modifier = modifier) {
         WebFieldLabel(label)
 
-        WebSelect(label = selected?.displayName ?: strings.select, isEnabled = isEnabled) { dismiss ->
+        WebSelect(label = selected?.let { strings.languageName(it.code) } ?: strings.select, isEnabled = isEnabled) { dismiss ->
             SupportedLanguage.entries.forEach { language ->
                 DropdownMenuItem(
-                    text = { Text(language.displayName) },
+                    text = { Text(strings.languageName(language.code)) },
                     onClick = {
                         onSelect(language)
                         dismiss()

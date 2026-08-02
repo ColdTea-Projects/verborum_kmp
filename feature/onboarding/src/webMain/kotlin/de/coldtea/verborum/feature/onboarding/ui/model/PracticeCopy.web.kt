@@ -8,9 +8,7 @@ import de.coldtea.verborum.core.localization.strings
 internal actual fun practiceCopy(): PracticeCopy = PracticeCopy(
     panel = OnboardingCopy(
         title = strings.onboardingPracticeFlipTitle,
-        description = "In self practice, click a card to flip it and see the translation. Then " +
-            "mark it correct when you knew it, or wrong when you did not — either way the word's " +
-            "level moves.",
+        description = strings.onboardingPracticeFlipBody,
     ),
     leftHint = strings.wrong,
     rightHint = strings.correct,

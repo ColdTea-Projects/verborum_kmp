@@ -52,7 +52,7 @@ internal fun LanguageDropdown(
 
     Column(modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
-            value = selected?.displayName.orEmpty(),
+            value = selected?.let { strings.languageName(it.code) }.orEmpty(),
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -77,7 +77,7 @@ internal fun LanguageDropdown(
         ) {
             SupportedLanguage.entries.forEach { language ->
                 DropdownMenuItem(
-                    text = { Text(language.displayName) },
+                    text = { Text(strings.languageName(language.code)) },
                     onClick = {
                         onSelect(language)
                         isExpanded = false

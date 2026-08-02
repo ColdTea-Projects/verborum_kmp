@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model
 
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
+import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.formsOf
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationLine
@@ -19,7 +20,7 @@ internal data class TestQuestion(
     val formKey: FieldKey? = null,
 ) {
     /** "Past", shown above the prompt so the question is not ambiguous. */
-    val formLabel: String? get() = formKey?.label
+    fun formLabel(strings: Strings): String? = formKey?.label(strings)
 }
 
 /** The question and the four answers it is asked with, one of them [TestQuestion.answer]. */

@@ -37,6 +37,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.Dictio
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
+import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.tagLabelOf
 
 /**
  * One dictionary as a desktop page: the two practice modes as tiles, then every word in a bordered
@@ -109,7 +110,7 @@ internal actual fun DictionaryDetailsContent(
 
                         WebPageTitle(
                             title = details.name,
-                            subtitle = "${details.languagePair} · ${wordCountLabel(details.words.size)}",
+                            subtitle = "${details.languagePair} · ${strings.wordCount(details.words.size)}",
                         )
 
                         WebPageSpacer()
@@ -122,9 +123,12 @@ internal actual fun DictionaryDetailsContent(
                             onUnavailableMode = onUnavailableMode,
                         )
 
+                        val tagStrings = strings
+
                         if (details.tags.isNotEmpty()) {
                             Text(
-                                text = details.tags.joinToString(" · "),
+                                // Stored codes, shown as words the reader knows.
+                                text = details.tags.joinToString(" · ") { tagLabelOf(it, tagStrings) },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = Spacing.medium),
@@ -199,7 +203,7 @@ private fun WordListPanel(
     onDeleteWord: (String) -> Unit,
 ) {
     WebPanel {
-        WebEyebrow("Word list")
+        WebEyebrow(strings.wordList)
 
         WebPageSpacer(Spacing.medium)
 

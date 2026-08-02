@@ -188,7 +188,7 @@ private fun LanguageMenu(
     emptyLabel: String,
     onSelect: (SupportedLanguage?) -> Unit,
 ) {
-    MenuField(label = selected?.displayName ?: emptyLabel) { dismiss ->
+    MenuField(label = selected?.let { strings.languageName(it.code) } ?: emptyLabel) { dismiss ->
         DropdownMenuItem(
             text = { Text(emptyLabel) },
             onClick = {
@@ -198,7 +198,7 @@ private fun LanguageMenu(
         )
         SupportedLanguage.entries.forEach { language ->
             DropdownMenuItem(
-                text = { Text(language.displayName) },
+                text = { Text(strings.languageName(language.code)) },
                 onClick = {
                     onSelect(language)
                     dismiss()
@@ -210,10 +210,10 @@ private fun LanguageMenu(
 
 @Composable
 private fun SortMenu(sort: DictionarySort, onSelect: (DictionarySort) -> Unit) {
-    MenuField(label = sort.label) { dismiss ->
+    MenuField(label = sort.label(strings)) { dismiss ->
         DictionarySort.entries.forEach { option ->
             DropdownMenuItem(
-                text = { Text(option.label) },
+                text = { Text(option.label(strings)) },
                 onClick = {
                     onSelect(option)
                     dismiss()

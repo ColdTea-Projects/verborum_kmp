@@ -234,6 +234,98 @@ interface Strings {
     val neuter: String get() = "neuter"
     val common: String get() = "common"
 
+    // ---- onboarding copy -----------------------------------------------------------------------
+    val onboardingWelcomeBody: String
+        get() = "Your personal vocabulary library. Build dictionaries, collect words and make them stick."
+    val onboardingLibraryBody: String
+        get() = "Create a dictionary for any language pair, then add words together with their " +
+            "grammar — articles, plurals, verb forms and more."
+    val onboardingTestBody: String
+        get() = "Take multiple-choice tests on your words. Every form you entered gets its own " +
+            "question, and correct answers raise a word's level."
+    val onboardingPracticeSwipeBody: String
+        get() = "In self practice, tap a card to reveal the translation, then swipe right when you " +
+            "knew it and left when you did not — either way the word's level moves."
+    val onboardingPracticeFlipBody: String
+        get() = "In self practice, click a card to flip it and see the translation. Then mark it " +
+            "correct when you knew it, or wrong when you did not — either way the word's level moves."
+
+    // ---- language names ------------------------------------------------------------------------
+
+    /**
+     * A language's name **in the reader's language** — "Deutsch" reads as "German" to an English
+     * speaker. One function rather than nineteen properties, so a translation is a single override.
+     *
+     * Distinct from `UiLanguage.endonym`, which names a language in itself. That is right for the
+     * picker, where the reader is looking for their own; this is right everywhere else, where the
+     * reader is being told what a dictionary is about.
+     */
+    fun languageName(code: String): String = when (code.lowercase()) {
+        "en" -> "English"
+        "de" -> "German"
+        "fr" -> "French"
+        "es" -> "Spanish"
+        "it" -> "Italian"
+        "pt" -> "Portuguese"
+        "nl" -> "Dutch"
+        "lt" -> "Lithuanian"
+        "tr" -> "Turkish"
+        "az" -> "Azerbaijani"
+        "pl" -> "Polish"
+        "uk" -> "Ukrainian"
+        "ru" -> "Russian"
+        "el" -> "Greek"
+        "ar" -> "Arabic"
+        "fa" -> "Farsi"
+        "ja" -> "Japanese"
+        "zh" -> "Chinese"
+        "ko" -> "Korean"
+        else -> code
+    }
+
+    // ---- dictionary tags -----------------------------------------------------------------------
+
+    /**
+     * A tag's label, or null where the tag is a proper noun that never translates — the framework
+     * codes (A1, N5, HSK 3) and the exam names (DELE, JLPT), which read the same in every language.
+     */
+    fun tagLabel(code: String): String? = when (code) {
+        "basic" -> "Basic"
+        "intermediate" -> "Intermediate"
+        "advanced" -> "Advanced"
+        "food_drink" -> "Food & drink"
+        "home_appliances" -> "Home & appliances"
+        "clothing" -> "Clothing"
+        "family" -> "Family"
+        "daily_routine" -> "Daily routine"
+        "shopping" -> "Shopping"
+        "money" -> "Money"
+        "travel" -> "Travel"
+        "transport" -> "Transport"
+        "cars_parts" -> "Cars & parts"
+        "directions" -> "Directions"
+        "city" -> "City"
+        "nature_weather" -> "Nature & weather"
+        "animals" -> "Animals"
+        "plants" -> "Plants"
+        "body_health" -> "Body & health"
+        "medicine" -> "Medicine"
+        "emotions" -> "Emotions"
+        "work_office" -> "Work & office"
+        "business" -> "Business"
+        "education" -> "Education"
+        "it_technology" -> "IT & technology"
+        "law" -> "Law"
+        "science" -> "Science"
+        "sports" -> "Sports"
+        "music" -> "Music"
+        "art_film" -> "Art & film"
+        "culture_holidays" -> "Culture & holidays"
+        "news_politics" -> "News & politics"
+        "food_service" -> "Food service"
+        else -> null
+    }
+
     // ---- sort ----------------------------------------------------------------------------------
     val sortNameAsc: String get() = "Name A–Z"
     val sortNameDesc: String get() = "Name Z–A"

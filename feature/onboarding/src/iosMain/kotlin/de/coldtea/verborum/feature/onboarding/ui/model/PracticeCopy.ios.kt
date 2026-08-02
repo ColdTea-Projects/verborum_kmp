@@ -8,8 +8,7 @@ import de.coldtea.verborum.core.localization.strings
 internal actual fun practiceCopy(): PracticeCopy = PracticeCopy(
     panel = OnboardingCopy(
         title = strings.onboardingPracticeSwipeTitle,
-        description = "In self practice, tap a card to reveal the translation. Swipe right when " +
-            "you know the word, swipe left when you need more practice.",
+        description = strings.onboardingPracticeSwipeBody,
     ),
     leftHint = "← needs practice",
     rightHint = "knows it →",

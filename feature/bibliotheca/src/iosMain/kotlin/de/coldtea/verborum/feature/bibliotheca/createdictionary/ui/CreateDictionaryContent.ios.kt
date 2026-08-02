@@ -90,9 +90,9 @@ internal actual fun CreateDictionaryContent(
         ) {
             Text(
                 text = when {
-                    state.isSaving -> "Saving…"
-                    state.isEditing -> "Save changes"
-                    else -> "Create dictionary"
+                    state.isSaving -> strings.saving
+                    state.isEditing -> strings.saveChanges
+                    else -> strings.createDictionary
                 },
                 style = MaterialTheme.typography.titleSmall,
             )

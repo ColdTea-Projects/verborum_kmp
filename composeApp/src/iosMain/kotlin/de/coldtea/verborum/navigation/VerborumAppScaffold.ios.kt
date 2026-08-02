@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import de.coldtea.verborum.core.designsystem.component.OfflineBanner
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBar
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarState
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The phone chrome: the shared top bar over tabs, matching the Android app. Unchanged by the web
@@ -93,7 +94,7 @@ private fun VerborumNavigationBar(
                 selected = currentDestination.isIn(destination),
                 onClick = { navController.switchTab(destination) },
                 icon = { Icon(destination.icon, contentDescription = null) },
-                label = { Text(destination.label) },
+                label = { Text(destination.label(strings)) },
             )
         }
     }
@@ -110,7 +111,7 @@ private fun VerborumNavigationRail(
                 selected = currentDestination.isIn(destination),
                 onClick = { navController.switchTab(destination) },
                 icon = { Icon(destination.icon, contentDescription = null) },
-                label = { Text(destination.label) },
+                label = { Text(destination.label(strings)) },
             )
         }
     }

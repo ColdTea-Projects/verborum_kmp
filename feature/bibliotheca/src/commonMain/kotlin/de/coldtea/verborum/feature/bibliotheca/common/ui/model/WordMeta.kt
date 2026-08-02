@@ -1,5 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.common.ui.model
 
+import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.core.network.VerborumJson
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import kotlinx.serialization.SerialName
@@ -9,36 +10,65 @@ import kotlinx.serialization.Serializable
  * A grammatical form stored alongside the base word. [metaKey] is the key in the meta blob; the
  * **declaration order is the display order**, so a verb reads "go · went · gone".
  */
-internal enum class FieldKey(val metaKey: String, val label: String) {
+internal enum class FieldKey(val metaKey: String) {
     // Reading leads so kana/pinyin show before every other form.
-    READING("reading", "Reading"),
-    PLURAL("plural", "Plural"),
-    FEMININE("feminine", "Feminine"),
-    COMPARATIVE("comparative", "Comparative"),
-    SUPERLATIVE("superlative", "Superlative"),
-    PRESENT_3RD("present", "Present"),
-    PAST("past", "Past"),
-    PAST_3RD("past3", "Past form"),
-    PARTICIPLE("participle", "Participle"),
-    AUXILIARY("aux", "Auxiliary"),
-    ASPECT("aspect", "Aspect"),
-    ROOT("root", "Root"),
-    STEM("stem", "Stem"),
-    MEASURE("measure", "Measure"),
-    CLASS("class", "Class"),
-    POLITE("polite", "Polite"),
+    READING("reading"),
+    PLURAL("plural"),
+    FEMININE("feminine"),
+    COMPARATIVE("comparative"),
+    SUPERLATIVE("superlative"),
+    PRESENT_3RD("present"),
+    PAST("past"),
+    PAST_3RD("past3"),
+    PARTICIPLE("participle"),
+    AUXILIARY("aux"),
+    ASPECT("aspect"),
+    ROOT("root"),
+    STEM("stem"),
+    MEASURE("measure"),
+    CLASS("class"),
+    POLITE("polite"),
+    ;
+
+    fun label(strings: Strings): String = when (this) {
+        READING -> strings.reading
+        PLURAL -> strings.plural
+        FEMININE -> strings.feminine
+        COMPARATIVE -> strings.comparative
+        SUPERLATIVE -> strings.superlative
+        PRESENT_3RD -> strings.present
+        PAST -> strings.past
+        PAST_3RD -> strings.pastForm
+        PARTICIPLE -> strings.participle
+        AUXILIARY -> strings.auxiliary
+        ASPECT -> strings.aspect
+        ROOT -> strings.root
+        STEM -> strings.stem
+        MEASURE -> strings.measure
+        CLASS -> strings.wordClass
+        POLITE -> strings.polite
+    }
 }
 
 /**
  * The top-level choice the form offers. The four open classes carry grammatical forms of their own;
  * every closed class collapses into [OTHER], which then names itself.
  */
-internal enum class WordCategory(val label: String) {
-    NOUN("Noun"),
-    VERB("Verb"),
-    ADJECTIVE("Adjective"),
-    ADVERB("Adverb"),
-    OTHER("Other"),
+internal enum class WordCategory {
+    NOUN,
+    VERB,
+    ADJECTIVE,
+    ADVERB,
+    OTHER,
+    ;
+
+    fun label(strings: Strings): String = when (this) {
+        NOUN -> strings.noun
+        VERB -> strings.verb
+        ADJECTIVE -> strings.adjective
+        ADVERB -> strings.adverb
+        OTHER -> strings.other
+    }.replaceFirstChar(Char::uppercaseChar)
 }
 
 /**
@@ -49,25 +79,38 @@ internal enum class WordCategory(val label: String) {
  */
 internal enum class WordType(
     val metaType: String?,
-    val label: String,
     val category: WordCategory,
 ) {
-    NOUN("noun", "noun", WordCategory.NOUN),
-    VERB("verb", "verb", WordCategory.VERB),
-    ADJECTIVE("adjective", "adjective", WordCategory.ADJECTIVE),
-    ADVERB("adverb", "adverb", WordCategory.ADVERB),
-    FREE_TEXT(null, "free text", WordCategory.OTHER),
-    PREPOSITION("preposition", "preposition", WordCategory.OTHER),
-    PRONOUN("pronoun", "pronoun", WordCategory.OTHER),
-    NUMERAL("numeral", "numeral", WordCategory.OTHER),
-    CONJUNCTION("conjunction", "conjunction", WordCategory.OTHER),
-    INTERJECTION("interjection", "interjection", WordCategory.OTHER),
-    ARTICLE("article", "article", WordCategory.OTHER),
+    NOUN("noun", WordCategory.NOUN),
+    VERB("verb", WordCategory.VERB),
+    ADJECTIVE("adjective", WordCategory.ADJECTIVE),
+    ADVERB("adverb", WordCategory.ADVERB),
+    FREE_TEXT(null, WordCategory.OTHER),
+    PREPOSITION("preposition", WordCategory.OTHER),
+    PRONOUN("pronoun", WordCategory.OTHER),
+    NUMERAL("numeral", WordCategory.OTHER),
+    CONJUNCTION("conjunction", WordCategory.OTHER),
+    INTERJECTION("interjection", WordCategory.OTHER),
+    ARTICLE("article", WordCategory.OTHER),
     ;
 
+    /** Trailing a word — "gehen (verb)" — so it reads lower case. */
+    fun label(strings: Strings): String = when (this) {
+        NOUN -> strings.noun
+        VERB -> strings.verb
+        ADJECTIVE -> strings.adjective
+        ADVERB -> strings.adverb
+        FREE_TEXT -> strings.freeText
+        PREPOSITION -> strings.preposition
+        PRONOUN -> strings.pronoun
+        NUMERAL -> strings.numeral
+        CONJUNCTION -> strings.conjunction
+        INTERJECTION -> strings.interjection
+        ARTICLE -> strings.article
+    }
+
     /** The same name where it heads a control rather than trailing a word. */
-    val chipLabel: String
-        get() = label.replaceFirstChar(Char::uppercaseChar)
+    fun chipLabel(strings: Strings): String = label(strings).replaceFirstChar(Char::uppercaseChar)
 
     companion object {
         /** The sub-types offered under "Other", free text first. */
@@ -208,7 +251,8 @@ internal fun formsOf(meta: String): Map<FieldKey, String> {
 }
 
 /** The part of speech to show after the word, if the meta records one. */
-internal fun wordTypeLabel(meta: String): String? = parseWordMeta(meta)?.wordType?.label
+internal fun wordTypeLabel(meta: String, strings: Strings): String? =
+    parseWordMeta(meta)?.wordType?.label(strings)
 
 internal fun Word.wordColumns(): List<String> = displayColumns(word, wordMeta)
 

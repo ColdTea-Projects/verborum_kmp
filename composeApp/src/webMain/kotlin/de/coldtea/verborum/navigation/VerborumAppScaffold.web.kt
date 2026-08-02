@@ -47,6 +47,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.onboarding.navigation.OnboardingGraph
+import de.coldtea.verborum.core.localization.strings
 
 /**
  * The desktop chrome: a fixed sidebar beside a scrolling page area.
@@ -232,7 +233,7 @@ private fun BottomBarItem(
             modifier = Modifier.size(Dimens.iconLarge),
         )
         Text(
-            text = destination.label,
+            text = destination.label(strings),
             style = MaterialTheme.typography.labelMedium,
             color = contentColor,
             maxLines = 1,
@@ -310,7 +311,7 @@ private fun SidebarItem(
                 modifier = Modifier.size(Dimens.iconMedium),
             )
             Text(
-                text = destination.label,
+                text = destination.label(strings),
                 style = MaterialTheme.typography.titleSmall,
                 color = contentColor,
             )

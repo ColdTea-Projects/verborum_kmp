@@ -247,7 +247,7 @@ private fun Header(
     ) {
         if (alternative == null) {
             Text(
-                text = SupportedLanguage.displayNameOf(languageCode),
+                text = strings.languageName(languageCode),
                 style = MaterialTheme.typography.titleSmall,
                 color = KeyboardColors.mutedText,
             )
@@ -295,7 +295,7 @@ private fun LanguageTab(languageCode: String, isSelected: Boolean, onClick: () -
         ),
     ) {
         Text(
-            text = SupportedLanguage.displayNameOf(languageCode),
+            text = strings.languageName(languageCode),
             style = MaterialTheme.typography.titleSmall,
             color = if (isSelected) KeyboardColors.onAccent else KeyboardColors.mutedText,
             modifier = Modifier.padding(horizontal = Spacing.medium, vertical = Spacing.small),
