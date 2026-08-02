@@ -1,7 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.createword.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,27 +9,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
@@ -39,15 +32,18 @@ import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.feature.bibliotheca.common.ui.composables.DropdownField
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
-import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordCategory
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.defaultType
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.LanguageInputCard
+import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.WordFieldFocus
 import de.coldtea.verborum.core.localization.strings
+import androidx.compose.ui.graphics.Color
 
 @Composable
 internal actual fun CreateWordContent(
@@ -80,6 +76,8 @@ internal actual fun CreateWordContent(
         dictionary == null -> LoadingState(modifier)
 
         else -> ContentColumn(modifier = modifier) {
+            val focusFor = rememberWordFieldFocus(state, dictionary.fromLang, dictionary.toLang)
+
             Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                 Spacer(modifier = Modifier.height(Spacing.medium))
 
@@ -89,11 +87,13 @@ internal actual fun CreateWordContent(
                 if (state.wordType.category == WordCategory.OTHER) {
                     Spacer(modifier = Modifier.height(Spacing.medium))
                     OtherTypeDropdown(selected = state.wordType, onSelect = onWordTypeChanged)
+                    Spacer(modifier = Modifier.height(Spacing.large))
                 }
 
                 MeaningSection(
                     side = WordSide.SOURCE,
                     languageCode = dictionary.fromLang,
+                    focusFor = focusFor,
                     inputs = state.sourceInputs,
                     wordType = state.wordType,
                     onTextChanged = onTextChanged,
@@ -108,6 +108,7 @@ internal actual fun CreateWordContent(
                 MeaningSection(
                     side = WordSide.TARGET,
                     languageCode = dictionary.toLang,
+                    focusFor = focusFor,
                     inputs = state.targetInputs,
                     wordType = state.wordType,
                     onTextChanged = onTextChanged,
@@ -142,6 +143,62 @@ internal actual fun CreateWordContent(
         }
     }
 }
+
+/**
+ * The form's fields in the order the user meets them, as a lookup from field to its focus wiring.
+ *
+ * Built here rather than inside the cards because the return key has to cross from the last field of
+ * the source card into the first of the target one, and neither card can see the other. The order
+ * mirrors what the cards lay out — every meaning of the source side, then every meaning of the
+ * target — and is derived from the same [WordGrammar] calls they use, so the two cannot drift.
+ */
+@Composable
+private fun rememberWordFieldFocus(
+    state: CreateWordUiState,
+    fromLang: String,
+    toLang: String,
+): (WordSide, Int, FieldKey?) -> WordFieldFocus {
+    // Requesters must outlive recomposition: a field that got a fresh one each pass could never be
+    // focused, because the instance the modifier holds would already be stale.
+    val requesters = remember { mutableMapOf<String, FocusRequester>() }
+    val focusManager = LocalFocusManager.current
+
+    val slots = buildList {
+        listOf(
+            Triple(WordSide.SOURCE, fromLang, state.sourceInputs),
+            Triple(WordSide.TARGET, toLang, state.targetInputs),
+        ).forEach { (side, languageCode, inputs) ->
+            val auxiliaryIsChips = WordGrammar.auxiliaryOptions(languageCode).isNotEmpty()
+
+            inputs.forEachIndexed { index, input ->
+                add(slotId(side, index, null) to input.text.isBlank())
+
+                WordGrammar.fieldsFor(languageCode, state.wordType)
+                    // The auxiliary is drawn as chips there, so it has no field to focus.
+                    .filterNot { key -> key == FieldKey.AUXILIARY && auxiliaryIsChips }
+                    .forEach { key -> add(slotId(side, index, key) to input.field(key).isBlank()) }
+            }
+        }
+    }
+
+    return { side, index, key ->
+        val id = slotId(side, index, key)
+        val next = slots
+            .drop(slots.indexOfFirst { it.first == id } + 1)
+            .firstOrNull { (_, isEmpty) -> isEmpty }
+
+        WordFieldFocus(
+            requester = requesters.getOrPut(id) { FocusRequester() },
+            hasNext = next != null,
+            onNext = {
+                next?.let { requesters[it.first]?.requestFocus() } ?: focusManager.clearFocus()
+            },
+        )
+    }
+}
+
+private fun slotId(side: WordSide, index: Int, key: FieldKey?): String =
+    "$side/$index/${key?.name.orEmpty()}"
 
 /**
  * The word type decides which grammatical fields both language cards ask for.
@@ -192,44 +249,13 @@ private fun WordTypeChips(selected: WordType, onSelect: (WordType) -> Unit) {
 /** Which kind of "Other": free text, or one of the closed parts of speech. */
 @Composable
 private fun OtherTypeDropdown(selected: WordType, onSelect: (WordType) -> Unit) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        OutlinedTextField(
-            value = selected.chipLabel(strings),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(strings.typeOfWord) },
-            trailingIcon = {
-                Icon(
-                    imageVector = VerborumIcons.ChevronDown,
-                    contentDescription = null,
-                    modifier = Modifier.size(Dimens.iconMedium),
-                )
-            },
-            shape = Shapes.medium,
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHoverIcon(PointerIcon.Hand)
-                .clickable { isExpanded = true },
-        )
-
-        DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
-            modifier = Modifier.heightIn(max = Dimens.sheetMaxHeight),
-        ) {
-            WordType.otherTypes.forEach { type ->
-                DropdownMenuItem(
-                    text = { Text(type.chipLabel(strings)) },
-                    onClick = {
-                        onSelect(type)
-                        isExpanded = false
-                    },
-                )
-            }
-        }
-    }
+    DropdownField(
+        label = strings.typeOfWord,
+        value = selected.chipLabel(strings),
+        options = WordType.otherTypes,
+        optionLabel = { it.chipLabel(strings) },
+        onSelect = onSelect,
+    )
 }
 
 /**
@@ -242,6 +268,7 @@ private fun OtherTypeDropdown(selected: WordType, onSelect: (WordType) -> Unit) 
 private fun MeaningSection(
     side: WordSide,
     languageCode: String,
+    focusFor: (WordSide, Int, FieldKey?) -> WordFieldFocus,
     inputs: List<WordFormInput>,
     wordType: WordType,
     onTextChanged: (WordSide, Int, String) -> Unit,
@@ -282,6 +309,7 @@ private fun MeaningSection(
                 onTextChanged = { text -> onTextChanged(side, index, text) },
                 onGenderChanged = { gender -> onGenderChanged(side, index, gender) },
                 onFieldChanged = { key, value -> onFieldChanged(side, index, key, value) },
+                focusFor = { key -> focusFor(side, index, key) },
             )
         }
 
