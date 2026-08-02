@@ -15,10 +15,10 @@ internal data class KeyCap(val lower: String, val upper: String) {
  * A language's on-screen keyboard.
  *
  * The keyboard **is** the restriction: a character can be entered only if there is a key for it, so
- * these rows are the app's per-language typeable-character contract. That contract is mirrored by
- * the Android client's field filter rather than shared with it — nothing is shared between the two
- * but the contracts — so a key added here that Android rejects produces a word one client can write
- * and the other cannot. See `docs/word-input-keyboard-webapp.md`.
+ * these rows are the app's per-language typeable-character contract. Web draws the keys from it and
+ * iOS filters its fields against it, which is why this lives in `commonMain` — a second copy is how
+ * you end up with a word one client can write and the other cannot. The Android client still
+ * mirrors it rather than sharing it. See `docs/word-input-keyboard-webapp.md`.
  *
  * [isRtl] lays the rows out right to left, so an Arabic keyboard reads the way its script does.
  * [composesHangul] turns the Korean jamo keys into syllables as they are typed — without it the
@@ -83,6 +83,16 @@ internal data class KeyboardLayout(
         char == ' ' ||
             char in typeable ||
             scriptRanges.any { range -> char in range }
+
+    /**
+     * [text] with the apostrophe normalised and every character this layout cannot type dropped.
+     *
+     * The string-level half of the same rule [accepts] states, for a caller holding a plain value
+     * rather than a cursor — the web field keeps its own copy so it can carry the caret across the
+     * edit.
+     */
+    fun filter(text: String): String =
+        text.replace(CURLY_APOSTROPHE, PLAIN_APOSTROPHE).filter(::accepts)
 
     /**
      * The single row an extended keyboard adds: digits unshifted, punctuation shifted.
