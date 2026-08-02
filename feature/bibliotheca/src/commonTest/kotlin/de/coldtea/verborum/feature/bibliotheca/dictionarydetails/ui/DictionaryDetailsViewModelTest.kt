@@ -85,7 +85,7 @@ class DictionaryDetailsViewModelTest {
         advanceUntilIdle()
 
         assertEquals("Beginner Spanish", viewModel.success().name)
-        assertEquals("English → Spanish", viewModel.success().languagePair)
+        assertEquals("English › Spanish", viewModel.success().languagePair)
     }
 
     @Test

@@ -97,7 +97,7 @@ private fun LibraryVisual(modifier: Modifier = Modifier) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     MockTitle("German Basics")
-                    MockCaption("English → German")
+                    MockCaption("English › German")
                 }
 
                 Icon(
