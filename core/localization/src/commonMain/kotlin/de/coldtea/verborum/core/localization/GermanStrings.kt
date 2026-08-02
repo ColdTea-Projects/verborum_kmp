@@ -70,6 +70,7 @@ internal object GermanStrings : Strings {
     override val toLanguage = "Zielsprache"
     override val select = "Auswählen…"
     override val tags = "Schlagwörter"
+    override val tagsHint = "Schlagwörter hinzufügen, um dein Wörterbuch zu ordnen (optional)"
     override val tagSectionLevel = "Niveau"
     override val tagSectionTopic = "Thema"
     override val tagSectionExam = "Prüfung"

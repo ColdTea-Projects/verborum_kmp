@@ -59,6 +59,7 @@ internal object FrenchStrings : Strings {
     override val toLanguage = "Langue cible"
     override val select = "Choisir…"
     override val tags = "Étiquettes"
+    override val tagsHint = "Ajoutez des étiquettes pour organiser votre dictionnaire (facultatif)"
     override val tagSectionLevel = "Niveau"
     override val tagSectionTopic = "Thème"
     override val tagSectionExam = "Examen"

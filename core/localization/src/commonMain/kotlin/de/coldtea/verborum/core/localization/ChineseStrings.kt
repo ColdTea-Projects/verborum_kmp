@@ -59,6 +59,7 @@ internal object ChineseStrings : Strings {
     override val toLanguage = "目标语言"
     override val select = "请选择…"
     override val tags = "标签"
+    override val tagsHint = "添加标签以整理你的词典（可选）"
     override val tagSectionLevel = "等级"
     override val tagSectionTopic = "主题"
     override val tagSectionExam = "考试"

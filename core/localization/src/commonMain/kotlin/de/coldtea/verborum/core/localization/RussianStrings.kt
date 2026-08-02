@@ -59,6 +59,7 @@ internal object RussianStrings : Strings {
     override val toLanguage = "Язык перевода"
     override val select = "Выберите…"
     override val tags = "Метки"
+    override val tagsHint = "Добавьте метки, чтобы упорядочить свой словарь (необязательно)"
     override val tagSectionLevel = "Уровень"
     override val tagSectionTopic = "Тема"
     override val tagSectionExam = "Экзамен"

@@ -59,6 +59,7 @@ internal object KoreanStrings : Strings {
     override val toLanguage = "도착 언어"
     override val select = "선택…"
     override val tags = "태그"
+    override val tagsHint = "사전을 정리할 태그를 추가하세요 (선택 사항)"
     override val tagSectionLevel = "수준"
     override val tagSectionTopic = "주제"
     override val tagSectionExam = "시험"

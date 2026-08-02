@@ -59,6 +59,7 @@ internal object AzerbaijaniStrings : Strings {
     override val toLanguage = "Hədəf dil"
     override val select = "Seçin…"
     override val tags = "Etiketlər"
+    override val tagsHint = "Lüğətinizi təşkil etmək üçün etiketlər əlavə edin (istəyə bağlı)"
     override val tagSectionLevel = "Səviyyə"
     override val tagSectionTopic = "Mövzu"
     override val tagSectionExam = "İmtahan"

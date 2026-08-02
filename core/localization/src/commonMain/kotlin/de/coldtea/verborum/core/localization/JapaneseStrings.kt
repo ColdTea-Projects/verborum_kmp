@@ -59,6 +59,7 @@ internal object JapaneseStrings : Strings {
     override val toLanguage = "訳す言語"
     override val select = "選択…"
     override val tags = "タグ"
+    override val tagsHint = "辞書を整理するタグを追加します（任意）"
     override val tagSectionLevel = "レベル"
     override val tagSectionTopic = "テーマ"
     override val tagSectionExam = "試験"

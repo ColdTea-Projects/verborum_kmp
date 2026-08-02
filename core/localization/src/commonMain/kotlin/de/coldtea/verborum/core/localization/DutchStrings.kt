@@ -59,6 +59,7 @@ internal object DutchStrings : Strings {
     override val toLanguage = "Naar taal"
     override val select = "Kiezen…"
     override val tags = "Labels"
+    override val tagsHint = "Voeg labels toe om je woordenboek te ordenen (optioneel)"
     override val tagSectionLevel = "Niveau"
     override val tagSectionTopic = "Onderwerp"
     override val tagSectionExam = "Examen"

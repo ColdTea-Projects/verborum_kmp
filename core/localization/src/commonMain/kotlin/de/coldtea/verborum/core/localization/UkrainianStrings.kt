@@ -59,6 +59,7 @@ internal object UkrainianStrings : Strings {
     override val toLanguage = "Мова перекладу"
     override val select = "Оберіть…"
     override val tags = "Мітки"
+    override val tagsHint = "Додайте мітки, щоб упорядкувати свій словник (необов’язково)"
     override val tagSectionLevel = "Рівень"
     override val tagSectionTopic = "Тема"
     override val tagSectionExam = "Іспит"

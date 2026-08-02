@@ -59,6 +59,7 @@ internal object PersianStrings : Strings {
     override val toLanguage = "زبان مقصد"
     override val select = "برگزینید…"
     override val tags = "برچسب‌ها"
+    override val tagsHint = "برای سازمان‌دهی واژه‌نامه خود برچسب اضافه کنید (اختیاری)"
     override val tagSectionLevel = "سطح"
     override val tagSectionTopic = "موضوع"
     override val tagSectionExam = "آزمون"

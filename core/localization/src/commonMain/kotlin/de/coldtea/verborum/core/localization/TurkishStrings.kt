@@ -59,6 +59,7 @@ internal object TurkishStrings : Strings {
     override val toLanguage = "Hedef dil"
     override val select = "Seçin…"
     override val tags = "Etiketler"
+    override val tagsHint = "Sözlüğünüzü düzenlemek için etiket ekleyin (isteğe bağlı)"
     override val tagSectionLevel = "Seviye"
     override val tagSectionTopic = "Konu"
     override val tagSectionExam = "Sınav"

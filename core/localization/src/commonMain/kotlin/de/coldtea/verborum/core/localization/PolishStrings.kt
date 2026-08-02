@@ -59,6 +59,7 @@ internal object PolishStrings : Strings {
     override val toLanguage = "Język docelowy"
     override val select = "Wybierz…"
     override val tags = "Tagi"
+    override val tagsHint = "Dodaj tagi, aby uporządkować swój słownik (opcjonalnie)"
     override val tagSectionLevel = "Poziom"
     override val tagSectionTopic = "Temat"
     override val tagSectionExam = "Egzamin"

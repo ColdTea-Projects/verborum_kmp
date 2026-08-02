@@ -59,6 +59,7 @@ internal object PortugueseStrings : Strings {
     override val toLanguage = "Idioma de destino"
     override val select = "Selecionar…"
     override val tags = "Etiquetas"
+    override val tagsHint = "Adicione etiquetas para organizar o seu dicionário (opcional)"
     override val tagSectionLevel = "Nível"
     override val tagSectionTopic = "Tema"
     override val tagSectionExam = "Exame"

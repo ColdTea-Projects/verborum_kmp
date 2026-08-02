@@ -59,6 +59,7 @@ internal object GreekStrings : Strings {
     override val toLanguage = "Γλώσσα προορισμού"
     override val select = "Επιλέξτε…"
     override val tags = "Ετικέτες"
+    override val tagsHint = "Πρόσθεσε ετικέτες για να οργανώσεις το λεξικό σου (προαιρετικό)"
     override val tagSectionLevel = "Επίπεδο"
     override val tagSectionTopic = "Θέμα"
     override val tagSectionExam = "Εξέταση"

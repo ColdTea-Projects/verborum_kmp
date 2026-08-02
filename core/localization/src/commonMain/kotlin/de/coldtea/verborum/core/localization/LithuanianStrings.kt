@@ -59,6 +59,7 @@ internal object LithuanianStrings : Strings {
     override val toLanguage = "Į kalbą"
     override val select = "Pasirinkite…"
     override val tags = "Žymos"
+    override val tagsHint = "Pridėkite žymų, kad sutvarkytumėte žodyną (nebūtina)"
     override val tagSectionLevel = "Lygis"
     override val tagSectionTopic = "Tema"
     override val tagSectionExam = "Egzaminas"

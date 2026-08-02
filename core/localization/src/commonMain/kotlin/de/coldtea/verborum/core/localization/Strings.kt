@@ -87,6 +87,7 @@ interface Strings {
     val toLanguage: String get() = "To language"
     val select: String get() = "Select…"
     val tags: String get() = "Tags"
+    val tagsHint: String get() = "Add tags to organize your dictionary (optional)"
     val tagSectionLevel: String get() = "Level"
     val tagSectionTopic: String get() = "Topic"
     val tagSectionExam: String get() = "Exam"

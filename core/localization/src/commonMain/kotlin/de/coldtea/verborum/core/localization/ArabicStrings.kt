@@ -59,6 +59,7 @@ internal object ArabicStrings : Strings {
     override val toLanguage = "اللغة الهدف"
     override val select = "اختر…"
     override val tags = "الوسوم"
+    override val tagsHint = "أضف وسومًا لتنظيم قاموسك (اختياري)"
     override val tagSectionLevel = "المستوى"
     override val tagSectionTopic = "الموضوع"
     override val tagSectionExam = "الامتحان"
