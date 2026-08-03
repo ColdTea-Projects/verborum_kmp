@@ -19,25 +19,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import de.coldtea.verborum.core.designsystem.component.ContentColumn
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
-import de.coldtea.verborum.core.localization.LocalStrings
-import de.coldtea.verborum.core.localization.UiLanguage
-import de.coldtea.verborum.feature.options.ui.composables.fontFamilyForUiLanguage
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import org.koin.compose.viewmodel.koinViewModel
+import de.coldtea.verborum.core.localization.LocalStrings
+import de.coldtea.verborum.core.localization.Strings
+import de.coldtea.verborum.core.localization.UiLanguage
 import de.coldtea.verborum.core.localization.strings
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * The Options tab. It holds only "Sign out" today, but is built as a list of [OptionRow]s so the next
@@ -46,6 +37,7 @@ import de.coldtea.verborum.core.localization.strings
 @Composable
 internal fun OptionsScreen(
     onHowToUseApp: (() -> Unit)?,
+    onOpenLanguagePicker: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OptionsViewModel = koinViewModel(),
 ) {
@@ -66,12 +58,20 @@ internal fun OptionsScreen(
         onFollowSystemLanguage = viewModel::followSystemLanguage,
         onSignOut = viewModel::signOut,
         onHowToUseApp = onHowToUseApp,
+        onOpenLanguagePicker = onOpenLanguagePicker,
         modifier = modifier,
     )
 }
 
+/**
+ * The per-platform half of the screen.
+ *
+ * iOS: the app language is a row that opens a picker screen of its own — a dropdown has no home on a
+ * touch screen sized for thumbs. Web: the language is picked inline, in a dropdown under the same
+ * rows, because a desktop window has room for a menu to fall open beside the cursor.
+ */
 @Composable
-internal fun OptionsContent(
+internal expect fun OptionsContent(
     state: OptionsState,
     language: UiLanguage,
     /** Null while following the device. */
@@ -84,42 +84,17 @@ internal fun OptionsContent(
      * then left out entirely rather than shown doing nothing.
      */
     onHowToUseApp: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-) {
-    val strings = LocalStrings.current
-
-    ContentColumn(modifier = modifier) {
-        LanguageRow(
-            effective = language,
-            chosen = chosenLanguage,
-            onChoose = onLanguageChosen,
-            onFollowSystem = onFollowSystemLanguage,
-        )
-
-        onHowToUseApp?.let { openTour ->
-            OptionRow(
-                icon = VerborumIcons.Book,
-                label = strings.howToUseTheApp,
-                onClick = openTour,
-                modifier = Modifier.padding(top = Spacing.medium),
-            )
-        }
-
-        OptionRow(
-            icon = VerborumIcons.Logout,
-            label = if (state.isSigningOut) strings.signingOut else strings.signOut,
-            onClick = onSignOut,
-            isEnabled = !state.isSigningOut,
-            // Session-ending, so it reads as consequential rather than as ordinary content.
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(top = Spacing.medium),
-        )
-    }
-}
+    /**
+     * Opens the app-language picker. iOS navigates to a dedicated screen; web picks inline and never
+     * uses it.
+     */
+    onOpenLanguagePicker: () -> Unit,
+    modifier: Modifier,
+)
 
 /** One tappable entry: icon, label, click. Deliberately generic so the screen can grow. */
 @Composable
-private fun OptionRow(
+internal fun OptionRow(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
@@ -156,80 +131,12 @@ private fun OptionRow(
 }
 
 /**
- * Picks the language the interface itself speaks.
+ * The app-language row's label: what was chosen, or the device's language when following it.
  *
- * Each language is listed in its own name — "Deutsch", not "German" — because the only person
- * reading this list is looking for their own, and they will not recognise it written in a language
- * they do not read.
+ * Shared across platforms so the row cannot drift apart from what the picker says. "System language
+ * (Deutsch)" states both the choice and what it resolves to today.
  */
-@Composable
-private fun LanguageRow(
-    effective: UiLanguage,
-    chosen: UiLanguage?,
-    onChoose: (UiLanguage) -> Unit,
-    onFollowSystem: () -> Unit,
-) {
-    val strings = LocalStrings.current
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Box(modifier = Modifier.padding(top = Spacing.medium)) {
-        OptionRow(
-            icon = VerborumIcons.Storefront,
-            // Following the device is named as such, with the language it currently resolves to, so
-            // the row says both what was chosen and what that means today.
-            label = when (chosen) {
-                null -> "${strings.appLanguage}: ${strings.systemLanguage} (${effective.endonym})"
-                else -> "${strings.appLanguage}: ${chosen.endonym}"
-            },
-            onClick = { isExpanded = true },
-        )
-
-        DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
-            modifier = Modifier.heightIn(max = Dimens.sheetMaxHeight),
-        ) {
-            // First, and the default: hand the choice back to the device.
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = strings.systemLanguage,
-                        color = if (chosen == null) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                    )
-                },
-                onClick = {
-                    isExpanded = false
-                    onFollowSystem()
-                },
-            )
-
-            HorizontalDivider()
-
-            UiLanguage.entries.forEach { language ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = language.endonym,
-                            // Its own name is written in its own script, which the default face may
-                            // not carry at all.
-                            fontFamily = fontFamilyForUiLanguage(language.code),
-                            color = if (language == chosen) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                        )
-                    },
-                    onClick = {
-                        isExpanded = false
-                        onChoose(language)
-                    },
-                )
-            }
-        }
-    }
+internal fun languageLabel(strings: Strings, effective: UiLanguage, chosen: UiLanguage?): String = when (chosen) {
+    null -> "${strings.appLanguage}: ${strings.systemLanguage} (${effective.endonym})"
+    else -> "${strings.appLanguage}: ${chosen.endonym}"
 }

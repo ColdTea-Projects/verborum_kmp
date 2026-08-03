@@ -34,6 +34,7 @@ fun VerborumNavHost(
         // Where the tour is not shown unprompted, Options is how it is reached. The shell decides
         // that, so neither feature has to know about the other.
         optionsGraph(
+            navController = navController,
             onHowToUseApp = { navController.navigate(OnboardingGraph) }
                 .takeIf { isOnboardingOpenedFromOptions },
         )
