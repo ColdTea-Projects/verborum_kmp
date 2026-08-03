@@ -26,6 +26,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.localization.strings
 
@@ -55,6 +56,12 @@ data class VerborumTopBarState(
      * a bare chevron is the platform's own convention and a label beside it reads as clutter.
      */
     val backLabel: String? = null,
+    /**
+     * Override the title's font family — needed on web where the canvas has no system fonts and a
+     * user-authored title may contain scripts (CJK, Arabic) the default Noto Sans Latin does not
+     * carry. Null means "use the typography's own family".
+     */
+    val titleFontFamily: FontFamily? = null,
 )
 
 /**
@@ -110,6 +117,7 @@ fun RegisterTopBar(
     showBackButton: Boolean = true,
     action: VerborumTopBarAction? = null,
     backLabel: String? = null,
+    titleFontFamily: FontFamily? = null,
 ) {
     val controller = LocalVerborumTopBarController.current
 
@@ -122,9 +130,10 @@ fun RegisterTopBar(
         showBackButton,
         action?.contentDescription,
         backLabel,
+        titleFontFamily,
     ) {
         val token = controller.register(
-            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel),
+            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel, titleFontFamily),
         )
 
         onDispose { controller.unregister(token) }
@@ -174,6 +183,7 @@ fun VerborumTopBar(
                 text = state.title,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
+                fontFamily = state.titleFontFamily,
             )
 
             state.subtitle?.let { subtitle ->

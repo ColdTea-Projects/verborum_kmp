@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
 
 /**
  * The furniture every redesigned web page is built from.
@@ -90,6 +91,10 @@ fun WebPageTitle(
             text = title,
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground,
+            // The title is often user content (a dictionary's name) in a script the default Latin
+            // face does not carry; script detection picks the right face, and returns null — the
+            // style's own family — for the Latin titles the app itself writes.
+            fontFamily = fontFamilyForText(title),
         )
 
         subtitle?.let {

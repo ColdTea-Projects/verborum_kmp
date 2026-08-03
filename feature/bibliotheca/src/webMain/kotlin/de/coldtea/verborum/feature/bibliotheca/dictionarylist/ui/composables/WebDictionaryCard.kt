@@ -36,6 +36,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
 import de.coldtea.verborum.core.localization.strings
@@ -85,6 +86,7 @@ internal fun WebDictionaryCard(
                         text = dictionary.name,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = fontFamilyForText(dictionary.name),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -124,6 +126,7 @@ private fun Monogram(name: String) {
                 text = name.trim().take(1).uppercase(),
                 style = MaterialTheme.typography.displayMedium,
                 color = MaterialTheme.colorScheme.onSecondary,
+                fontFamily = fontFamilyForText(name),
             )
         }
     }

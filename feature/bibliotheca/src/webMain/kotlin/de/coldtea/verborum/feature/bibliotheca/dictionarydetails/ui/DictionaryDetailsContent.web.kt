@@ -31,6 +31,7 @@ import de.coldtea.verborum.core.designsystem.component.WebPanel
 import de.coldtea.verborum.core.designsystem.component.WebPrimaryButton
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WebPracticeTile
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WebWordRow
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
@@ -85,6 +86,8 @@ internal actual fun DictionaryDetailsContent(
                 title = details.name,
                 showBackButton = true,
                 backLabel = strings.backToDictionaries,
+                // A user-authored name can be written in any script the canvas must be told about.
+                titleFontFamily = fontFamilyForText(details.name),
             )
 
             var showDeleteDialog by remember { mutableStateOf(false) }
