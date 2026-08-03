@@ -3,6 +3,7 @@ package de.coldtea.verborum.feature.bibliotheca.common.ui.model
 import de.coldtea.verborum.core.localization.EnglishStrings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -186,5 +187,26 @@ class WordFormInputTest {
 
         // The display side folds the auxiliary into the participle, as every screen shows it.
         assertEquals(listOf("gehen", "ging", "(sein) gegangen"), displayColumns(text, meta))
+    }
+
+    @Test
+    fun `a word form takes 40 characters and free text takes 150`() {
+        assertEquals(40, WordType.NOUN.fieldLimit)
+        assertEquals(40, WordType.VERB.fieldLimit)
+        assertEquals(150, WordType.FREE_TEXT.fieldLimit)
+
+        assertTrue(WordType.NOUN.acceptsEdit(current = "", edited = "a".repeat(40)))
+        assertFalse(WordType.NOUN.acceptsEdit(current = "", edited = "a".repeat(41)))
+        assertTrue(WordType.FREE_TEXT.acceptsEdit(current = "", edited = "a".repeat(150)))
+        assertFalse(WordType.FREE_TEXT.acceptsEdit(current = "", edited = "a".repeat(151)))
+    }
+
+    @Test
+    fun `a word already over the limit can still be shortened`() {
+        val stored = "a".repeat(60)
+
+        // Deleting from it must work, or a word saved before the limit would be stuck.
+        assertTrue(WordType.NOUN.acceptsEdit(current = stored, edited = "a".repeat(59)))
+        assertFalse(WordType.NOUN.acceptsEdit(current = stored, edited = "a".repeat(61)))
     }
 }

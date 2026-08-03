@@ -36,6 +36,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.acceptsEdit
 import de.coldtea.verborum.core.localization.strings
 
 /**
@@ -135,7 +136,9 @@ internal fun WebLanguageCard(
                     cardId = cardId,
                     languageCode = languageCode,
                     value = input.text,
-                    onValueChange = onTextChanged,
+                    onValueChange = { value ->
+                        if (wordType.acceptsEdit(input.text, value)) onTextChanged(value)
+                    },
                     placeholder = strings.word,
                 )
 
@@ -167,7 +170,11 @@ internal fun WebLanguageCard(
                             cardId = cardId,
                             languageCode = languageCode,
                             value = input.field(key),
-                            onValueChange = { value -> onFieldChanged(key, value) },
+                            onValueChange = { value ->
+                                if (wordType.acceptsEdit(input.field(key), value)) {
+                                    onFieldChanged(key, value)
+                                }
+                            },
                             fieldKey = key,
                             placeholder = key.label(strings),
                             // A reading is not a word surface — "nihongo" is a perfectly good note

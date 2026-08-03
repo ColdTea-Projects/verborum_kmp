@@ -18,6 +18,26 @@ internal data class WordFormInput(
     fun withField(key: FieldKey, value: String): WordFormInput = copy(fields = fields + (key to value))
 }
 
+/**
+ * How many characters one field of the form takes. Free text is a phrase or a whole sentence — that
+ * is what the type is for — while every other field holds a single word form.
+ */
+internal val WordType.fieldLimit: Int
+    get() = if (this == WordType.FREE_TEXT) FREE_TEXT_LIMIT else WORD_FORM_LIMIT
+
+/**
+ * Whether a field takes this edit.
+ *
+ * Measured against what is already in the field as well as against the limit: a word saved before
+ * the limit existed is over it, and refusing every edit would leave it uneditable — so anything that
+ * shortens the value is always taken.
+ */
+internal fun WordType.acceptsEdit(current: String, edited: String): Boolean =
+    edited.length <= fieldLimit || edited.length < current.length
+
+private const val WORD_FORM_LIMIT = 40
+private const val FREE_TEXT_LIMIT = 150
+
 @Serializable
 private data class StoredMeta(
     @SerialName("lang") val lang: String,

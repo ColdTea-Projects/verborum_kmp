@@ -40,6 +40,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.acceptsEdit
 import de.coldtea.verborum.core.localization.strings
 
 /**
@@ -93,7 +94,10 @@ internal fun LanguageInputCard(
 
             WordTextField(
                 value = input.text,
-                onValueChange = { value -> onTextChanged(charset?.filter(value) ?: value) },
+                onValueChange = { value ->
+                    val accepted = charset?.filter(value) ?: value
+                    if (wordType.acceptsEdit(input.text, accepted)) onTextChanged(accepted)
+                },
                 label = strings.word,
                 direction = direction,
                 focus = focusFor(null),
@@ -136,7 +140,10 @@ internal fun LanguageInputCard(
                     WordTextField(
                         value = input.field(key),
                         onValueChange = { value ->
-                            onFieldChanged(key, if (isReading) value else charset?.filter(value) ?: value)
+                            val accepted = if (isReading) value else charset?.filter(value) ?: value
+                            if (wordType.acceptsEdit(input.field(key), accepted)) {
+                                onFieldChanged(key, accepted)
+                            }
                         },
                         label = key.label(strings),
                         // A reading is Latin whatever the word's script, so it stays left to right.
