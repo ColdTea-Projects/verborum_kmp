@@ -101,7 +101,9 @@ fun NavGraphBuilder.bibliothecaGraph(navController: NavController) {
             CreateWordScreen(
                 dictionaryId = route.dictionaryId,
                 wordId = route.wordId,
-                onSaved = { navController.popBackStack() },
+                onSaved = { wasEditing ->
+                    if (wasEditing) navController.popBackStack()
+                },
             )
         }
 

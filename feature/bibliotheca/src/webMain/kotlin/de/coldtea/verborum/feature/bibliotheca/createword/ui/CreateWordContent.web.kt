@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
@@ -37,6 +39,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
+import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.AnimatedWordCount
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.WebLanguageCard
 import de.coldtea.verborum.core.localization.strings
 
@@ -55,6 +58,7 @@ private const val SIDE_STRIDE = 100_000
 @Composable
 internal actual fun CreateWordContent(
     state: CreateWordUiState,
+    wordCountChanged: Int,
     onWordTypeChanged: (WordType) -> Unit,
     onTextChanged: (WordSide, Int, String) -> Unit,
     onGenderChanged: (WordSide, Int, Gender?) -> Unit,
@@ -66,12 +70,8 @@ internal actual fun CreateWordContent(
     modifier: Modifier,
 ) {
     val dictionary = state.dictionary
-    // One controller for the whole form, not one per card: Enter has to be able to walk out of the
-    // last source field and into the first target one.
     val keyboardController = remember { KeyboardController() }
 
-    // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
-    // that wants no chrome at all, and would lose the sidebar with it.
     RegisterTopBar(
         title = if (state.isEditing) strings.editWordTitle else strings.newWord,
         subtitle = dictionary?.name,
@@ -97,7 +97,20 @@ internal actual fun CreateWordContent(
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         WebPageSpacer(Spacing.extraLarge)
 
-                        WebPageTitle(title = if (state.isEditing) strings.editWordTitle else strings.addWordTitle)
+                        WebPageTitle(
+                            title = if (state.isEditing) strings.editWordTitle else strings.addWordTitle,
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = Spacing.small),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.extraSmall),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            AnimatedWordCount(
+                                wordCount = state.wordCount,
+                                changeTrigger = wordCountChanged,
+                            )
+                        }
 
                         WebPageSpacer()
 

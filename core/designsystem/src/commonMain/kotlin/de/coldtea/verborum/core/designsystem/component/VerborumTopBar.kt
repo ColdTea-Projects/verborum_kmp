@@ -62,6 +62,11 @@ data class VerborumTopBarState(
      * carry. Null means "use the typography's own family".
      */
     val titleFontFamily: FontFamily? = null,
+    /**
+     * Optional composable rendered in place of [subtitle] when a plain string is not enough —
+     * for example an animated word count that flashes on change.
+     */
+    val subtitleContent: (@Composable () -> Unit)? = null,
 )
 
 /**
@@ -118,11 +123,14 @@ fun RegisterTopBar(
     action: VerborumTopBarAction? = null,
     backLabel: String? = null,
     titleFontFamily: FontFamily? = null,
+    subtitleContent: (@Composable () -> Unit)? = null,
 ) {
     val controller = LocalVerborumTopBarController.current
 
     // Keyed on the action's identity rather than the object, since its onClick is a fresh lambda
     // each recomposition; that lambda closes over remembered state, so a "stale" one still works.
+    // The same applies to subtitleContent — it is remembered by the caller so it only changes when
+    // the underlying content actually changes (word count update), not on every recomposition.
     DisposableEffect(
         controller,
         title,
@@ -131,9 +139,10 @@ fun RegisterTopBar(
         action?.contentDescription,
         backLabel,
         titleFontFamily,
+        subtitleContent,
     ) {
         val token = controller.register(
-            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel, titleFontFamily),
+            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel, titleFontFamily, subtitleContent),
         )
 
         onDispose { controller.unregister(token) }
@@ -186,13 +195,17 @@ fun VerborumTopBar(
                 fontFamily = state.titleFontFamily,
             )
 
-            state.subtitle?.let { subtitle ->
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = Spacing.extraSmall),
-                )
+            if (state.subtitleContent != null) {
+                state.subtitleContent()
+            } else {
+                state.subtitle?.let { subtitle ->
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = Spacing.extraSmall),
+                    )
+                }
             }
         }
 

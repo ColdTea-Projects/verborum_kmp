@@ -28,6 +28,7 @@ internal fun CreateWordScreen(
     viewModel: CreateWordViewModel = koinViewModel { parametersOf(dictionaryId, wordId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val wordCountChanged by viewModel.wordCountChanged.collectAsStateWithLifecycle()
 
     ShowSnackbarMessages(viewModel.messages)
 
@@ -38,6 +39,7 @@ internal fun CreateWordScreen(
 
     CreateWordContent(
         state = state,
+        wordCountChanged = wordCountChanged,
         onWordTypeChanged = viewModel::onWordTypeChanged,
         onTextChanged = viewModel::onTextChanged,
         onGenderChanged = viewModel::onGenderChanged,
@@ -59,6 +61,7 @@ internal fun CreateWordScreen(
 @Composable
 internal expect fun CreateWordContent(
     state: CreateWordUiState,
+    wordCountChanged: Int,
     onWordTypeChanged: (WordType) -> Unit,
     onTextChanged: (WordSide, Int, String) -> Unit,
     onGenderChanged: (WordSide, Int, Gender?) -> Unit,

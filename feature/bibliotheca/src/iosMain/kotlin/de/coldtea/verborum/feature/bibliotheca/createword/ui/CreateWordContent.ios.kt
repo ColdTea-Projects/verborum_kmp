@@ -40,6 +40,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.defaultType
+import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.AnimatedWordCount
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.LanguageInputCard
 import de.coldtea.verborum.feature.bibliotheca.createword.ui.composables.WordFieldFocus
 import de.coldtea.verborum.core.localization.strings
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 internal actual fun CreateWordContent(
     state: CreateWordUiState,
+    wordCountChanged: Int,
     onWordTypeChanged: (WordType) -> Unit,
     onTextChanged: (WordSide, Int, String) -> Unit,
     onGenderChanged: (WordSide, Int, Gender?) -> Unit,
@@ -58,13 +60,38 @@ internal actual fun CreateWordContent(
     onRetry: () -> Unit,
     modifier: Modifier,
 ) {
+    val dictionary = state.dictionary
+
+    val subtitleContent = remember(wordCountChanged, dictionary?.name) {
+        @Composable {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                dictionary?.let {
+                    Text(
+                        text = it.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = " · ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                AnimatedWordCount(
+                    wordCount = state.wordCount,
+                    changeTrigger = wordCountChanged,
+                )
+            }
+        }
+    }
+
     RegisterTopBar(
         title = if (state.isEditing) strings.editWordTitle else strings.newWord,
-        subtitle = state.dictionary?.name,
+        subtitleContent = subtitleContent,
         showBackButton = true,
     )
-
-    val dictionary = state.dictionary
 
     when {
         state.hasFailed -> ErrorState(

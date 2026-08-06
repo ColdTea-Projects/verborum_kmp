@@ -12,6 +12,9 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
@@ -33,6 +36,7 @@ internal enum class WordSide { SOURCE, TARGET }
 internal data class CreateWordUiState(
     val dictionary: Dictionary? = null,
     val wordType: WordType = WordType.NOUN,
+    val wordCount: Int = 0,
     /**
      * One entry per alternative on each side, and the two sides are independent: *kaufen/erwerben*
      * can both mean *buy*, so a word may carry two alternatives in one language and one in the
@@ -79,10 +83,15 @@ internal class CreateWordViewModel(
     /** True when the save was an edit; emitted only on success, so a failure never navigates. */
     val saved: SharedFlow<Boolean> = _saved.asSharedFlow()
 
+    private val _wordCountChanged = MutableStateFlow(0)
+    val wordCountChanged: StateFlow<Int> = _wordCountChanged.asStateFlow()
+
     private var editing: Word? = null
+    private var hasLoadedInitialCount = false
 
     init {
         load()
+        observeWordCount()
     }
 
     private fun load() {
@@ -102,10 +111,6 @@ internal class CreateWordViewModel(
                     dictionary = dictionary,
                     isEditing = word != null,
                     hasFailed = false,
-                    // An edited word arrives as stored, so the form shows what was typed: the base
-                    // word without its article, with the gender chip selected instead.
-                    // An existing word that records no type predates sub-types, so it edits as
-                    // free text; a new word starts on the commonest choice instead.
                     wordType = when (word) {
                         null -> WordType.NOUN
                         else -> parseWordMeta(word.wordMeta)?.wordType ?: WordType.FREE_TEXT
@@ -119,6 +124,20 @@ internal class CreateWordViewModel(
                         }
                         ?: listOf(WordFormInput()),
                 )
+            }
+        }
+    }
+
+    private fun observeWordCount() {
+        viewModelScope.launch {
+            wordService.observeWords(dictionaryId).collect { words ->
+                val newCount = words.size
+                val previousCount = currentState.wordCount
+                setState { copy(wordCount = newCount) }
+                if (hasLoadedInitialCount && newCount != previousCount) {
+                    _wordCountChanged.value = newCount
+                }
+                hasLoadedInitialCount = true
             }
         }
     }
@@ -197,6 +216,7 @@ internal class CreateWordViewModel(
             setState { copy(isSaving = false) }
 
             if (outcome is Outcome.Success) {
+                if (existing == null) resetForm()
                 _saved.emit(existing != null)
             } else {
                 _messages.emit(strings.wordSaveFailed)
@@ -211,6 +231,13 @@ internal class CreateWordViewModel(
                 WordSide.TARGET -> copy(targetInputs = targetInputs.replace(index, transform))
             }
         }
+
+    private fun resetForm() = setState {
+        copy(
+            sourceInputs = listOf(WordFormInput()),
+            targetInputs = listOf(WordFormInput()),
+        )
+    }
 }
 
 private fun List<WordFormInput>.replace(
