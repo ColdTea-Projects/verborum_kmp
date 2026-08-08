@@ -2,6 +2,7 @@ package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.data.WordRepository
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 
 /**
  * Brings local state and the server together. One entry point per thing a screen opens, so callers do
@@ -15,6 +16,7 @@ internal class SyncService(
     private val activeUser: ActiveUserUseCase,
     private val syncDictionariesUseCase: SyncUserDictionariesUseCase,
     private val wordRepository: WordRepository,
+    private val uploadPendingChanges: UploadPendingChangesUseCase,
 ) {
 
     /**
@@ -28,6 +30,10 @@ internal class SyncService(
     suspend fun syncDictionaries(): Outcome<Unit> {
         val userId = activeUser() ?: return Outcome.Success(Unit)
 
+        // Upload first, always: a download that ran before it could drop a row the server has not
+        // been told about yet. This is also the only thing that drains changes made offline.
+        uploadPendingChanges()
+
         return syncDictionariesUseCase(userId).also { outcome ->
             if (outcome is Outcome.Success) wordRepository.pullAllWords(userId)
         }
@@ -36,6 +42,8 @@ internal class SyncService(
     /** Downloads one dictionary's words, for the details screen. */
     suspend fun syncDictionaryWords(dictionaryId: String): Outcome<Unit> {
         activeUser() ?: return Outcome.Success(Unit)
+
+        uploadPendingChanges()
 
         return wordRepository.pullWords(dictionaryId)
     }

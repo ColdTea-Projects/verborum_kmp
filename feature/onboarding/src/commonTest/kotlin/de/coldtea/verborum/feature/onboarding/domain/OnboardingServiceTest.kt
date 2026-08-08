@@ -23,7 +23,7 @@ class OnboardingServiceTest {
     }
 
     @Test
-    fun `completion survives a new instance, which is what stops it reappearing`() = runTest {
+    fun `completion survives a new instance which is what stops it reappearing`() = runTest {
         val cache = InMemoryCache()
         OnboardingService(LocalCacheOnboardingRepository(cache)).complete()
 
@@ -42,7 +42,7 @@ class OnboardingServiceTest {
     }
 
     @Test
-    fun `the tour ends on its last page, which is the one carrying the done button`() {
+    fun `the tour ends on its last page which is the one carrying the done button`() {
         assertEquals(4, OnboardingPage.entries.size)
         assertTrue(OnboardingPage.entries.last().isLast)
         assertFalse(OnboardingPage.entries.first().isLast)

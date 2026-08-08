@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class UiLanguageTest {
 
     @Test
-    fun `a regional tag resolves to the language, not to English`() {
+    fun `a regional tag resolves to the language not to English`() {
         // The app has one German, and an Austrian asking for de-AT wants it.
         assertEquals(UiLanguage.GERMAN, UiLanguage.fromTag("de-AT"))
         assertEquals(UiLanguage.PORTUGUESE, UiLanguage.fromTag("pt_BR"))
@@ -17,7 +17,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `a language the app does not speak resolves to nothing, so the caller can fall back`() {
+    fun `a language the app does not speak resolves to nothing so the caller can fall back`() {
         assertNull(UiLanguage.fromTag("sv"))
         assertNull(UiLanguage.fromTag(""))
         assertNull(UiLanguage.fromTag(null))
@@ -33,7 +33,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `each language speaks for itself, and none is quietly English`() {
+    fun `each language speaks for itself and none is quietly English`() {
         val english = EnglishStrings.back
 
         UiLanguage.entries.filter { it != UiLanguage.ENGLISH }.forEach { language ->
@@ -49,7 +49,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `every language can name every language, and every translatable tag`() {
+    fun `every language can name every language and every translatable tag`() {
         val codes = UiLanguage.entries.map { it.code }
         // The 33 tags that are words rather than proper nouns; A1 and DELE are the same everywhere.
         val translatableTags = EnglishStrings.let { english ->
@@ -89,7 +89,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `the tour says something on every page, in every translated language`() {
+    fun `the tour says something on every page in every translated language`() {
         translations.values.forEach { strings ->
             listOf(
                 strings.onboardingWelcomeTitle,
@@ -102,7 +102,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `a chosen language outlives the device setting, and giving it up restores it`() {
+    fun `a chosen language outlives the device setting and giving it up restores it`() {
         val stored = mutableMapOf<String, String>()
         val storage = object : LanguageStorage {
             override fun read() = stored["k"]
@@ -128,7 +128,7 @@ class UiLanguageTest {
     }
 
     @Test
-    fun `following the device tracks it, rather than freezing today's answer`() {
+    fun `following the device tracks it rather than freezing today's answer`() {
         var deviceTag = "fr-FR"
         val settings = LanguageSettings(
             storage = object : LanguageStorage {

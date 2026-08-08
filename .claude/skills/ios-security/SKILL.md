@@ -27,6 +27,12 @@ only (Keychain for the refresh token alone) is the remaining hardening step.
 command line tools). First run on a simulator should confirm read/write/delete and the
 upgrade-from-`NSUserDefaults` path.
 
+**`core:database`'s `BibliothecaDatabase` is a real SQLite file on iOS.** It sits in Application
+Support under `de.coldtea.verborum`, created with `NSFileProtectionCompleteUntilFirstUserAuthentication`
+(the Keychain's `AfterFirstUnlock` posture) and excluded from backup with `NSURLIsExcludedFromBackupKey`
+— the rows mirror what the server holds, so a restore loses nothing. It stores dictionaries and words
+only; never put a token or any authorization material in a table.
+
 **`core:database`'s `LocalCache` is real on iOS** — audit what it caches. Anything user-identifying
 or authorization-bearing needs the same protection as a token, or must not be cached at all.
 
@@ -55,7 +61,9 @@ or authorization-bearing needs the same protection as a token, or must not be ca
 - Register the redirect URI's custom scheme / universal link and validate the callback: verify
   `state`, and prefer a **universal link** over a custom scheme (custom schemes can be claimed by
   another app).
-- Handle `signOut()` by clearing Keychain, `LocalCache`, and any in-memory state.
+- Handle `signOut()` by clearing Keychain, `LocalCache`, the local database, and any in-memory state.
+  `OptionsViewModel` calls `BibliothecaDatabase.clear()` after `AuthService.signOut()` — the library
+  is one user's content, and the next person to sign in on the device must not find it waiting.
 
 ## Data at rest and on screen
 
@@ -90,7 +98,7 @@ the `Authorization` header into the device console, which any connected Mac can 
 ## Review checklist
 
 - [ ] Tokens/credentials in Keychain with `…ThisDeviceOnly`, not `NSUserDefaults`
-- [ ] Sign-out clears Keychain **and** `LocalCache`
+- [ ] Sign-out clears Keychain, `LocalCache` **and** the local database
 - [ ] No ATS exception added; base URL is `https://` and production
 - [ ] Authorization uses `ASWebAuthenticationSession`, not an embedded web view
 - [ ] PKCE `S256`; crypto randomness from `SecRandomCopyBytes`; `state` verified

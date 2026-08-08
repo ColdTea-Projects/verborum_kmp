@@ -76,7 +76,7 @@ class CreateWordViewModelTest {
     }
 
     @Test
-    fun `editing prefills both sides and keeps the word's id, level and creation time`() = runTest {
+    fun `editing prefills both sides and keeps the word's id level and creation time`() = runTest {
         val existing = Word(
             wordId = "word-1",
             dictionaryId = "dict-1",
@@ -114,7 +114,7 @@ class CreateWordViewModelTest {
     }
 
     @Test
-    fun `a word saved before types existed edits as free text, not as a noun`() = runTest {
+    fun `a word saved before types existed edits as free text not as a noun`() = runTest {
         val untyped = Word(
             wordId = "word-1",
             dictionaryId = "dict-1",
@@ -158,7 +158,7 @@ class CreateWordViewModelTest {
     }
 
     @Test
-    fun `an alternative is added to the side that asked for it, and to that side only`() = runTest {
+    fun `an alternative is added to the side that asked for it and to that side only`() = runTest {
         val viewModel = viewModel()
         advanceUntilIdle()
 

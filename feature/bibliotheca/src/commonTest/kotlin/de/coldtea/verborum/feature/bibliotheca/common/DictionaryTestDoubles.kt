@@ -56,9 +56,13 @@ internal class FakeDictionaryRepository(
     private val pullResult: Outcome<List<Dictionary>>? = null,
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
     private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
+    private val uploadResult: Outcome<Unit> = Outcome.Success(Unit),
 ) : DictionaryRepository {
 
     private val rows = MutableStateFlow(initial)
+
+    /** What the upload pass pushed, in order — how a test sees the queue drain. */
+    val uploaded = mutableListOf<Dictionary>()
 
     var pulledUserId: String? = null
         private set
@@ -84,7 +88,7 @@ internal class FakeDictionaryRepository(
         return outcome
     }
 
-    override fun findDictionary(dictionaryId: String): Dictionary? =
+    override suspend fun findDictionary(dictionaryId: String): Dictionary? =
         rows.value.firstOrNull { it.dictionaryId == dictionaryId }
 
     override suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> {
@@ -116,6 +120,23 @@ internal class FakeDictionaryRepository(
         }
     }
 
+    override suspend fun pendingUploads(): List<Dictionary> =
+        rows.value.filterNot { it.isDeleted || it.isSynced }
+
+    override suspend fun tombstoned(): List<Dictionary> = rows.value.filter(Dictionary::isDeleted)
+
+    override suspend fun upload(dictionary: Dictionary): Outcome<Unit> {
+        uploaded += dictionary
+
+        if (uploadResult is Outcome.Success) {
+            rows.value = rows.value.map {
+                if (it.dictionaryId == dictionary.dictionaryId) it.copy(isSynced = true) else it
+            }
+        }
+
+        return uploadResult
+    }
+
     /** Includes tombstoned rows, which `observeDictionaries` deliberately hides. */
     fun allRows(): List<Dictionary> = rows.value
 }
@@ -127,9 +148,13 @@ internal class FakeWordRepository(
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
     private val updateResult: Outcome<Unit> = Outcome.Success(Unit),
     private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
+    private val uploadResult: Outcome<Unit> = Outcome.Success(Unit),
 ) : WordRepository {
 
     private val rows = MutableStateFlow(initial)
+
+    /** What the upload pass pushed, in order. */
+    val uploaded = mutableListOf<Word>()
 
     var savedWord: Word? = null
         private set
@@ -165,7 +190,8 @@ internal class FakeWordRepository(
         return pullResult ?: Outcome.Success(Unit)
     }
 
-    override fun findWord(wordId: String): Word? = rows.value.firstOrNull { it.wordId == wordId }
+    override suspend fun findWord(wordId: String): Word? =
+        rows.value.firstOrNull { it.wordId == wordId }
 
     override suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> {
         savedWord = word
@@ -215,6 +241,23 @@ internal class FakeWordRepository(
 
     override suspend fun removeDictionaryLocally(dictionaryId: String) {
         rows.value = rows.value.filterNot { it.dictionaryId == dictionaryId }
+    }
+
+    override suspend fun pendingUploads(): List<Word> =
+        rows.value.filterNot { it.isDeleted || it.isSynced }
+
+    override suspend fun tombstoned(): List<Word> = rows.value.filter(Word::isDeleted)
+
+    override suspend fun upload(word: Word): Outcome<Unit> {
+        uploaded += word
+
+        if (uploadResult is Outcome.Success) {
+            rows.value = rows.value.map {
+                if (it.wordId == word.wordId) it.copy(isSynced = true) else it
+            }
+        }
+
+        return uploadResult
     }
 
     fun allRows(): List<Word> = rows.value

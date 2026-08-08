@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class AuthConfigWebTest {
 
     @Test
-    fun `keycloak is addressed on the app's own origin, so the exchange stays same-origin`() {
+    fun `keycloak is addressed on the app's own origin so the exchange stays same-origin`() {
         assertEquals(
             "https://verborum.coldtea.de/auth/realms/verborum",
             issuerFor("https://verborum.coldtea.de"),
@@ -15,7 +15,7 @@ class AuthConfigWebTest {
     }
 
     @Test
-    fun `development uses the same path, which the dev server proxies`() {
+    fun `development uses the same path which the dev server proxies`() {
         // No localhost special case: the proxy is what makes dev match production, so a changed dev
         // port cannot reintroduce a cross-origin token call.
         assertEquals(

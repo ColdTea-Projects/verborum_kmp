@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class DictionaryTagTest {
 
     @Test
-    fun `the catalogue is offered in three sections, in a fixed order`() {
+    fun `the catalogue is offered in three sections in a fixed order`() {
         assertEquals(
             listOf("Level", "Topic", "Exam"),
             TagSection.entries.map { it.title(EnglishStrings) },
@@ -41,14 +41,14 @@ class DictionaryTagTest {
     }
 
     @Test
-    fun `an unknown code still shows, as itself`() {
+    fun `an unknown code still shows as itself`() {
         // An edited dictionary may carry a tag a newer client added.
         assertEquals("Basic", tagLabelOf("basic", EnglishStrings))
         assertEquals("something_new", tagLabelOf("something_new", EnglishStrings))
     }
 
     @Test
-    fun `level and topic labels follow the UI language, framework codes do not`() {
+    fun `level and topic labels follow the UI language framework codes do not`() {
         val german = stringsFor(UiLanguage.GERMAN)
         val turkish = stringsFor(UiLanguage.TURKISH)
 

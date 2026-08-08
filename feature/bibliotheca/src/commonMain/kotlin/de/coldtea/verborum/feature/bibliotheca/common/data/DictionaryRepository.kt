@@ -22,10 +22,22 @@ internal interface DictionaryRepository {
     /** Pulls the user's dictionaries and merges them into the store. */
     suspend fun pullDictionaries(userId: String): Outcome<List<Dictionary>>
 
-    fun findDictionary(dictionaryId: String): Dictionary?
+    /** Suspending because the local copy may be a database, which cannot answer on the spot. */
+    suspend fun findDictionary(dictionaryId: String): Dictionary?
 
     /** Saves a new dictionary and returns its id, or updates an existing one. */
     suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit>
+
+    /** Rows the server has not seen yet, and rows whose delete it has not confirmed. */
+    suspend fun pendingUploads(): List<Dictionary>
+
+    suspend fun tombstoned(): List<Dictionary>
+
+    /**
+     * Pushes a row already stored locally, marking it synced if the server takes it. No local write
+     * on the way in — unlike [save], the row is on disk before this is called.
+     */
+    suspend fun upload(dictionary: Dictionary): Outcome<Unit>
 
     suspend fun markDeleted(dictionaryId: String)
 
@@ -47,13 +59,14 @@ internal class NetworkDictionaryRepository(
     override fun observeDictionary(dictionaryId: String): Flow<Dictionary?> =
         store.dictionaries.map { rows -> rows.firstOrNull { it.dictionaryId == dictionaryId } }
 
-    override suspend fun pullDictionaries(userId: String): Outcome<List<Dictionary>> =
-        api.dictionariesOf(userId)
+    override suspend fun pullDictionaries(userId: String): Outcome<List<Dictionary>> {
+        val known = store.knownTimestamps()
+        val now = time.nowEpochMillis()
+
+        return api.dictionariesOf(userId)
             .map { dtos ->
-                val now = time.nowEpochMillis()
                 dtos.map { dto ->
-                    val (createdAt, updatedAt) = store.knownTimestamps(dto.dictionaryId)
-                        ?: (now to now)
+                    val (createdAt, updatedAt) = known[dto.dictionaryId] ?: (now to now)
                     dto.toDictionary(fallbackCreatedAt = createdAt, fallbackUpdatedAt = updatedAt)
                 }
             }
@@ -62,27 +75,55 @@ internal class NetworkDictionaryRepository(
                 // "the user has no dictionaries".
                 if (outcome is Outcome.Success) store.merge(outcome.data)
             }
+    }
 
-    override fun findDictionary(dictionaryId: String): Dictionary? = store.find(dictionaryId)
+    override suspend fun findDictionary(dictionaryId: String): Dictionary? =
+        store.find(dictionaryId)
 
     override suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> {
         val previous = store.find(dictionary.dictionaryId)
 
-        // Optimistic, like every other write here: the row appears at once and is rolled back if
-        // the server refuses, so the list never shows something the backend does not have.
+        // Optimistic: the row appears at once, marked as not yet on the server.
         store.upsert(dictionary.copy(isSynced = false))
 
         val request = dictionary.toRequest()
         val outcome = if (isNew) api.create(request) else api.update(request)
 
-        when {
-            outcome is Outcome.Success -> store.upsert(dictionary.copy(isSynced = true))
-            previous != null -> store.upsert(previous)
-            else -> store.remove(dictionary.dictionaryId)
-        }
+        return when {
+            outcome is Outcome.Success -> {
+                store.upsert(dictionary.copy(isSynced = true))
+                outcome
+            }
 
-        return outcome
+            // The request never landed, so the row stays exactly as written and the next upload
+            // carries it. Reported as a success because, from here on, it behaves like any other
+            // saved row — it is on the device and it will reach the server.
+            outcome is Outcome.Failure && outcome.error.isWorthKeeping() -> Outcome.Success(Unit)
+
+            // The server refused it. Retrying would fail the same way, so put back what was there
+            // and let the screen say so.
+            previous != null -> {
+                store.upsert(previous)
+                outcome
+            }
+
+            else -> {
+                store.remove(dictionary.dictionaryId)
+                outcome
+            }
+        }
     }
+
+    override suspend fun pendingUploads(): List<Dictionary> = store.pendingUploads()
+
+    override suspend fun tombstoned(): List<Dictionary> = store.tombstoned()
+
+    override suspend fun upload(dictionary: Dictionary): Outcome<Unit> =
+        // Always a create: the endpoint upserts on the client-generated id, which is what lets the
+        // Android app push a pending row without knowing whether the server has seen it.
+        api.create(dictionary.toRequest()).also { outcome ->
+            if (outcome is Outcome.Success) store.upsert(dictionary.copy(isSynced = true))
+        }
 
     override suspend fun markDeleted(dictionaryId: String) = store.markDeleted(dictionaryId)
 

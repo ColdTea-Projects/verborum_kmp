@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
@@ -79,6 +80,7 @@ class DictionaryListViewModelTest {
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
                 wordRepository = wordRepository,
+                uploadPendingChanges = UploadPendingChangesUseCase(repository, wordRepository),
             ),
         )
     }
@@ -96,7 +98,7 @@ class DictionaryListViewModelTest {
     }
 
     @Test
-    fun `search matches the name, case-insensitively`() = runTest(mainDispatcher) {
+    fun `search matches the name case-insensitively`() = runTest(mainDispatcher) {
         val viewModel = viewModel()
         advanceUntilIdle()
 

@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
@@ -69,6 +70,7 @@ class DictionaryDetailsViewModelTest {
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaryRepository),
                 wordRepository = wordRepository,
+                uploadPendingChanges = UploadPendingChangesUseCase(dictionaryRepository, wordRepository),
             ),
         )
 
@@ -111,7 +113,7 @@ class DictionaryDetailsViewModelTest {
     }
 
     @Test
-    fun `self practice needs a word, a test needs enough distinct ones`() = runTest(mainDispatcher) {
+    fun `self practice needs a word a test needs enough distinct ones`() = runTest(mainDispatcher) {
         val (oneWord, _) = viewModel(words = listOf(word("w1", dictionaryId)))
         advanceUntilIdle()
 

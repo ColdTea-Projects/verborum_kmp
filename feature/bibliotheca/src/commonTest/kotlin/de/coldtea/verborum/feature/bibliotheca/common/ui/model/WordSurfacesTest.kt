@@ -42,7 +42,7 @@ class WordSurfacesTest {
     }
 
     @Test
-    fun `a missing or unreadable meta blob yields no language, not a crash`() {
+    fun `a missing or unreadable meta blob yields no language not a crash`() {
         assertEquals("", WordSurfaces.languageCodeOf(""))
         assertEquals("", WordSurfaces.languageCodeOf("not json"))
         assertEquals("", WordSurfaces.languageCodeOf("""{"type":"verb"}"""))

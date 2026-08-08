@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -22,10 +23,11 @@ class SyncServiceTest {
         activeUser = ActiveUserUseCase { signedInAs },
         syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
         wordRepository = wordRepository,
+        uploadPendingChanges = UploadPendingChangesUseCase(repository, wordRepository),
     )
 
     @Test
-    fun `signed out there is nothing to reconcile, which is not an error`() = runTest {
+    fun `signed out there is nothing to reconcile which is not an error`() = runTest {
         val repository = FakeDictionaryRepository(listOf(dictionary("a")))
 
         val outcome = syncService(repository, signedInAs = null).syncDictionaries()

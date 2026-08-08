@@ -23,12 +23,20 @@ internal interface WordRepository {
     suspend fun pullAllWords(userId: String): Outcome<Unit>
 
     /** Saves a word, local view first; the previous value comes back if the server refuses. */
-    fun findWord(wordId: String): Word?
+    suspend fun findWord(wordId: String): Word?
 
     suspend fun updateWord(word: Word): Outcome<Unit>
 
     /** Creates a word, or updates it when [isNew] is false. */
     suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit>
+
+    /** Words the server has not seen yet, and words whose delete it has not confirmed. */
+    suspend fun pendingUploads(): List<Word>
+
+    suspend fun tombstoned(): List<Word>
+
+    /** Pushes a word already stored locally, marking it synced if the server takes it. */
+    suspend fun upload(word: Word): Outcome<Unit>
 
     suspend fun markDeleted(wordId: String)
 
@@ -58,19 +66,25 @@ internal class NetworkWordRepository(
 
     override fun observeAllWords(): Flow<List<Word>> = store.all()
 
-    override suspend fun pullWords(dictionaryId: String): Outcome<Unit> =
-        api.wordsOfDictionary(dictionaryId)
-            .map { dtos -> dtos.toWords(dictionaryId) }
-            .alsoMerge { words -> store.mergeDictionary(dictionaryId, words) }
+    override suspend fun pullWords(dictionaryId: String): Outcome<Unit> {
+        val known = store.knownTimestamps()
 
-    override suspend fun pullAllWords(userId: String): Outcome<Unit> =
-        api.wordsOfUser(userId)
+        return api.wordsOfDictionary(dictionaryId)
+            .map { dtos -> dtos.toWords(dictionaryId, known) }
+            .alsoMerge { words -> store.mergeDictionary(dictionaryId, words) }
+    }
+
+    override suspend fun pullAllWords(userId: String): Outcome<Unit> {
+        val known = store.knownTimestamps()
+
+        return api.wordsOfUser(userId)
             // The payload carries each word's own dictionary id; the fallback is only for a row that
             // omits it, which would otherwise land under an empty key.
-            .map { dtos -> dtos.toWords(dictionaryId = "") }
+            .map { dtos -> dtos.toWords(dictionaryId = "", known = known) }
             .alsoMerge { words -> store.mergeAll(words) }
+    }
 
-    override fun findWord(wordId: String): Word? = store.find(wordId)
+    override suspend fun findWord(wordId: String): Word? = store.find(wordId)
 
     override suspend fun updateWord(word: Word): Outcome<Unit> {
         val previous = store.find(word.wordId)
@@ -83,13 +97,23 @@ internal class NetworkWordRepository(
             listOf(WordBundleRequest(dictionaryId = word.dictionaryId, words = listOf(word.toRequest()))),
         )
 
-        when {
-            outcome is Outcome.Success -> store.upsert(word.copy(isSynced = true))
-            // Put back exactly what was there, so a failed save cannot look like a successful one.
-            previous != null -> store.upsert(previous)
-        }
+        return when {
+            outcome is Outcome.Success -> {
+                store.upsert(word.copy(isSynced = true))
+                outcome.map { }
+            }
 
-        return outcome.map { }
+            // Never reached the server: the new level stays on the device and uploads later.
+            outcome is Outcome.Failure && outcome.error.isWorthKeeping() -> Outcome.Success(Unit)
+
+            // Put back exactly what was there, so a refused save cannot look like a successful one.
+            previous != null -> {
+                store.upsert(previous)
+                outcome.map { }
+            }
+
+            else -> outcome.map { }
+        }
     }
 
     override suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> {
@@ -101,13 +125,41 @@ internal class NetworkWordRepository(
         )
         val outcome = if (isNew) api.create(bundles) else api.update(bundles)
 
-        when {
-            outcome is Outcome.Success -> store.upsert(word.copy(isSynced = true))
-            previous != null -> store.upsert(previous)
-            else -> store.remove(word.wordId)
-        }
+        return when {
+            outcome is Outcome.Success -> {
+                store.upsert(word.copy(isSynced = true))
+                outcome
+            }
 
-        return outcome
+            // Stored and queued rather than lost — see `NetworkDictionaryRepository.save`.
+            outcome is Outcome.Failure && outcome.error.isWorthKeeping() -> Outcome.Success(Unit)
+
+            previous != null -> {
+                store.upsert(previous)
+                outcome
+            }
+
+            else -> {
+                store.remove(word.wordId)
+                outcome
+            }
+        }
+    }
+
+    override suspend fun pendingUploads(): List<Word> = store.pendingUploads()
+
+    override suspend fun tombstoned(): List<Word> = store.tombstoned()
+
+    override suspend fun upload(word: Word): Outcome<Unit> {
+        // An update, not a create: the word already carries its client-generated id, which is the
+        // same choice the Android upload makes.
+        val bundles = listOf(
+            WordBundleRequest(dictionaryId = word.dictionaryId, words = listOf(word.toRequest())),
+        )
+
+        return api.update(bundles).also { outcome ->
+            if (outcome is Outcome.Success) store.upsert(word.copy(isSynced = true))
+        }
     }
 
     override suspend fun markDeleted(wordId: String) = store.markDeleted(wordId)
@@ -127,11 +179,14 @@ internal class NetworkWordRepository(
     override suspend fun removeDictionaryLocally(dictionaryId: String) =
         store.removeDictionary(dictionaryId)
 
-    private fun List<WordDto>.toWords(dictionaryId: String): List<Word> {
+    private fun List<WordDto>.toWords(
+        dictionaryId: String,
+        known: Map<String, Pair<Long, Long>>,
+    ): List<Word> {
         val now = time.nowEpochMillis()
 
         return map { dto ->
-            val (createdAt, updatedAt) = store.knownTimestamps(dto.wordId.orEmpty()) ?: (now to now)
+            val (createdAt, updatedAt) = known[dto.wordId.orEmpty()] ?: (now to now)
             dto.toWord(
                 dictionaryId = dictionaryId,
                 fallbackCreatedAt = createdAt,

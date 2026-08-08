@@ -106,12 +106,25 @@ why rather than sitting there inert — self practice needs one word, a test nee
 user from the auth session and pulls `GET dictionaries/{userId}` plus, in one further request,
 `GET words/user/{userId}` — which is what puts a word count on every list row. The details screen
 pulls just its own `GET words/dictionary/{id}`. Both land in `DictionaryStore` / `WordStore`, the
-in-memory single sources of truth the screens observe. Deletes tombstone locally first, then ask the
-server, and restore the row if the server refuses.
+single sources of truth the screens observe. Deletes tombstone locally first, then ask the server,
+and restore the row if the server refuses.
 
-The deliberate gap: there is **no local database**, so both stores are empty again after a restart
-until the first sync completes. Creating and editing dictionaries and words, and the two practice
-screens, are still to come; until then those taps report themselves on the snackbar.
+Where those stores keep the rows depends on the platform. **iOS has a local database** — Room over
+the `dictionary` and `word` tables the Android app uses, so the library is on screen at launch and
+survives being offline. **Web has none**, and its stores are empty again after a reload until the
+first sync completes. The seam is `BibliothecaDatabase` in `core:database`, whose factory simply
+answers null in the browser.
+
+A merge protects two kinds of row from the server's answer: one tombstoned locally, so a pending
+delete is never undone, and one still marked `isSynced = false`, so work done offline is not wiped by
+a pull that has not seen it yet.
+
+**Writes do not need the backend.** A save or delete that never reached the server leaves the row on
+the device — unsent rows keep `isSynced = false`, deleted ones keep their tombstone — and the screen
+is told it worked, because it did. `UploadPendingChangesUseCase` runs in front of every pull and
+drains them, so opening the library or pulling to refresh is what pushes anything made offline. A
+write the server actively *refused* is rolled back and reported instead: retrying a payload the
+backend has already judged would fail the same way every time.
 
 Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
 it, so no CORS configuration is required on the service.

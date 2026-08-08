@@ -15,6 +15,8 @@ import de.coldtea.verborum.core.auth.createPendingAuthorizationStore
 import de.coldtea.verborum.core.auth.createTokenStorage
 import de.coldtea.verborum.core.auth.defaultAuthConfig
 import de.coldtea.verborum.core.database.LocalCache
+import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
+import de.coldtea.verborum.core.database.bibliotheca.createBibliothecaDatabase
 import de.coldtea.verborum.core.database.createLocalCache
 import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.network.BearerTokenProvider
@@ -40,6 +42,10 @@ val coreModule: Module = module {
     single<AuthConfig> { defaultAuthConfig() }
     single<TokenStorage> { createTokenStorage() }
     single<LocalCache> { createLocalCache() }
+
+    // Only iOS has a local database, so the binding only exists there and callers ask with
+    // `getOrNull`. Building it is cheap — Room does not touch the file until the first query.
+    createBibliothecaDatabase()?.let { database -> single<BibliothecaDatabase> { database } }
 
     single<AuthorizationLauncher> { createAuthorizationLauncher() }
     single<PendingAuthorizationStore> { createPendingAuthorizationStore() }

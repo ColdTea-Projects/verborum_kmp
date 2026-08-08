@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
@@ -66,6 +67,7 @@ class SelfPracticeViewModelTest {
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
                 wordRepository = wordRepository,
+                uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
             ),
         )
 
@@ -86,7 +88,7 @@ class SelfPracticeViewModelTest {
     }
 
     @Test
-    fun `the columns are the same forms, kept separate for the stacked web card`() =
+    fun `the columns are the same forms kept separate for the stacked web card`() =
         runTest(mainDispatcher) {
             val (viewModel, _) = viewModel()
             advanceUntilIdle()
@@ -111,7 +113,7 @@ class SelfPracticeViewModelTest {
     }
 
     @Test
-    fun `switching sides closes open cards, or the answer would already be showing`() =
+    fun `switching sides closes open cards or the answer would already be showing`() =
         runTest(mainDispatcher) {
             val (viewModel, _) = viewModel()
             advanceUntilIdle()
@@ -136,7 +138,7 @@ class SelfPracticeViewModelTest {
     }
 
     @Test
-    fun `a correct answer moves the word one rung up, a wrong one down`() = runTest(mainDispatcher) {
+    fun `a correct answer moves the word one rung up a wrong one down`() = runTest(mainDispatcher) {
         val (viewModel, repository) = viewModel(words = listOf(verb.copy(level = 3)))
         advanceUntilIdle()
 
@@ -200,6 +202,7 @@ class SelfPracticeViewModelTest {
                     activeUser = ActiveUserUseCase { "user-42" },
                     syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
                     wordRepository = wordRepository,
+                    uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
                 ),
             )
 

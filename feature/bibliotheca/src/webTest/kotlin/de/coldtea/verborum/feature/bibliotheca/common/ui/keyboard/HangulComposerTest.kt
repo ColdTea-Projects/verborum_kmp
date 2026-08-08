@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class HangulComposerTest {
 
     @Test
-    fun `a lead, a vowel and a tail make one syllable`() {
+    fun `a lead a vowel and a tail make one syllable`() {
         assertEquals("한", type("ㅎ", "ㅏ", "ㄴ"))
         assertEquals("가", type("ㄱ", "ㅏ"))
     }
@@ -22,7 +22,7 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `two consonants can share one tail, and a vowel splits them again`() {
+    fun `two consonants can share one tail and a vowel splits them again`() {
         assertEquals("갉", type("ㄱ", "ㅏ", "ㄹ", "ㄱ"))
         // The compound breaks up: ㄹ stays behind and ㄱ leads the new syllable.
         assertEquals("갈가", type("ㄱ", "ㅏ", "ㄹ", "ㄱ", "ㅏ"))
@@ -105,7 +105,7 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `only Korean composes, and only the right-to-left scripts are marked so`() {
+    fun `only Korean composes and only the right-to-left scripts are marked so`() {
         assertTrue(keyboardLayoutFor("ko")?.composesHangul == true)
         assertTrue(keyboardLayoutFor("de")?.composesHangul == false)
 
@@ -132,7 +132,7 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `no keyboard can type a meaning separator, extended keys included`() {
+    fun `no keyboard can type a meaning separator extended keys included`() {
         // Every separator `WordMeta` puts *between* meanings or forms. Each meaning is its own entry
         // in an array, so a key for one would let it be typed into a single surface and read back as
         // two. `،` and `؛` are ordinary Arabic punctuation and still excluded, for that reason.
@@ -172,7 +172,7 @@ class HangulComposerTest {
         keyboardLayoutFor(code)?.digits.orEmpty().joinToString("") { it.lower }
 
     @Test
-    fun `the Chinese reading field types pinyin, while the word itself is bopomofo`() {
+    fun `the Chinese reading field types pinyin while the word itself is bopomofo`() {
         val reading = keyboardLayoutFor("zh", FieldKey.READING)?.rows.orEmpty()
             .flatten().map { it.lower }.toSet()
 
@@ -187,7 +187,7 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `a field accepts what its keyboard types, and refuses what it does not`() {
+    fun `a field accepts what its keyboard types and refuses what it does not`() {
         val german = keyboardLayoutFor("de")!!
 
         assertTrue("Straße".all(german::accepts))
@@ -242,7 +242,7 @@ class HangulComposerTest {
     }
 
     @Test
-    fun `the extended row pairs each digit with a symbol, as a physical keyboard does`() {
+    fun `the extended row pairs each digit with a symbol as a physical keyboard does`() {
         val layout = KeyboardLayout(
             rows = emptyList(),
             digits = "1234567890".map { KeyCap(it.toString(), it.toString()) },

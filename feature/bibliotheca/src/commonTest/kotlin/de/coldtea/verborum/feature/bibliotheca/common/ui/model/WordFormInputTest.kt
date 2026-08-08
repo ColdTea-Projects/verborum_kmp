@@ -30,7 +30,7 @@ class WordFormInputTest {
     }
 
     @Test
-    fun `a language without articles stores the bare word, keeping the gender in the meta`() {
+    fun `a language without articles stores the bare word keeping the gender in the meta`() {
         val input = WordFormInput(text = "namas", gender = Gender.MASCULINE)
 
         assertEquals("""["namas"]""", composeWordText("lt", listOf(input)))
@@ -129,7 +129,7 @@ class WordFormInputTest {
     }
 
     @Test
-    fun `every closed class sits under Other, and the open ones each have their own chip`() {
+    fun `every closed class sits under Other and the open ones each have their own chip`() {
         assertEquals(
             listOf(
                 WordType.FREE_TEXT,
@@ -155,7 +155,7 @@ class WordFormInputTest {
     }
 
     @Test
-    fun `free text stores no type at all, and a word without one claims none`() {
+    fun `free text stores no type at all and a word without one claims none`() {
         val meta = composeWordMeta("en", WordType.FREE_TEXT, listOf(WordFormInput("good morning")))
 
         assertTrue(!meta.contains("\"type\""))

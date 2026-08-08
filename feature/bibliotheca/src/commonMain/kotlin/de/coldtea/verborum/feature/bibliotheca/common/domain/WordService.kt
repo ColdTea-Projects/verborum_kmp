@@ -3,6 +3,7 @@ package de.coldtea.verborum.feature.bibliotheca.common.domain
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.feature.bibliotheca.common.data.WordRepository
+import de.coldtea.verborum.feature.bibliotheca.common.data.isWorthKeeping
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -22,7 +23,7 @@ internal class WordService(
         repository.observeWordCounts().distinctUntilChanged()
 
     /** One-shot read for prefilling the edit form. */
-    fun word(wordId: String): Word? = repository.findWord(wordId)
+    suspend fun word(wordId: String): Word? = repository.findWord(wordId)
 
     suspend fun saveWord(word: Word, isNew: Boolean): Outcome<Unit> =
         repository.saveWord(word, isNew)
@@ -38,8 +39,10 @@ internal class WordService(
     }
 
     /**
-     * Deletes a word, local view first: it disappears at once, and comes back if the server refuses,
-     * rather than quietly vanishing from a list that never actually changed.
+     * Deletes a word, local view first: it disappears at once. A request that never reached the
+     * server leaves the tombstone standing for the next upload to finish; only a delete the server
+     * refused brings the word back, rather than letting it quietly vanish from a list that never
+     * actually changed.
      */
     suspend fun deleteWord(wordId: String): Outcome<Unit> {
         repository.markDeleted(wordId)
@@ -50,9 +53,13 @@ internal class WordService(
                 outcome
             }
 
-            is Outcome.Failure -> {
-                repository.restore(wordId)
-                outcome
+            is Outcome.Failure -> when {
+                outcome.error.isWorthKeeping() -> Outcome.Success(Unit)
+
+                else -> {
+                    repository.restore(wordId)
+                    outcome
+                }
             }
 
             Outcome.Loading -> Outcome.Loading

@@ -14,6 +14,9 @@ import de.coldtea.verborum.core.auth.SessionState
 import de.coldtea.verborum.core.auth.TokenRefresher
 import de.coldtea.verborum.core.auth.TokenStorage
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
+import de.coldtea.verborum.core.database.bibliotheca.DictionaryDao
+import de.coldtea.verborum.core.database.bibliotheca.WordDao
 import de.coldtea.verborum.core.common.VerborumError
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -45,7 +48,7 @@ class OptionsViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     @Test
-    fun `signing out ends the session, which is what moves the app to the login wall`() =
+    fun `signing out ends the session which is what moves the app to the login wall`() =
         runTest(mainDispatcher) {
             val storage = InMemoryTokenStorage(signedInTokens)
             val (viewModel, session) = viewModel(storage)
@@ -84,6 +87,19 @@ class OptionsViewModelTest {
 
         assertEquals(1, storage.clearCount)
     }
+
+    @Test
+    fun `signing out empties the local library`() = runTest(mainDispatcher) {
+        // The rows are one user's own content. Leaving them on the device would show them to
+        // whoever signs in next.
+        val library = RecordingLibrary()
+        val (viewModel, _) = viewModel(InMemoryTokenStorage(signedInTokens), library)
+
+        viewModel.signOut()
+        viewModel.awaitSignOut()
+
+        assertTrue(library.wasCleared)
+    }
 }
 
 /**
@@ -101,7 +117,10 @@ private val signedInTokens = AuthTokens(
     expiresAtEpochSeconds = Long.MAX_VALUE,
 )
 
-private fun viewModel(storage: TokenStorage): Pair<OptionsViewModel, AuthSession> {
+private fun viewModel(
+    storage: TokenStorage,
+    library: BibliothecaDatabase? = null,
+): Pair<OptionsViewModel, AuthSession> {
     val config = AuthConfig(
         issuer = "https://auth.example.test/realms/verborum",
         clientId = "verborum-app",
@@ -125,7 +144,27 @@ private fun viewModel(storage: TokenStorage): Pair<OptionsViewModel, AuthSession
             storage = NoLanguageStored,
             platformLanguage = { "en" },
         ),
+        localLibrary = library,
     ) to session
+}
+
+/**
+ * Records that the library was emptied. The DAOs are never reached: sign-out only ever calls
+ * [clear], and a fake that pretended to be a database would be asserting on its own behaviour.
+ */
+private class RecordingLibrary : BibliothecaDatabase {
+
+    var wasCleared = false
+        private set
+
+    override val dictionaryDao: DictionaryDao get() = error("sign-out reads no rows")
+    override val wordDao: WordDao get() = error("sign-out reads no rows")
+
+    override suspend fun <R> withTransaction(block: suspend () -> R): R = block()
+
+    override suspend fun clear() {
+        wasCleared = true
+    }
 }
 
 /** Counts clears, which is how a duplicated sign-out would show up. */

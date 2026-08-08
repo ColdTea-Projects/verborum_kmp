@@ -46,7 +46,7 @@ class KeyboardControllerTest {
     }
 
     @Test
-    fun `the chosen keyboard language is remembered, and dropped when the keyboard closes`() {
+    fun `the chosen keyboard language is remembered and dropped when the keyboard closes`() {
         val controller = KeyboardController()
 
         controller.selectLanguage("ja")

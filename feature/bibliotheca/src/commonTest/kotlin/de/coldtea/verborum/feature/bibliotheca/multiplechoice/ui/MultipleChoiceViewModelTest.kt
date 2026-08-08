@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
@@ -59,6 +60,7 @@ class MultipleChoiceViewModelTest {
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
                 wordRepository = wordRepository,
+                uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
             ),
         )
 
@@ -122,7 +124,7 @@ class MultipleChoiceViewModelTest {
     }
 
     @Test
-    fun `a correct answer raises the word once, however many of its forms are asked`() =
+    fun `a correct answer raises the word once however many of its forms are asked`() =
         runTest(mainDispatcher) {
             val (viewModel, repository) = viewModel(words = listOf(verb) + fourWords)
             advanceUntilIdle()

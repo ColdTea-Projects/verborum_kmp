@@ -8,7 +8,7 @@ import kotlin.test.assertNull
 class ScriptDetectionTest {
 
     @Test
-    fun `text is drawn in the script it is written in, not the language it belongs to`() {
+    fun `text is drawn in the script it is written in not the language it belongs to`() {
         // The case that matters: a Latin name typed while the Arabic keyboard is open. The Arabic
         // face carries no Latin at all, so getting this wrong is a field full of empty boxes.
         assertNull(scriptCodeOf("German Basics"))

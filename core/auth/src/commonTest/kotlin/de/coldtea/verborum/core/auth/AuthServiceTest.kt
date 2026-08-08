@@ -103,7 +103,7 @@ class AuthServiceTest {
     }
 
     @Test
-    fun `a redirect that cannot be verified is reported, not silently dropped`() = runTest {
+    fun `a redirect that cannot be verified is reported not silently dropped`() = runTest {
         // On web this is the case that would otherwise just show the login screen again with no
         // explanation: the code came back but the pending authorization was gone.
         val (service, _) = service(echoesState, retainPending = false)

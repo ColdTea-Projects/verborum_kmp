@@ -26,7 +26,7 @@ class RelativeTimeTest {
     }
 
     @Test
-    fun `a timestamp in the future reads as just now, not as a negative age`() {
+    fun `a timestamp in the future reads as just now not as a negative age`() {
         // Server and device clocks disagreeing must not produce "in -3 days".
         assertEquals("just now", RelativeTime.ago(now + 60_000, now))
     }
