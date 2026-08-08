@@ -1,6 +1,6 @@
 ---
 name: kmp-app-architecture
-description: The module graph, layering rules and MVVM/MVI contracts of this Kotlin Multiplatform app. Load before adding or moving a module, adding a feature, deciding where a class belongs, wiring Koin, changing navigation, or reviewing whether a change respects layering. Triggers on "new feature module", "where should this live", "core vs feature", "dependency direction", "ViewModel", "navigation graph", "Koin module", "clean architecture".
+description: Reviews and implements against the module graph, layering rules and MVVM/MVI contracts of this Kotlin Multiplatform app — composeApp shell, feature slices, core plumbing, Koin wiring and navigation. Use when adding or moving a module, adding a feature, deciding where a class belongs, wiring Koin, changing the navigation graph, or reviewing whether a change respects layering; triggers on "new feature module", "where should this live", "core vs feature", "dependency direction", "ViewModel", "navigation graph", "Koin module".
 ---
 
 # Verborum KMP architecture
@@ -23,19 +23,20 @@ composeApp  ──▶ feature/*  ──▶ core/*
 | `core:network`       | Ktor client factory, `ApiConfig` per target, `apiCall`, error mapping   |
 | `core:auth`          | `AuthSession`, `TokenStorage` (expect/actual), PKCE, SHA-256            |
 | `core:database`      | `LocalCache` — real on iOS, no-op on web; `BibliothecaDatabase` — Room on iOS, absent on web |
-| `feature:auth`        | the login wall (Keycloak, Authorization Code + PKCE)                    |
+| `feature:auth`       | the login wall (Keycloak, Authorization Code + PKCE)                    |
 | `feature:bibliotheca`| the library — slice per screen (`dictionarylist`, `dictionarydetails`)   |
 | `feature:forum`      | marketplace listings                                                    |
 | `feature:onboarding` | the welcome tour; owns when it is shown per platform                     |
-| `feature:options`     | the Options tab; owns sign-out                                          |
+| `feature:options`    | the Options tab; owns sign-out                                          |
 
-### Non-negotiable rules
+## Non-negotiable rules
 
 1. **Dependencies point one way only.** `composeApp → feature → core`. Never `core → feature`,
    never `feature → composeApp`.
-2. **Features never depend on features.** Shared behaviour is promoted to a `core:*` module. When one
-   feature's screen must open another's, the graph builder takes a lambda and the **shell** supplies it
-   (`optionsGraph(onHowToUseApp = …)` opens onboarding without Options knowing it exists).
+2. **Features never depend on features.** Shared behaviour is promoted to a `core:*` module. When
+   one feature's screen must open another's, the graph builder takes a lambda and the **shell**
+   supplies it (`optionsGraph(onHowToUseApp = …)` opens onboarding without Options knowing it
+   exists).
 3. **A feature exposes exactly two things**: its nav-graph entry (`BibliothecaGraph` +
    `bibliothecaGraph()`) and its Koin module (`bibliothecaModule`). Screens, view models,
    repositories and route classes stay `internal`/`private` to the feature.
@@ -44,170 +45,24 @@ composeApp  ──▶ feature/*  ──▶ core/*
 5. **`core:network` is the only module that knows Ktor.** Features see `Outcome` and
    `VerborumError`, never an `HttpResponse` or a Ktor exception.
 
-## Feature module anatomy
-
-A feature is a set of **screen slices**. Each slice is one screen (plus the pieces only it needs) and
-carries its own `data` / `domain` / `di` / `ui` folders; anything two slices share moves up into the
-feature's `common/`. This mirrors the Android app package-for-package, so a screen ported from there
-lands in the same place here.
+## Quick start — where a new screen lands
 
 ```
-feature/<name>/src/commonMain/kotlin/de/coldtea/verborum/feature/<name>/
-├── common/                     shared *inside* this feature only
-│   ├── data/                     DTO/API pieces more than one slice uses
-│   ├── domain/                   SyncService, cross-slice use cases
-│   └── ui/model/                 shared UI enums/models (SupportedLanguage)
-├── <slice>/                    one screen, e.g. dictionarylist/
-│   ├── data/                     DTOs, Api, Store, Repository — while only this screen reads them
-│   ├── di/                       <Slice>Module.kt — the slice's Koin module
-│   ├── domain/                   domain model, <Slice>Service, usecase/ — same condition
-│   └── ui/                       <Screen>.kt, <Screen>ViewModel.kt
-│       ├── composables/          pieces of that screen only
-│       └── model/                State, UI model, sort/filter enums
-├── di/<Name>Module.kt          the feature's single Koin module: `includes(<slice>Module)`
-└── navigation/<Name>Navigation.kt   @Serializable routes + NavGraphBuilder extension
+feature/<name>/<slice>/ui/<Screen>Screen.kt       stateful half + expect <Screen>Content
+feature/<name>/<slice>/ui/<Screen>Content.ios.kt  the Android design
+feature/<name>/<slice>/ui/<Screen>Content.web.kt  the desktop design
+feature/<name>/<slice>/di/<Slice>Module.kt        included by the feature's single Koin module
 ```
 
-`feature/bibliotheca/dictionarylist` is the reference slice. Rules that follow from this shape:
+Full folder layout, the sharing rules between slices, the per-platform UI fork and the steps to
+register a new feature: [references/feature_module_anatomy.md](references/feature_module_anatomy.md).
 
-- **A slice owns its whole vertical.** Its repository, use cases and view model are `internal` to the
-  module and never referenced from another slice.
-- **Sharing goes up, never sideways.** Slice A does not import from slice B; the shared piece moves
-  to `common/`. Needed by a second *feature*, it moves to a `core:*` module instead. This is not
-  theoretical: the dictionary and word data/domain layers live in `common/` precisely because the list
-  and the details screen both read them, so `dictionarylist/` and `dictionarydetails/` are `di` + `ui`
-  only. A slice keeps its own `data`/`domain` only until a second screen needs them.
-- **One Koin module per slice**, aggregated by the feature's module with `includes(...)` — the shell
-  still sees exactly one module per feature.
-- **The feature's public surface is unchanged**: the nav graph entry plus the Koin module. Slices add
-  no new public API.
-- **A slice forks its UI per platform** — `expect`/`actual` on the content composable, with
-  `iosMain`/`webMain` actuals. This is the norm in `feature:bibliotheca`, not the exception: the web
-  app is laid out as a desktop app and iOS keeps the Android design, so the two
-  differ by intent. The split is always the same:
+## The other two contracts
 
-  ```
-  ui/<Screen>Screen.kt          commonMain — the stateful half: view model, RegisterTopBar,
-                                             then `expect fun <Screen>Content(…)`
-  ui/<Screen>Content.ios.kt     iosMain    — the Android design
-  ui/<Screen>Content.web.kt     webMain    — the desktop design
-  ui/composables/…              whichever source set actually draws them
-  ```
-
-  The view model, the state and the callback signatures stay shared, so the fork is presentation
-  only and no behaviour can drift. A composable only one platform draws belongs in that platform's
-  source set — leaving it in `commonMain` is how the two designs start bleeding into each other.
-
-  Web pages take their furniture from `core:designsystem/webMain` (`WebPageTitle`, `WebChip`,
-  `WebPanel`, `WebSelect`, `WebTextField`, `WebPrimaryButton`) and their measure from `ContentPane` +
-  `ContentWidth.Web`; iOS screens keep `ContentColumn`.
-
-- **Every screen calls `RegisterTopBar`, on both platforms.** iOS renders it as the top bar; web
-  renders it as `WebTopBar`, the strip above the page holding the way back, and pages add a
-  `backLabel` naming where back leads. Register in the shared half where the title is the same on
-  both platforms, and in each actual where it is not.
-
-- **Web navigation follows the window.** Sidebar at ≥700dp, bottom bar below it; the shell decides
-  from the destination, and only the onboarding graph goes without. Do not gate navigation on what a
-  screen registered — a screen that forgets would silently lose it.
-
-  `selfpractice` forked before the web redesign and is unaffected by it.
-- A single-screen feature (`feature/forum`, `feature/auth`, `feature/options`) keeps the flat
-  `data`/`di`/`ui` layout until a second screen arrives; the slice folders are what a second screen
-  introduces.
-- **One bottom-bar tab = one feature graph.** `TopLevelDestination` maps each tab onto a feature's
-  `*Graph`, so a new tab is a new feature module rather than an entry in an existing one.
-
-Then: `include(":feature:<name>")` in `settings.gradle.kts`, a build file with
-`id("verborum.kmp.feature")`, and add the module + its Koin module to `composeApp`
-(`build.gradle.kts` dependency, `appModules` in `di/AppModule.kt`, `VerborumNavHost`, and
-`TopLevelDestination` if it is a tab).
-
-## MVVM / MVI contract
-
-`BaseViewModel<State, Effect>` in `core:common` is the only base class:
-
-- **State** — one immutable `data class` per screen, defaults for every field, exposed as
-  `StateFlow`. Mutated only through `setState { copy(...) }`.
-- **Effect** — a `sealed interface` of one-shot events (navigation, snackbars) on a hot
-  `SharedFlow`. Never model navigation as state.
-- **Intents** — plain public methods on the view model (`search(query)`, `retry()`). No
-  `dispatch(Action)` switchboard.
-- Work runs in `viewModelScope`; suspending calls return `Outcome`, so `try/catch` never appears
-  in a view model.
-
-### Screen split
-
-Every screen is two composables:
-
-```kotlin
-@Composable
-internal fun DictionaryListScreen(         // stateful: injects the VM, collects state
-    onDictionaryClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: DictionaryListViewModel = koinViewModel(),
-) { ... }
-
-@Composable
-internal fun DictionaryListContent(        // stateless: pure state -> UI, previewable, testable
-    state: DictionaryListUiState,
-    onQueryChanged: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) { ... }
-```
-
-Navigation is passed **in** as lambdas from the nav graph; a screen never holds a `NavController`.
-
-## Data layer
-
-- Repository interface + implementation live in the slice's `data/` package; the interface is what
-  the domain layer depends on. The domain model lives in `domain/`, the row the screen renders in
-  `ui/model/` — three shapes, mapped at each boundary, none of them shared.
-- Every repository method returns `Outcome<T>` — never throws, never returns `null` to mean failure.
-- Fakes are legitimate production stand-ins while an endpoint is pending; swap the Koin binding, not
-  the call sites.
-- DTOs (`@Serializable`) stay in the data layer and are mapped to domain models before crossing into
-  `ui/`. Do not let a DTO reach a composable.
-- **Not every endpoint uses `Envelope`.** The dictionary service answers with the payload directly,
-  so those calls go through `plainApiCall` / `statusApiCall`; `apiCall` is for enveloped endpoints.
-- **The local copy is a store interface with two implementations, chosen per platform.**
-  `DictionaryStore` / `WordStore` are the single source of truth a slice observes.
-  `DatabaseDictionaryStore` / `DatabaseWordStore` back them with Room on iOS, so the library survives
-  a restart; `InMemoryDictionaryStore` / `InMemoryWordStore` back them on web, which has no local
-  database and keeps the library for the session. The feature's Koin module picks with
-  `getOrNull<BibliothecaDatabase>()`. Store reads are **suspending** because a database cannot answer
-  synchronously.
-- **Tombstones are the delete contract, on both.** A delete flags the row `isDeleted` and hides it at
-  once; a merge never lets the server resurrect it, and only drops the tombstone once the server has
-  forgotten the row too. A merge likewise never wipes a row the server has not seen yet
-  (`isSynced = false`), or work done offline would be lost. `DictionaryStoreContract` /
-  `WordStoreContract` are the shared tests, run against both implementations.
-- **A failed write is not automatically an error.** `VerborumError.isWorthKeeping()` decides: a
-  request that never landed (`Network`, 5xx) leaves the row pending and reports success, because the
-  save did happen locally; one the server refused (4xx, `Serialization`, `Unauthorized`) is rolled
-  back and reported. Never widen this to "any failure keeps the row" — a row the backend rejects
-  would then retry forever.
-- **`UploadPendingChangesUseCase` runs in front of every pull**, inside `SyncService`. It is the only
-  thing that drains offline changes, and the ordering is what stops a download racing an unsent row.
-  Best-effort by design: a row that fails stays pending for the next pass.
-- `LocalCache` is **not** the database and not a substitute for it: it is plaintext `NSUserDefaults`
-  on iOS and a no-op on web, so putting user content in it is a data-at-rest decision, not a detail.
-
-## Dependency injection boundaries
-
-- `coreModule` (in `composeApp/di/AppModule.kt`) wires `core:*` only.
-- Each feature owns one `Module`; `appModules` is the single list, `initKoin()` the single
-  entry point, called exactly once per platform launcher before first composition.
-- View models are registered with `viewModelOf(::Vm)` and resolved with `koinViewModel()`.
-- Interfaces are bound explicitly: `single<WordRepository> { InMemoryWordRepository() }`.
-- No `GlobalContext.get()`, no service locators inside classes — constructor injection only.
-
-## expect/actual placement
-
-Declare the `expect` next to the interface it serves in `commonMain`, and put actuals in the
-narrowest source set that works: `webMain` when js and wasmJs share the implementation,
-`jsMain`/`wasmJsMain` only for the low-level bridge that cannot be shared (see
-`kmp-development` for the `js(...)` constraint), `iosMain` for Apple.
+- View model, state/effect/intent shapes, the stateful-plus-stateless screen split, Koin binding
+  rules and `expect`/`actual` placement: [references/mvvm_and_di.md](references/mvvm_and_di.md).
+- Repository/domain/UI-model boundaries, the per-platform store, tombstone deletes, offline sync and
+  what a failed write means: [references/data_layer.md](references/data_layer.md).
 
 ## Review checklist
 

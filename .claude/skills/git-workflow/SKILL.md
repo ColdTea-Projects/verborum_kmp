@@ -1,6 +1,6 @@
 ---
 name: git-workflow
-description: Git workflow for the Verborum KMP project — staging and commit conventions, what must be committed and what must never be, and the cross-platform verification required before any commit. Use when staging, committing, preparing a PR, or reasoning about git state in this repo.
+description: Manages git for the Verborum KMP project — staging and commit conventions, what must be committed and what must never be, and the cross-platform verification required before any commit. Use when staging, committing, preparing a PR, or reasoning about git state in this repo.
 ---
 
 # Git workflow (Verborum KMP)
@@ -63,56 +63,10 @@ reversible; committing is not, from the user's point of view.
    git diff --staged     # this is the commit
    ```
 
-3. **Check for accidents**: a scratchpad file written inside the repo, a `build/` artifact
-   force-added, a leftover `println`, `enableLogging = true`, a populated `TEAM_ID`, a
-   localhost/staging base URL.
-
-## Commit messages
-
-Match the existing history — lowercase, imperative, concise, one line:
-
-```
-initial commit
-update theme
-```
-
-One logical change per commit: a feature, a fix, a build change, or a config change — not a mix. If
-the diff needs "and" to describe it, it is two commits. Add a body only when the *why* is not
-obvious from the diff. End the message with:
-
-```
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-```
-
-Use the model actually running the session. This repo's two existing commits predate the convention
-and carry no trailer.
-
-## Must be committed
-
-- `.claude/skills/`, `.claude/agents/`, `CLAUDE.md` — shared team config.
-- `gradle/libs.versions.toml`, `settings.gradle.kts`, every `build.gradle.kts`, and all of
-  `build-logic/`.
-- `gradle/wrapper/gradle-wrapper.properties` **including `distributionSha256Sum`**, plus
-  `gradlew`/`gradlew.bat`.
-- **`kotlin-js-store/yarn.lock`** and `kotlin-js-store/wasm/` — these are lockfiles, not build
-  output. Regenerate with `./gradlew kotlinUpgradeYarnLock` and commit the result; never delete them
-  to work around a mismatch.
-- `iosApp/iosApp.xcodeproj/project.pbxproj` and shared schemes — `.gitignore` deliberately
-  un-ignores these while excluding `xcuserdata` and per-user settings.
-
-## Never commit
-
-- Build output: `**/build/`, `.gradle/`, `.kotlin/`, `node_modules/`, and the web
-  `dist/…/productionExecutable/` bundle. All gitignored — do not `git add -f` past it.
-- `local.properties`, `.idea/`, `.DS_Store`, `xcuserdata/`.
-- **Secrets of any kind**: keystores, API keys, client secrets, tokens. A committed secret is
-  compromised even after a later removal — tell the user immediately rather than quietly amending.
-- A populated `TEAM_ID` in `iosApp/Configuration/Config.xcconfig`. It is intentionally empty in the
-  repo and set locally.
-- `.claude/settings.local.json` (personal overrides) if one ever appears. **It is not currently in
-  `.gitignore`** — add the entry before creating such a file.
-- Scratchpad/temp files. If one landed inside the repo by accident, delete it (and
-  `git restore --staged --` it if already staged).
+3. **Check for accidents** and confirm every path belongs in the commit — the allow/deny lists,
+   the commit-message format and the platform tag live in
+   [references/what_to_commit.md](references/what_to_commit.md). Read it before staging anything
+   unfamiliar, and before writing the message.
 
 ## Quick reference
 

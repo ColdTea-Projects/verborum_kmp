@@ -50,6 +50,16 @@ reasoning from general knowledge.
 | `kmp-unit-testing` | Writing or changing any test; assessing whether a change is covered |
 | `kmp-integration-testing` | Testing across layers — `MockEngine`, auth session, Koin graph, Compose UI tests |
 | `git-workflow` | Staging, committing, preparing a PR, or reasoning about git state |
+| `write-a-skill` | Creating, expanding, splitting or auditing any skill under `.claude/skills` |
+
+**Skill file shape.** Every skill here follows the `write-a-skill` standard: a description that
+opens with an action verb and names its triggers with "Use when …", a `SKILL.md` under 100 lines,
+and deeper material in a flat `references/` folder one level down. Adding to or creating a skill
+means loading `write-a-skill` first, then proving the result with its validators:
+
+```bash
+python3 .claude/skills/write-a-skill/scripts/skill_review_checklist_runner.py .claude/skills/<name>
+```
 
 **Default bundles.** Any code change loads `kotlin` + `kmp-development`. Add
 `kmp-app-architecture` for anything structural, `material-design` for anything visual, the matching

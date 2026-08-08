@@ -1,6 +1,6 @@
 ---
 name: kmp-unit-testing
-description: Writing unit tests for this KMP project — commonTest layout, kotlin-test, coroutine and StateFlow testing, fakes instead of mocks, injecting clocks and randomness, and the per-target test tasks. Load before writing or changing any test, adding testable logic, or when asked whether a change is covered.
+description: Writes unit tests for this KMP project — commonTest layout, kotlin-test assertions, coroutine and StateFlow testing with runTest, hand-written fakes instead of mocks, injected clocks and randomness, and the per-target test tasks. Use when writing or changing any test, adding testable logic, or judging whether a change is covered.
 ---
 
 # KMP unit testing
@@ -20,7 +20,7 @@ Mirror the production package. **Write in `commonTest`** unless the thing under 
 platform-specific — a `commonTest` test is three tests for the price of one and catches
 Native-vs-JS divergence.
 
-## Conventions
+## Quick start
 
 Backticked descriptive names, one behaviour per test, arrange/act/assert with a blank line between:
 
@@ -39,13 +39,8 @@ not on interactions — there is no mocking framework and that is a feature, not
 
 ## Coroutines
 
-Add once to `libs.versions.toml` and to the base convention plugin's `commonTest`:
-
-```toml
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-```
-
-Then:
+`kotlinx-coroutines-test` belongs in `libs.versions.toml` and the base convention plugin's
+`commonTest`, not in a single module's build file. Then:
 
 ```kotlin
 @Test
@@ -64,68 +59,11 @@ fun `search publishes the repository result`() = runTest {
 - Prefer `advanceUntilIdle()` / `runCurrent()` over real delays; use the injected
   `StandardTestDispatcher` rather than wall-clock time.
 
-## Testing a `BaseViewModel`
+## View models, fakes and injected clocks
 
-- Construct the view model directly with fakes — no Koin in a unit test.
-- Assert on `state.value` after the coroutine settles.
-- For effects, collect before acting (`effects` is a hot `SharedFlow`, so a late collector misses
-  emissions):
-
-```kotlin
-@Test
-fun `clicking a word emits an open effect`() = runTest {
-    val emitted = mutableListOf<DictionaryEffect>()
-    val job = launch { viewModel.effects.toList(emitted) }
-
-    viewModel.onWordClicked("liber")
-    advanceUntilIdle()
-
-    assertEquals(listOf(DictionaryEffect.OpenWord("liber")), emitted)
-    job.cancel()
-}
-```
-
-- `init { search("") }` in a view model runs at construction — account for the initial load in
-  assertions.
-
-## Fakes, not mocks
-
-Hand-written fakes in `commonTest`, or the production stand-ins that already exist
-(`InMemoryWordRepository`, `InMemoryTokenStorage`). Keep them small and deterministic:
-
-```kotlin
-private class FakeWordRepository(
-    private val result: Outcome<List<Word>> = Outcome.Success(emptyList()),
-) : WordRepository {
-    var lastQuery: String? = null
-        private set
-
-    override suspend fun search(query: String): Outcome<List<Word>> =
-        result.also { lastQuery = query }
-
-    override suspend fun word(id: String): Outcome<Word> =
-        Outcome.Failure(VerborumError.Http(404))
-}
-```
-
-Cover the failure paths too: every `VerborumError` case a view model branches on deserves a test.
-
-## Make code testable by injecting the non-deterministic parts
-
-This is why `AuthSession` takes `nowEpochSeconds: () -> Long = ::currentEpochSeconds` — a test
-passes a fixed clock and asserts the 60-second refresh leeway exactly:
-
-```kotlin
-val session = AuthSession(
-    storage = InMemoryTokenStorage(tokens),
-    refresher = TokenRefresher { Outcome.Success(refreshed) },
-    nowEpochSeconds = { 1_000L },
-)
-```
-
-Do the same for randomness and IDs: default to the platform source, override in tests. Keep the
-seam `internal` so it does not widen the public API. Verified cryptographic primitives get **known
-answer tests** against published vectors, as `PkceTest` does with RFC 7636 Appendix B.
+Collecting a hot `SharedFlow` of effects before acting, the shape of a hand-written fake, and the
+injected-clock seam (`AuthSession`'s `nowEpochSeconds`) are in
+[references/viewmodel_and_fakes.md](references/viewmodel_and_fakes.md).
 
 ## What to test
 
@@ -140,7 +78,7 @@ delegations, the framework itself.
 
 ```bash
 ./gradlew jsNodeTest wasmJsNodeTest              # fast — run these while iterating
-./gradlew iosSimulatorArm64Test                  # needs Xcode command line tools
+./gradlew iosSimulatorArm64Test                  # needs Xcode
 ./gradlew :core:auth:jsNodeTest                  # scope to a module
 ./gradlew allTests                               # everything
 ```
