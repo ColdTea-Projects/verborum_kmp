@@ -5,8 +5,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.auth.SessionState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
@@ -25,10 +23,7 @@ import org.koin.compose.koinInject
  * every screen lives behind a feature module's nav graph.
  */
 @Composable
-fun App(
-    navController: NavHostController = rememberNavController(),
-    languageSettings: LanguageSettings = koinInject(),
-) {
+fun App(languageSettings: LanguageSettings = koinInject()) {
     val language by languageSettings.language.collectAsStateWithLifecycle()
 
     // One provider for the whole tree: every screen reads its words from here, so changing the
@@ -38,7 +33,7 @@ fun App(
         LocalUiLanguage provides language,
     ) {
         VerborumTheme {
-            AuthGate(navController)
+            AuthGate()
         }
     }
 }
@@ -48,10 +43,7 @@ fun App(
  * it is a wall in front of the whole graph, so no back stack can ever lead behind it.
  */
 @Composable
-private fun AuthGate(
-    navController: NavHostController,
-    authService: AuthService = koinInject(),
-) {
+private fun AuthGate(authService: AuthService = koinInject()) {
     val sessionState by authService.sessionState.collectAsStateWithLifecycle()
 
     // Reads persisted tokens and finishes an OAuth redirect the web app was started with. Keyed on
@@ -67,6 +59,11 @@ private fun AuthGate(
         SessionState.SignedOut -> LoginScreen()
         // Signing out lives in the Options tab, so the shell only decides wall-or-app.
         // The tour, where a platform shows it at all, comes between signing in and the app.
-        is SessionState.SignedIn -> OnboardingGate { NavigationCentral(navController) }
+        //
+        // The nav controller is created *here*, inside the branch, so it lives and dies with the
+        // session: a controller hoisted above this gate outlives the host that signing out disposed,
+        // and the next sign-in re-attaches it to back stack entries that are already destroyed —
+        // which draws nothing at all. A session gets its own controller, and its own view models.
+        is SessionState.SignedIn -> OnboardingGate { NavigationCentral() }
     }
 }
