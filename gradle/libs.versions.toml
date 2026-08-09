@@ -4,6 +4,7 @@ androidx-room = "2.8.4"
 androidx-sqlite = "2.6.2"
 composeMultiplatform = "1.11.1"
 junit = "4.13.2"
+kermit = "2.1.0"
 koin = "4.2.2"
 ksp = "2.3.11"
 kotlin = "2.4.10"
@@ -26,6 +27,9 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "androidx-room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidx-room" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
+# Logging. `kermit` is part of core:common's public surface — every module logs through it.
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-test = { module = "co.touchlab:kermit-test", version.ref = "kermit" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }

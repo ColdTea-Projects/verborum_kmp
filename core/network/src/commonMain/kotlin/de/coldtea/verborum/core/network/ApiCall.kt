@@ -23,13 +23,13 @@ suspend inline fun <reified T> apiCall(
     when (status) {
         401 -> Outcome.Failure(VerborumError.Unauthorized)
         else -> response.body<Envelope<T>>().toOutcome(status)
-    }
+    }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation
 } catch (serialization: SerializationException) {
-    Outcome.Failure(VerborumError.Serialization(serialization.message))
+    Outcome.Failure(VerborumError.Serialization(serialization.message)).logFailure()
 } catch (throwable: Throwable) {
-    Outcome.Failure(throwable.toVerborumError())
+    Outcome.Failure(throwable.toVerborumError()).logFailure()
 }
 
 /**
@@ -47,13 +47,13 @@ suspend inline fun <reified T> plainApiCall(
         status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
         status in 200..299 -> Outcome.Success(response.body<T>())
         else -> Outcome.Failure(VerborumError.Http(status))
-    }
+    }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation
 } catch (serialization: SerializationException) {
-    Outcome.Failure(VerborumError.Serialization(serialization.message))
+    Outcome.Failure(VerborumError.Serialization(serialization.message)).logFailure()
 } catch (throwable: Throwable) {
-    Outcome.Failure(throwable.toVerborumError())
+    Outcome.Failure(throwable.toVerborumError()).logFailure()
 }
 
 /**
@@ -63,17 +63,18 @@ suspend inline fun <reified T> plainApiCall(
 suspend inline fun statusApiCall(
     crossinline request: suspend () -> HttpResponse,
 ): Outcome<Unit> = try {
-    val status = request().status.value
+    val response = request()
+    val status = response.status.value
 
     when {
         status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
         status in 200..299 -> Outcome.Success(Unit)
         else -> Outcome.Failure(VerborumError.Http(status))
-    }
+    }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation
 } catch (throwable: Throwable) {
-    Outcome.Failure(throwable.toVerborumError())
+    Outcome.Failure(throwable.toVerborumError()).logFailure()
 }
 
 /** Maps a transport-level throwable onto the shared error model. */

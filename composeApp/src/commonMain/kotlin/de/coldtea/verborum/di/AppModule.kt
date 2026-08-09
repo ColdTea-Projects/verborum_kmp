@@ -17,6 +17,9 @@ import de.coldtea.verborum.core.auth.defaultAuthConfig
 import de.coldtea.verborum.core.database.LocalCache
 import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
 import de.coldtea.verborum.core.database.bibliotheca.createBibliothecaDatabase
+import de.coldtea.verborum.core.common.getPlatform
+import de.coldtea.verborum.core.common.logging.initLogging
+import de.coldtea.verborum.core.common.logging.logger
 import de.coldtea.verborum.core.database.createLocalCache
 import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.network.BearerTokenProvider
@@ -91,8 +94,15 @@ val appModules: List<Module> =
  * Single Koin entry point. Every platform launcher calls this exactly once
  * before the first composition.
  */
-fun initKoin(extraModules: List<Module> = emptyList()): KoinApplication = startKoin {
-    modules(appModules + extraModules)
+fun initKoin(extraModules: List<Module> = emptyList()): KoinApplication {
+    // Before the graph is built, so a failure while wiring it is not the first thing that cannot
+    // be logged.
+    initLogging()
+    logger("App").i { "starting on ${getPlatform().name}" }
+
+    return startKoin {
+        modules(appModules + extraModules)
+    }
 }
 
 private const val AUTH_HTTP_CLIENT = "authHttpClient"

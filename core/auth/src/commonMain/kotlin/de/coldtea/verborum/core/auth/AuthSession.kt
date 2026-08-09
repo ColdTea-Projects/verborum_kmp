@@ -2,6 +2,7 @@ package de.coldtea.verborum.core.auth
 
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.getOrNull
+import de.coldtea.verborum.core.common.logging.logger
 import de.coldtea.verborum.core.network.BearerTokenProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +39,8 @@ class AuthSession(
 
     private val mutex = Mutex()
 
+    private val log = logger("Auth")
+
     private val _sessionState = MutableStateFlow<SessionState>(SessionState.Unknown)
 
     /** The gate the app shell watches to choose between the login wall and the app. */
@@ -48,13 +51,17 @@ class AuthSession(
 
         if (!tokens.isExpiring(nowEpochSeconds())) return@withLock tokens.accessToken
 
+        log.d { "access token is expiring, refreshing" }
+
         val refreshed = refresher.refresh(tokens.refreshToken).getOrNull()
         if (refreshed == null) {
             // A failed refresh ends the session — there is nothing left to retry with.
+            log.w { "refresh failed, signing out" }
             storage.clear()
             _sessionState.value = SessionState.SignedOut
             null
         } else {
+            log.d { "refresh succeeded" }
             storage.write(refreshed)
             _sessionState.value = refreshed.toSignedIn()
             refreshed.accessToken
@@ -64,22 +71,35 @@ class AuthSession(
     /** Reads persisted tokens once at startup and publishes the resulting state. */
     suspend fun restore() = mutex.withLock {
         _sessionState.value = storage.read()?.toSignedIn() ?: SessionState.SignedOut
+        log.i { "session restored: ${_sessionState.value.describe()}" }
     }
 
     suspend fun signIn(tokens: AuthTokens) = mutex.withLock {
         storage.write(tokens)
         _sessionState.value = tokens.toSignedIn()
+        log.i { "signed in" }
     }
 
     suspend fun signOut() = mutex.withLock {
         storage.clear()
         _sessionState.value = SessionState.SignedOut
+        log.i { "signed out" }
     }
 
     suspend fun isSignedIn(): Boolean = storage.read() != null
 
     /** The refresh token, for the back-channel logout that ends the Keycloak SSO session. */
     suspend fun currentRefreshToken(): String? = storage.read()?.refreshToken
+}
+
+/**
+ * The session state as one word. Never the identity itself: a user id or an email in a log line is
+ * personal data sitting in the device console.
+ */
+private fun SessionState.describe(): String = when (this) {
+    SessionState.Unknown -> "unknown"
+    SessionState.SignedOut -> "signed out"
+    is SessionState.SignedIn -> "signed in"
 }
 
 private fun AuthTokens.toSignedIn(): SessionState.SignedIn =

@@ -13,6 +13,9 @@ kotlin {
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.serialization.kotlinxJson)
         }
+        commonTest.dependencies {
+            implementation(libs.kermit.test)
+        }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }

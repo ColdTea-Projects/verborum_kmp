@@ -50,7 +50,12 @@ fun createHttpClient(
 
     if (config.enableLogging) {
         install(Logging) {
+            logger = KtorKermitLogger
+            // INFO is method, URL and status — no headers and no bodies. The sanitiser is the
+            // belt-and-braces for the day someone raises this to HEADERS while debugging: the
+            // access token must never reach a console.
             level = LogLevel.INFO
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
 

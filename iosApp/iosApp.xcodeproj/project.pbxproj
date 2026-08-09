@@ -152,7 +152,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\n# Xcode runs this phase with a sanitised environment: no JAVA_HOME and a PATH\n# holding only the Xcode toolchain, so Gradle cannot find a JDK on its own.\nif [ -z \"$JAVA_HOME\" ]; then\n  if RESOLVED_JAVA_HOME=$(/usr/libexec/java_home 2>/dev/null); then\n    export JAVA_HOME=\"$RESOLVED_JAVA_HOME\"\n  elif [ -x \"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/java\" ]; then\n    export JAVA_HOME=\"/Applications/Android Studio.app/Contents/jbr/Contents/Home\"\n  else\n    echo \"error: no JDK found. Install one (for example: brew install --cask temurin@21) or set JAVA_HOME.\"\n    exit 1\n  fi\nfi\nexport PATH=\"$JAVA_HOME/bin:$PATH\"\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
