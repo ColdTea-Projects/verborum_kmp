@@ -144,8 +144,14 @@ private fun NSData.toKotlinString(): String? =
 @OptIn(ExperimentalForeignApi::class)
 internal actual fun secureRandomBytes(size: Int): ByteArray {
     val bytes = ByteArray(size)
-    bytes.usePinned { pinned ->
+    val status = bytes.usePinned { pinned ->
         SecRandomCopyBytes(kSecRandomDefault, size.toULong(), pinned.addressOf(0))
     }
+
+    // Failing outright is the only safe answer. Ignoring the status leaves the array as it was
+    // allocated — all zeroes — which is a fully predictable PKCE verifier and `state`, and those are
+    // the two values the whole flow's security rests on.
+    check(status == errSecSuccess) { "SecRandomCopyBytes failed with status $status." }
+
     return bytes
 }
