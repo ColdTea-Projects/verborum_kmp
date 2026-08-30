@@ -1,6 +1,8 @@
 package de.coldtea.verborum.core.auth
 
+import de.coldtea.verborum.core.common.logging.logger
 import de.coldtea.verborum.core.network.VerborumJson
+import kotlinx.cinterop.COpaquePointer
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.alloc
@@ -10,7 +12,6 @@ import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
 import platform.CoreFoundation.CFDictionaryAddValue
 import platform.CoreFoundation.CFDictionaryCreateMutable
-import platform.CoreFoundation.CFDictionaryRef
 import platform.CoreFoundation.CFMutableDictionaryRef
 import platform.CoreFoundation.CFRelease
 import platform.CoreFoundation.CFTypeRefVar
@@ -59,26 +60,34 @@ private class KeychainTokenStorage(
     private val legacyDefaults: NSUserDefaults = NSUserDefaults.standardUserDefaults,
 ) : TokenStorage {
 
+    private val log = logger("Auth")
+
     override suspend fun read(): AuthTokens? {
         migrateLegacyTokensIfPresent()
         return keychainRead()?.let(::decode)
     }
 
     override suspend fun write(tokens: AuthTokens) {
-        val payload = VerborumJson.encodeToString(tokens)
+        val payload = CFBridgingRetain(VerborumJson.encodeToString(tokens).toNSData())
 
-        // The Keychain has no upsert: an existing item must go before the new one is added.
-        keychainDelete()
+        try {
+            // The Keychain has no upsert: an existing item must go before the new one is added.
+            keychainDelete()
 
-        val query = newQuery()
-        CFDictionaryAddValue(query, kSecValueData, CFBridgingRetain(payload.toNSData()))
-        CFDictionaryAddValue(
-            query,
-            kSecAttrAccessible,
-            kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-        )
-        SecItemAdd(query as CFDictionaryRef, null)
-        CFRelease(query)
+            val status = withQuery(
+                kSecValueData to payload,
+                kSecAttrAccessible to kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            ) { query -> SecItemAdd(query, null) }
+
+            // Not worth crashing over, but silence would be worse: the app goes on looking signed
+            // in until the process ends, then finds the session it never persisted gone. The status
+            // alone — the payload is the token.
+            if (status != errSecSuccess) {
+                log.w { "the Keychain refused the token item (status $status)" }
+            }
+        } finally {
+            CFRelease(payload)
+        }
     }
 
     override suspend fun clear() {
@@ -87,12 +96,10 @@ private class KeychainTokenStorage(
     }
 
     private fun keychainRead(): String? = memScoped {
-        val query = newQuery()
-        CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue)
-
         val result = alloc<CFTypeRefVar>()
-        val status = SecItemCopyMatching(query as CFDictionaryRef, result.ptr)
-        CFRelease(query)
+        val status = withQuery(kSecReturnData to kCFBooleanTrue) { query ->
+            SecItemCopyMatching(query, result.ptr)
+        }
 
         if (status != errSecSuccess) return@memScoped null
 
@@ -101,20 +108,40 @@ private class KeychainTokenStorage(
     }
 
     private fun keychainDelete() {
-        val query = newQuery()
-        SecItemDelete(query as CFDictionaryRef)
-        CFRelease(query)
+        withQuery { query -> SecItemDelete(query) }
     }
 
-    /** The service/account pair identifying this app's single token item. */
-    private fun newQuery(): CFMutableDictionaryRef {
+    /**
+     * Runs [block] against the query identifying this app's single token item — the service/account
+     * pair, plus whatever [extra] the call adds — and tears the query down afterwards.
+     *
+     * The dictionary is created with no callbacks, so it never retains what it is given: each
+     * `CFBridgingRetain` below has to be released by hand, and releasing the dictionary does not do
+     * it. Anything owned elsewhere — the Security constants, and the payload [write] bridges — is
+     * left alone here. Getting this wrong leaks once per call, and [read] runs on every request.
+     */
+    private fun <R> withQuery(
+        vararg extra: Pair<COpaquePointer?, COpaquePointer?>,
+        block: (CFMutableDictionaryRef) -> R,
+    ): R {
+        val service = CFBridgingRetain(SERVICE)
+        val account = CFBridgingRetain(ACCOUNT)
         val query = requireNotNull(CFDictionaryCreateMutable(null, 0, null, null)) {
             "The Keychain query dictionary could not be allocated."
         }
+
         CFDictionaryAddValue(query, kSecClass, kSecClassGenericPassword)
-        CFDictionaryAddValue(query, kSecAttrService, CFBridgingRetain(SERVICE as NSString))
-        CFDictionaryAddValue(query, kSecAttrAccount, CFBridgingRetain(ACCOUNT as NSString))
-        return query
+        CFDictionaryAddValue(query, kSecAttrService, service)
+        CFDictionaryAddValue(query, kSecAttrAccount, account)
+        extra.forEach { (key, value) -> CFDictionaryAddValue(query, key, value) }
+
+        return try {
+            block(query)
+        } finally {
+            CFRelease(query)
+            CFRelease(service)
+            CFRelease(account)
+        }
     }
 
     /**
