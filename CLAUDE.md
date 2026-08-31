@@ -96,7 +96,13 @@ Typical flow for a substantial change: `*-development` to implement → `*-build
   ```bash
   ./gradlew compileKotlinJs compileKotlinWasmJs compileKotlinIosSimulatorArm64
   ./gradlew jsNodeTest wasmJsNodeTest
+  ./gradlew iosSimulatorArm64Test          # needs Xcode; not covered by the line above
   ```
+  **`wasmJsNodeTest` is disabled for every Compose module** — skiko cannot load under Node, so the
+  task is skipped rather than failed and the run still goes green (`KmpComposeConventionPlugin` sets
+  this, with the reason). Their `commonTest` is therefore covered by `jsNodeTest` and, when you run
+  it, `iosSimulatorArm64Test` — never on wasm. Reading a green `wasmJsNodeTest` as wasm coverage for
+  `feature/*` or a Compose `core/*` module is wrong; `wasmJsBrowserTest` is what would give it.
 - **Errors are values.** Repositories return `Outcome<T>`; `VerborumError` is the only error model
   features see. No Ktor type escapes `core:network`. Rethrow `CancellationException`. No `!!`.
 - **Tokens are not hardcoded, not logged, not widened.** Storage is the Keychain on iOS
