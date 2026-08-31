@@ -15,6 +15,13 @@ object VerborumColors {
     val LightGold = Color(0xFFD4AF37)
     val LightBorder = Color(0xFFE0E0E0)
 
+    // Material 3's baseline error ramp rather than a Verborum colour, and deliberately so: the
+    // accent is itself a crimson, so an error drawn in the palette would read as an ordinary
+    // control. Kept here anyway, because a value the theme reads belongs with the rest of them.
+    val LightError = Color(0xFFB3261E)
+    val LightErrorContainer = Color(0xFFF9DEDC)
+    val LightOnErrorContainer = Color(0xFF410E0B)
+
     // Dark Theme
     val DarkBackground = Color(0xFF0F0F0F)
     val DarkSurface = Color(0xFF1A1A1A)
@@ -25,6 +32,10 @@ object VerborumColors {
     val DarkAccent = Color(0xFFE63946)
     val DarkGold = Color(0xFFE6C547)
     val DarkBorder = Color(0xFF333333)
+
+    val DarkError = Color(0xFFCF6679)
+    val DarkErrorContainer = Color(0xFF93000A)
+    val DarkOnErrorContainer = Color(0xFFFFDAD6)
 }
 
 /**
