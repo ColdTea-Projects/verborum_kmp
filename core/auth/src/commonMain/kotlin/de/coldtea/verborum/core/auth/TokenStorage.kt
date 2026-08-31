@@ -22,7 +22,12 @@ interface TokenStorage {
     suspend fun clear()
 }
 
-/** The platform-backed storage: the Keychain on iOS, `sessionStorage` on web. */
+/**
+ * The platform-backed storage: the Keychain on iOS, `localStorage` on web.
+ *
+ * `localStorage` rather than `sessionStorage` is deliberate — the session has to outlive the tab —
+ * and the web actual states plainly what that costs and what would actually improve it.
+ */
 expect fun createTokenStorage(): TokenStorage
 
 /** Non-persistent storage, useful in tests. */

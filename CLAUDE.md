@@ -99,9 +99,11 @@ Typical flow for a substantial change: `*-development` to implement → `*-build
   ```
 - **Errors are values.** Repositories return `Outcome<T>`; `VerborumError` is the only error model
   features see. No Ktor type escapes `core:network`. Rethrow `CancellationException`. No `!!`.
-- **Tokens are not hardcoded, not logged, not widened.** Storage is the Keychain on iOS and
-  `sessionStorage` on web; `TokenStorage` is the only seam that may change. Never move a token to
-  `NSUserDefaults` or `localStorage`, and read the matching `*-security` skill before touching auth.
+- **Tokens are not hardcoded, not logged, not widened.** Storage is the Keychain on iOS
+  (`…AfterFirstUnlockThisDeviceOnly`) and `localStorage` on web — the latter a deliberate trade so
+  the session outlives the tab, **not** an oversight to "fix" back to `sessionStorage`, which holds
+  the PKCE verifier alone. `TokenStorage` is the only seam that may change. Never move a token to
+  `NSUserDefaults`, and read the matching `*-security` skill before touching auth.
 - **Design tokens only.** `MaterialTheme.colorScheme`, `MaterialTheme.typography`, `Spacing`. No
   colour, text style or `.dp` literal in a feature module.
 - **One version catalog.** `gradle/libs.versions.toml`. No version literals in build files. Shared
