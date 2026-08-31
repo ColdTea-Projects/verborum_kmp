@@ -42,8 +42,11 @@ composeApp  ──▶ feature/*  ──▶ core/*
    repositories and route classes stay `internal`/`private` to the feature.
 4. **The shell owns no feature logic.** If `App.kt` or `VerborumNavHost` starts knowing about a
    screen, a repository or a piece of state, the logic belongs in the feature.
-5. **`core:network` is the only module that knows Ktor.** Features see `Outcome` and
-   `VerborumError`, never an `HttpResponse` or a Ktor exception.
+5. **Ktor stops inside `core:*`.** `core:network` owns the client and the `apiCall` family;
+   `core:auth` is the one other module allowed to name a Ktor type, because Keycloak answers in its
+   own shape rather than the app's `Envelope` and `KeycloakAuthClient` maps its responses itself.
+   No feature ever sees an `HttpResponse` or a Ktor exception — features see `Outcome` and
+   `VerborumError`.
 
 ## Quick start — where a new screen lands
 
