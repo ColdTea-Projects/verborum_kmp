@@ -5,27 +5,42 @@ import de.coldtea.verborum.core.localization.Strings
 /**
  * A selectable dictionary tag.
  *
- * [code] is the stable identifier to persist and send — it never changes with the UI language. The
- * display label is one of two kinds, matching the Android client:
- * - a [localized] resolver for proficiency levels and topics (follows the app language)
- * - a [fixed] proper-noun label shown as-is in every language (framework codes like A1 / N5 /
- *   HSK 3 and exam names like "DELE (es)")
- *
- * Exactly one of the two is set.
+ * [code] is the stable identifier to persist and send — it never changes with the UI language. How
+ * the label is produced is the whole difference between the two kinds, matching the Android client,
+ * so the type carries it rather than a pair of nullable fields: a tag with neither label, or with
+ * both, is not something this can be asked to represent.
  */
-internal data class DictionaryTag(
-    val code: String,
-    private val fixed: String? = null,
-    private val localized: (Strings.() -> String)? = null,
-) {
-    fun label(strings: Strings): String = fixed ?: localized!!.invoke(strings)
+internal sealed interface DictionaryTag {
+
+    val code: String
+
+    fun label(strings: Strings): String
+
+    /**
+     * A proper noun, shown as-is in every language — framework codes like A1 / N5 / HSK 3, and exam
+     * names like "DELE (es)".
+     */
+    data class Fixed(override val code: String, private val name: String) : DictionaryTag {
+        override fun label(strings: Strings): String = name
+    }
+
+    /**
+     * Read from the catalogue on every call, so a label follows the app language rather than
+     * whichever one happened to be current when these lists were first touched.
+     */
+    data class Localized(
+        override val code: String,
+        private val resolve: Strings.() -> String,
+    ) : DictionaryTag {
+        override fun label(strings: Strings): String = strings.resolve()
+    }
 }
 
-private fun translated(code: String, label: Strings.() -> String) =
-    DictionaryTag(code = code, localized = label)
+private fun translated(code: String, label: Strings.() -> String): DictionaryTag =
+    DictionaryTag.Localized(code = code, resolve = label)
 
-private fun fixed(code: String, name: String) =
-    DictionaryTag(code = code, fixed = name)
+private fun fixed(code: String, name: String): DictionaryTag =
+    DictionaryTag.Fixed(code = code, name = name)
 
 // --- Provisional tag taxonomy (UI; codes are the eventual storage keys) ---
 
