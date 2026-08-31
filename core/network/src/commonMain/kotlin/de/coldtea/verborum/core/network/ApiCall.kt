@@ -6,6 +6,7 @@ import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.core.common.toOutcome
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
+import io.ktor.serialization.ContentConvertException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.SerializationException
 
@@ -20,9 +21,19 @@ suspend inline fun <reified T> apiCall(
     val response = request()
     val status = response.status.value
 
-    when (status) {
-        401 -> Outcome.Failure(VerborumError.Unauthorized)
-        else -> response.body<Envelope<T>>().toOutcome(status)
+    when {
+        status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
+        status in 200..299 -> response.body<Envelope<T>>().toOutcome(status)
+
+        // A failing status is read for the backend's own error code, but never for its verdict: the
+        // status already decided that, and a body that will not decode at all — a proxy's HTML page,
+        // an empty gateway response — must still arrive as `Http`. That is what a caller branches on
+        // to tell a retryable 5xx from a refusal it should stop repeating; as a `Serialization` it
+        // would look like a permanently malformed payload instead.
+        else -> {
+            val error = response.envelopeOrNull<T>()?.error
+            Outcome.Failure(VerborumError.Http(status, error?.code, error?.message))
+        }
     }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation
@@ -77,8 +88,28 @@ suspend inline fun statusApiCall(
     Outcome.Failure(throwable.toVerborumError()).logFailure()
 }
 
+/**
+ * The body as an [Envelope], or null when it is not one — a proxy's HTML error page, a plain-text
+ * gateway message, an empty body.
+ *
+ * `@PublishedApi internal` because [apiCall] is inline. Why the body would not decode is deliberately
+ * discarded: this is only ever called where a status already settles the outcome, so the reason adds
+ * nothing that would reach a caller.
+ */
+@PublishedApi
+internal suspend inline fun <reified T> HttpResponse.envelopeOrNull(): Envelope<T>? = try {
+    body<Envelope<T>>()
+} catch (cancellation: CancellationException) {
+    throw cancellation
+} catch (throwable: Throwable) {
+    null
+}
+
 /** Maps a transport-level throwable onto the shared error model. */
 fun Throwable.toVerborumError(): VerborumError = when (this) {
     is SerializationException -> VerborumError.Serialization(message)
+    // Ktor wraps a decode failure in its own conversion exception rather than letting the
+    // kotlinx one through, so without this a malformed payload would read as a transport fault.
+    is ContentConvertException -> VerborumError.Serialization(message)
     else -> VerborumError.Network(message ?: this::class.simpleName)
 }
