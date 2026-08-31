@@ -19,7 +19,7 @@ import io.ktor.http.contentType
 internal class DictionaryApi(private val client: HttpClient) {
 
     suspend fun dictionariesOf(userId: String): Outcome<List<DictionaryDto>> = plainApiCall {
-        client.get("dictionaries/$userId")
+        client.get("dictionaries/${userId.asPathSegment()}")
     }
 
     suspend fun create(request: DictionaryRequest): Outcome<Unit> = statusApiCall {
@@ -37,6 +37,6 @@ internal class DictionaryApi(private val client: HttpClient) {
     }
 
     suspend fun delete(dictionaryId: String): Outcome<Unit> = statusApiCall {
-        client.delete("dictionaries/$dictionaryId")
+        client.delete("dictionaries/${dictionaryId.asPathSegment()}")
     }
 }

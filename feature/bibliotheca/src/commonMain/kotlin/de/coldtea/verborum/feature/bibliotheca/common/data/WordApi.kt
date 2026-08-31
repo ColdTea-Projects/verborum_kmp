@@ -16,7 +16,7 @@ import io.ktor.http.contentType
 internal class WordApi(private val client: HttpClient) {
 
     suspend fun wordsOfDictionary(dictionaryId: String): Outcome<List<WordDto>> = plainApiCall {
-        client.get("words/dictionary/$dictionaryId")
+        client.get("words/dictionary/${dictionaryId.asPathSegment()}")
     }
 
     /**
@@ -24,7 +24,7 @@ internal class WordApi(private val client: HttpClient) {
      * affordable — the alternative is one request per dictionary on every list open.
      */
     suspend fun wordsOfUser(userId: String): Outcome<List<WordDto>> = plainApiCall {
-        client.get("words/user/$userId")
+        client.get("words/user/${userId.asPathSegment()}")
     }
 
     suspend fun create(bundles: List<WordBundleRequest>): Outcome<Unit> = statusApiCall {
@@ -43,10 +43,10 @@ internal class WordApi(private val client: HttpClient) {
     }
 
     suspend fun delete(wordId: String): Outcome<Unit> = statusApiCall {
-        client.delete("words/$wordId")
+        client.delete("words/${wordId.asPathSegment()}")
     }
 
     suspend fun deleteByDictionary(dictionaryId: String): Outcome<Unit> = statusApiCall {
-        client.delete("words/dictionary/$dictionaryId")
+        client.delete("words/dictionary/${dictionaryId.asPathSegment()}")
     }
 }
