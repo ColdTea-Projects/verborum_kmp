@@ -128,7 +128,7 @@ internal class NetworkDictionaryRepository(
     override suspend fun markDeleted(dictionaryId: String) = store.markDeleted(dictionaryId)
 
     override suspend fun deleteRemotely(dictionaryId: String): Outcome<Unit> =
-        api.delete(dictionaryId)
+        api.delete(dictionaryId).orAlreadyGone()
 
     override suspend fun removeLocally(dictionaryId: String) = store.remove(dictionaryId)
 

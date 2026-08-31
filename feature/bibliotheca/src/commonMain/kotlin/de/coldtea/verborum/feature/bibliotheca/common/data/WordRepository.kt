@@ -164,7 +164,8 @@ internal class NetworkWordRepository(
 
     override suspend fun markDeleted(wordId: String) = store.markDeleted(wordId)
 
-    override suspend fun deleteRemotely(wordId: String): Outcome<Unit> = api.delete(wordId)
+    override suspend fun deleteRemotely(wordId: String): Outcome<Unit> =
+        api.delete(wordId).orAlreadyGone()
 
     override suspend fun removeLocally(wordId: String) = store.remove(wordId)
 
@@ -174,7 +175,7 @@ internal class NetworkWordRepository(
         store.markDictionaryDeleted(dictionaryId)
 
     override suspend fun deleteDictionaryWordsRemotely(dictionaryId: String): Outcome<Unit> =
-        api.deleteByDictionary(dictionaryId)
+        api.deleteByDictionary(dictionaryId).orAlreadyGone()
 
     override suspend fun removeDictionaryLocally(dictionaryId: String) =
         store.removeDictionary(dictionaryId)
