@@ -8,6 +8,13 @@ actual fun createLocalCache(): LocalCache = UserDefaultsLocalCache()
 
 actual val localCacheIsPersistent: Boolean = true
 
+/**
+ * `NSUserDefaults` is the right home for settings of this size, and only for those. Its plist sits
+ * in the app container with no protection attributes of its own and is copied into every device
+ * backup — unlike the library database's directory, which is explicitly marked
+ * `NSFileProtectionCompleteUntilFirstUserAuthentication` and excluded from backups. That asymmetry
+ * is deliberate, and it is what the "no user content" rule on [LocalCache] exists to protect.
+ */
 private class UserDefaultsLocalCache(
     private val defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults,
 ) : LocalCache {
