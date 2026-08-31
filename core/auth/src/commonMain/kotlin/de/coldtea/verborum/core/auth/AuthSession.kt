@@ -86,10 +86,20 @@ class AuthSession(
         log.i { "signed out" }
     }
 
-    suspend fun isSignedIn(): Boolean = storage.read() != null
+    /**
+     * Whether a token pair is stored, asked once rather than observed. [sessionState] is the answer
+     * a screen wants; this is for a caller with no composition to collect in.
+     */
+    suspend fun isSignedIn(): Boolean = mutex.withLock { storage.read() != null }
 
-    /** The refresh token, for the back-channel logout that ends the Keycloak SSO session. */
-    suspend fun currentRefreshToken(): String? = storage.read()?.refreshToken
+    /**
+     * The refresh token, for the back-channel logout that ends the Keycloak SSO session.
+     *
+     * Behind the mutex like every other access to the pair: a refresh running concurrently rewrites
+     * it, or clears it outright when it fails, and a read taken around that could hand back a token
+     * the session has already given up on.
+     */
+    suspend fun currentRefreshToken(): String? = mutex.withLock { storage.read()?.refreshToken }
 }
 
 /**
