@@ -16,6 +16,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.Dictionar
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.toUi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -65,8 +66,19 @@ internal class DictionaryListViewModel(
         refresh()
     }
 
+    /**
+     * The live subscription, kept so a re-subscribe replaces it instead of adding to it.
+     *
+     * Only [retry] re-subscribes, and only from the failed state, where the previous flow has
+     * already completed — so nothing collects twice today. Cancelling first is what keeps that true
+     * of a caller who does not know it.
+     */
+    private var dictionariesSubscription: Job? = null
+
     private fun observeDictionaries() {
-        viewModelScope.launch {
+        dictionariesSubscription?.cancel()
+
+        dictionariesSubscription = viewModelScope.launch {
             combine(
                 dictionaryService.observeDictionaries(),
                 wordService.observeWordCounts(),
