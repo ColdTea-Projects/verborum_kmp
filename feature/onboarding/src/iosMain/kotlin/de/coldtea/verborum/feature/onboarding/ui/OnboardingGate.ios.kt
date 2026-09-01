@@ -19,7 +19,13 @@ actual fun OnboardingGate(content: @Composable () -> Unit) {
         // Neither the tour nor the app until the stored answer is in: showing the app first and
         // then covering it with the tour would be worse than a moment of nothing.
         null -> LoadingState()
-        false -> OnboardingScreen(onDone = {})
+
+        // The same view model, handed over rather than resolved again. Both would resolve to one
+        // instance from the shared store anyway, but then this gate would be relying on that to
+        // notice the tour finishing — and `onDone` is empty precisely because it does not need to
+        // act: completing flips `isCompleted`, and that is what swaps the tour for the app.
+        false -> OnboardingScreen(onDone = {}, viewModel = viewModel)
+
         true -> content()
     }
 }
