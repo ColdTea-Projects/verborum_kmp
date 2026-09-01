@@ -3,6 +3,7 @@ package de.coldtea.verborum.feature.options.ui
 import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.common.BaseViewModel
+import de.coldtea.verborum.core.database.LocalCache
 import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
 import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.localization.UiLanguage
@@ -20,6 +21,13 @@ internal class OptionsViewModel(
      * them waiting. Null on web, which stores nothing across a session.
      */
     private val localLibrary: BibliothecaDatabase? = null,
+    /**
+     * The device's small on-disk settings. Emptied along with the library, because nothing in here
+     * is promised to be about the device rather than the person: today it holds only whether the
+     * tour has been shown, so the next person to sign in sees it — which is the right answer on a
+     * shared device, and the reason not to leave the store behind for whatever is cached next.
+     */
+    private val localCache: LocalCache,
 ) : BaseViewModel<OptionsState, Nothing>(OptionsState()) {
 
     /** What the interface is speaking now — the device's language until someone chooses otherwise. */
@@ -50,8 +58,10 @@ internal class OptionsViewModel(
             authService.signOut()
 
             // After the session is actually gone, so a failed sign-out does not leave the user
-            // signed in and looking at an empty library.
+            // signed in and looking at an empty library. The UI language is not touched: it lives
+            // under its own key, and which language someone reads is a property of the device.
             localLibrary?.clear()
+            localCache.clear()
 
             // The shell usually replaces this screen before the flag matters; it is reset anyway so
             // a failed sign-out leaves a usable button rather than a permanently disabled one.

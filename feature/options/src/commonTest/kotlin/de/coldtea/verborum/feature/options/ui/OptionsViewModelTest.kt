@@ -14,6 +14,7 @@ import de.coldtea.verborum.core.auth.SessionState
 import de.coldtea.verborum.core.auth.TokenRefresher
 import de.coldtea.verborum.core.auth.TokenStorage
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.database.LocalCache
 import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
 import de.coldtea.verborum.core.database.bibliotheca.DictionaryDao
 import de.coldtea.verborum.core.database.bibliotheca.WordDao
@@ -100,6 +101,44 @@ class OptionsViewModelTest {
 
         assertTrue(library.wasCleared)
     }
+
+    @Test
+    fun `signing out empties the on-device settings too`() = runTest(mainDispatcher) {
+        // Whatever is cached is not promised to be about the device rather than the person, so it
+        // must not outlive the session — today that is the flag saying the tour has been shown, and
+        // the next person to sign in should see it.
+        val cache = RecordingCache()
+        val (viewModel, _) = viewModel(InMemoryTokenStorage(signedInTokens), cache = cache)
+
+        viewModel.signOut()
+        viewModel.awaitSignOut()
+
+        assertTrue(cache.wasCleared)
+    }
+}
+
+/** Records that the device's settings were emptied. */
+private class RecordingCache : LocalCache {
+
+    var wasCleared = false
+        private set
+
+    private val entries = mutableMapOf<String, String>()
+
+    override suspend fun put(key: String, value: String) {
+        entries[key] = value
+    }
+
+    override suspend fun get(key: String): String? = entries[key]
+
+    override suspend fun remove(key: String) {
+        entries -= key
+    }
+
+    override suspend fun clear() {
+        entries.clear()
+        wasCleared = true
+    }
 }
 
 /**
@@ -120,6 +159,7 @@ private val signedInTokens = AuthTokens(
 private fun viewModel(
     storage: TokenStorage,
     library: BibliothecaDatabase? = null,
+    cache: LocalCache = RecordingCache(),
 ): Pair<OptionsViewModel, AuthSession> {
     val config = AuthConfig(
         issuer = "https://auth.example.test/realms/verborum",
@@ -145,6 +185,7 @@ private fun viewModel(
             platformLanguage = { "en" },
         ),
         localLibrary = library,
+        localCache = cache,
     ) to session
 }
 

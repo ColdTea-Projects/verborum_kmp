@@ -14,6 +14,7 @@ val optionsModule: Module = module {
             authService = get(),
             languageSettings = get(),
             localLibrary = getOrNull(),
+            localCache = get(),
         )
     }
 }
