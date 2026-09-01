@@ -28,6 +28,15 @@ interface Strings {
     val createAccount: String get() = "Create account"
     val signInTagline: String get() = "Your dictionaries, on every device."
 
+    // Why an attempt did not sign anyone in. Deliberately free of error codes and configuration
+    // advice: what a Keycloak reason or a CORS misconfiguration means belongs in the log, to the
+    // person building the app, not on screen in front of the person trying to get in.
+    val signInRefused: String get() = "Sign-in was refused. Please try again."
+    val signInUnverified: String get() = "That sign-in could not be verified. Please try again."
+    val signInUnreachable: String get() = "The sign-in server could not be reached. Check your connection."
+    val signInRejected: String get() = "The sign-in server rejected this attempt. Please try again."
+    val signInFailed: String get() = "Signing in did not finish. Please try again."
+
     // ---- tabs ----------------------------------------------------------------------------------
     val bibliotheca: String get() = "Bibliotheca"
     val forum: String get() = "Forum"

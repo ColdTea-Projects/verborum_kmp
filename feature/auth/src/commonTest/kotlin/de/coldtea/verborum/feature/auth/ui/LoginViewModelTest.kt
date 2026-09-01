@@ -9,6 +9,7 @@ import de.coldtea.verborum.core.auth.InMemoryTokenStorage
 import de.coldtea.verborum.core.auth.KeycloakAuthClient
 import de.coldtea.verborum.core.auth.PendingAuthorization
 import de.coldtea.verborum.core.auth.PendingAuthorizationStore
+import de.coldtea.verborum.core.auth.SignInFailure
 import de.coldtea.verborum.core.auth.TokenRefresher
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.VerborumError
@@ -24,8 +25,8 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -49,9 +50,11 @@ class LoginViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isAuthenticating)
-        // The reason is named, not swallowed: a silent return to this screen looks like a no-op.
-        assertNotNull(viewModel.state.value.failureMessage)
-        assertTrue(viewModel.state.value.failureMessage!!.contains("access_denied"))
+        // The failure is reported, not swallowed: a silent return to this screen looks like a no-op.
+        // What it says is the screen's business — it holds the failure, not a sentence, so the words
+        // come from the string catalogue in the reader's language. The raw reason ("access_denied")
+        // is a diagnosis for the log, and deliberately never reaches the state.
+        assertEquals(SignInFailure.Refused("access_denied"), viewModel.state.value.failure)
     }
 
     @Test
@@ -62,7 +65,7 @@ class LoginViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isAuthenticating)
-        assertNull(viewModel.state.value.failureMessage)
+        assertNull(viewModel.state.value.failure)
     }
 
     @Test
@@ -75,7 +78,7 @@ class LoginViewModelTest {
         viewModel.signIn()
 
         assertTrue(viewModel.state.value.isAuthenticating)
-        assertNull(viewModel.state.value.failureMessage)
+        assertNull(viewModel.state.value.failure)
     }
 }
 

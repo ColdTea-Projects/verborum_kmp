@@ -6,6 +6,7 @@ import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.auth.SignInFailure
 import de.coldtea.verborum.core.common.BaseViewModel
 import de.coldtea.verborum.core.common.VerborumError
+import de.coldtea.verborum.core.common.logging.logger
 import kotlinx.coroutines.launch
 
 /**
@@ -14,8 +15,13 @@ import kotlinx.coroutines.launch
  */
 data class LoginState(
     val isAuthenticating: Boolean = false,
-    /** Null when nothing has gone wrong; otherwise what to tell the user. */
-    val failureMessage: String? = null,
+    /**
+     * Null when nothing has gone wrong; otherwise why the last attempt did not sign anyone in.
+     *
+     * The failure itself rather than a sentence about it: the screen turns it into words, so the
+     * message follows the app's language instead of whichever one was current when it was written.
+     */
+    val failure: SignInFailure? = null,
 )
 
 /**
@@ -26,12 +32,19 @@ class LoginViewModel(
     private val authService: AuthService,
 ) : BaseViewModel<LoginState, Nothing>(LoginState()) {
 
+    private val log = logger("Auth")
+
     init {
         // On web the attempt that fails is the redirect completion at app start, long before this
         // screen exists — so the failure is observed, not returned.
         viewModelScope.launch {
             authService.lastFailure.collect { failure ->
-                setState { copy(failureMessage = failure?.toMessage()) }
+                // Every one of these names something the developer has to fix, so the detail is
+                // recorded here instead of being shown to someone who cannot act on it. Nothing
+                // logged carries a token or a code.
+                failure?.let { log.w { "sign-in failed: ${it.diagnostic()}" } }
+
+                setState { copy(failure = failure) }
             }
         }
     }
@@ -42,7 +55,7 @@ class LoginViewModel(
     fun createAccount() = authenticate(AuthEntry.CreateAccount)
 
     private fun authenticate(entry: AuthEntry) {
-        setState { copy(isAuthenticating = true, failureMessage = null) }
+        setState { copy(isAuthenticating = true, failure = null) }
 
         viewModelScope.launch {
             // On web this never returns: the page navigates to Keycloak and the redirect is
@@ -55,29 +68,30 @@ class LoginViewModel(
 }
 
 /**
- * Says what actually failed rather than "something went wrong". These messages name the likely
- * misconfiguration on purpose: every one of them is something the developer has to fix, and a
- * generic message would hide it. Nothing here carries a token or a code.
+ * The line written to the log — the diagnosis, for whoever is building the app.
+ *
+ * It names the likely misconfiguration on purpose, because every one of these is something a
+ * developer has to fix and a generic line would hide it. None of it belongs on screen: an OAuth
+ * reason code and a CORS hint mean nothing to the person who just wanted to sign in.
  */
-private fun SignInFailure.toMessage(): String = when (this) {
+private fun SignInFailure.diagnostic(): String = when (this) {
     is SignInFailure.Refused ->
-        "Sign-in was refused${reason?.let { ": $it" }.orEmpty()}."
+        "the authorization server refused it${reason?.let { " ($it)" }.orEmpty()}"
 
     SignInFailure.UnverifiedRedirect ->
-        "That sign-in could not be verified, so it was not completed. Please try again."
+        "a code came back with no matching pending authorization — on web, usually a redirect " +
+            "landing in a different tab than the one that started it"
 
     is SignInFailure.ExchangeFailed -> when (val cause = error) {
         is VerborumError.Network ->
-            "The sign-in server could not be reached to finish signing in. " +
-                "On web this is usually a CORS problem: the app's origin must be listed in the " +
-                "Keycloak client's Web origins."
+            "the token endpoint could not be reached; on web this is usually CORS — the app's " +
+                "origin must be listed in the Keycloak client's Web origins"
 
         VerborumError.Unauthorized ->
-            "The sign-in server rejected this attempt. Check the client's valid redirect URIs."
+            "the token endpoint rejected the grant; check the client's valid redirect URIs"
 
-        is VerborumError.Http ->
-            "Finishing sign-in failed (HTTP ${cause.status})."
-
-        else -> "Finishing sign-in failed. Please try again."
+        is VerborumError.Http -> "the token endpoint answered HTTP ${cause.status}"
+        is VerborumError.Serialization -> "the token response could not be decoded"
+        is VerborumError.Unknown -> "the token exchange failed: ${cause.cause.orEmpty()}"
     }
 }

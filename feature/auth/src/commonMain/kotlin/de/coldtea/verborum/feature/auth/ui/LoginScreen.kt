@@ -26,11 +26,33 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.auth.SignInFailure
+import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.core.designsystem.component.VerborumBrandMark
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import org.koin.compose.viewmodel.koinViewModel
 import de.coldtea.verborum.core.localization.strings
+
+/**
+ * What to tell someone whose sign-in did not go through, in their own language.
+ *
+ * Resolved here rather than in the view model so it follows the app's language — and so the
+ * diagnosis, which the view model logs, never reaches the screen. Every case is spelled out: a new
+ * kind of failure should stop the compiler here rather than fall through to something vague.
+ */
+@Composable
+private fun SignInFailure.message(): String = when (this) {
+    is SignInFailure.Refused -> strings.signInRefused
+    SignInFailure.UnverifiedRedirect -> strings.signInUnverified
+    is SignInFailure.ExchangeFailed -> when (error) {
+        is VerborumError.Network -> strings.signInUnreachable
+        VerborumError.Unauthorized -> strings.signInRejected
+        is VerborumError.Http -> strings.signInFailed
+        is VerborumError.Serialization -> strings.signInFailed
+        is VerborumError.Unknown -> strings.signInFailed
+    }
+}
 
 /**
  * The login wall the app shell shows whenever no one is signed in. Signing in and creating an
@@ -122,9 +144,9 @@ internal fun LoginContent(
                     Text(strings.createAccount)
                 }
 
-                state.failureMessage?.let { message ->
+                state.failure?.let { failure ->
                     Text(
-                        text = message,
+                        text = failure.message(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
