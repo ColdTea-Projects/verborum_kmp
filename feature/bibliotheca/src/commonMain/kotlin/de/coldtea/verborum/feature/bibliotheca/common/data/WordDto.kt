@@ -5,6 +5,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
 
@@ -26,14 +27,26 @@ internal data class WordDto(
     @SerialName("updatedAt") val updatedAt: String? = null,
 ) {
     /** The level the server sent, but only when it is a whole number the app could have written. */
-    private val validLevel: Int?
+    private val storedLevel: Int?
         get() = (level as? JsonPrimitive)?.intOrNull?.takeIf { it in 0..Word.MAX_LEVEL }
+
+    /**
+     * Whether the server said nothing at all about the level — the field absent, or an explicit
+     * null. A different thing from having sent a value this app cannot use, and treated differently.
+     */
+    private val levelIsAbsent: Boolean
+        get() = level == null || level is JsonNull
 
     /**
      * Server timestamps win when present; the fallbacks cover a backend that omits them.
      *
-     * An invalid level is reset to 0 **and** the row is marked unsynced, so the corrected value is
-     * pushed back and the bad data is healed on the server rather than being read wrong forever.
+     * A level the server sent but this app could not have written is reset to 0 **and** the row is
+     * marked unsynced, so the correction is pushed back and the bad value is healed rather than read
+     * wrong forever.
+     *
+     * A level the server never sent is left synced. Silence is not a claim about the word, and
+     * reading it as one would mark every pulled row unsynced and have the very next sync upload the
+     * whole library with `level = 0` — destroying whatever progress the server actually holds.
      */
     fun toWord(
         dictionaryId: String,
@@ -48,8 +61,8 @@ internal data class WordDto(
         translationMeta = translationMeta.orEmpty(),
         createdAt = ApiTimestamp.parse(createdAt) ?: fallbackCreatedAt,
         updatedAt = ApiTimestamp.parse(updatedAt) ?: fallbackUpdatedAt,
-        level = validLevel ?: 0,
-        isSynced = validLevel != null,
+        level = storedLevel ?: 0,
+        isSynced = levelIsAbsent || storedLevel != null,
     )
 }
 

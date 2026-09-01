@@ -186,8 +186,13 @@ internal class NetworkWordRepository(
     ): List<Word> {
         val now = time.nowEpochMillis()
 
-        return map { dto ->
-            val (createdAt, updatedAt) = known[dto.wordId.orEmpty()] ?: (now to now)
+        return mapNotNull { dto ->
+            // A word with no id of its own is dropped rather than stored under an empty one: it
+            // could never be updated, deleted or uploaded, and a second such row would land on the
+            // same key and quietly replace the first.
+            val wordId = dto.wordId?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+
+            val (createdAt, updatedAt) = known[wordId] ?: (now to now)
             dto.toWord(
                 dictionaryId = dictionaryId,
                 fallbackCreatedAt = createdAt,
