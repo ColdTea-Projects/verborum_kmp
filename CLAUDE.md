@@ -111,7 +111,11 @@ Typical flow for a substantial change: `*-development` to implement → `*-build
   the PKCE verifier alone. `TokenStorage` is the only seam that may change. Never move a token to
   `NSUserDefaults`, and read the matching `*-security` skill before touching auth.
 - **Design tokens only.** `MaterialTheme.colorScheme`, `MaterialTheme.typography`, `Spacing`. No
-  colour, text style or `.dp` literal in a feature module.
+  colour or text style in a feature module, and no dimension written inline at a call site. Spacing,
+  padding and gaps always come from `Spacing`; a component's own geometry — a key cap, a skeleton
+  bar, the width a layout needs before it splits — may be a named `private val` at the foot of its
+  file, which is what every feature module already does. Promote one to `core:designsystem` only
+  when a second file genuinely means the *same* dimension, not merely the same number.
 - **One version catalog.** `gradle/libs.versions.toml`. No version literals in build files. Shared
   build setup goes in a convention plugin, not a second module build file.
 - **Match the surrounding code** — structure, naming, and its sparse "explain why" comment style.

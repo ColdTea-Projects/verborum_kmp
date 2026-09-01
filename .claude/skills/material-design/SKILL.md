@@ -34,6 +34,11 @@ Never a raw `fontSize`/`TextStyle` in a feature; if a style is missing, add it t
 `extraLarge` 32). Corner radius and elevation come from the component defaults unless there is a
 stated reason.
 
+**A component's own geometry** — a key cap, a skeleton bar, the width a layout needs before it
+splits — is not spacing, and `Spacing` is the wrong place for it. It belongs in a named `private val`
+at the foot of the file that draws it, never inline at the call site. Two files sharing a *number* is
+not a reason to promote it to `core:designsystem`; two files meaning the same *dimension* is.
+
 ## Shared composables
 
 Use the existing state surfaces so every screen behaves identically:
