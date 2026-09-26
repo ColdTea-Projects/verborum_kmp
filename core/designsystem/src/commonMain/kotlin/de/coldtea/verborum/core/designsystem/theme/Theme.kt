@@ -83,6 +83,15 @@ private val LightColorScheme = lightColorScheme(
 internal expect fun verborumTypography(): Typography
 
 /**
+ * Owns the loading of any font the type scale itself does not carry, for as long as the app runs.
+ *
+ * iOS needs nothing here. The web target loads a face per script, and *where* that load is owned
+ * decides whether it survives: the web actual explains it.
+ */
+@Composable
+internal expect fun ProvideScriptFonts(content: @Composable () -> Unit)
+
+/**
  * The single Material 3 theme for the whole app. Every entry point (iOS, web)
  * and every preview wraps its content in this.
  */
@@ -94,6 +103,7 @@ fun VerborumTheme(
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
         typography = verborumTypography(),
-        content = content,
-    )
+    ) {
+        ProvideScriptFonts(content)
+    }
 }

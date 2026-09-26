@@ -40,6 +40,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
+import de.coldtea.verborum.core.designsystem.theme.scriptedText
 
 /**
  * The furniture every redesigned web page is built from.
@@ -72,7 +73,9 @@ fun WebBackLink(
         )
         Spacer(modifier = Modifier.width(Spacing.small))
         Text(
-            text = label,
+            // "Back to 日本語の基礎" is two scripts in one line, and the label arrives already
+            // assembled, so the split has to happen on what it says rather than on what built it.
+            text = scriptedText(label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

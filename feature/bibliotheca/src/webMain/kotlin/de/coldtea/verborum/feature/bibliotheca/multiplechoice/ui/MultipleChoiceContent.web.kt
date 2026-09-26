@@ -24,6 +24,7 @@ import de.coldtea.verborum.core.designsystem.component.WebPrimaryButton
 import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.scriptedText
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebQuestionCard
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebTestResult
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
@@ -157,12 +158,11 @@ private fun AnswerFeedback(isCorrect: Boolean, correctAnswer: String) {
         shape = Shapes.medium,
         color = color.copy(alpha = FeedbackAlpha),
     ) {
+        val feedback = if (isCorrect) "Correct!" else "Not quite — the answer is “$correctAnswer”."
+
         Text(
-            text = if (isCorrect) {
-                "Correct!"
-            } else {
-                "Not quite — the answer is “$correctAnswer”."
-            },
+            // The answer carries its own script into the sentence, the same as the question does.
+            text = scriptedText(feedback),
             style = MaterialTheme.typography.titleSmall,
             color = color,
             textAlign = TextAlign.Center,

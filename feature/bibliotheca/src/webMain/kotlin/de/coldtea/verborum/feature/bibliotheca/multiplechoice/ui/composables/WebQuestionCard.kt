@@ -27,6 +27,7 @@ import de.coldtea.verborum.core.designsystem.component.WebProgressBar
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
+import de.coldtea.verborum.core.designsystem.theme.scriptedText
 import de.coldtea.verborum.core.localization.strings
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 
@@ -68,7 +69,9 @@ internal fun WebQuestionCard(
             }
 
             Text(
-                text = strings.askMeaning(question.choice.question.prompt),
+                // The word is in the language being studied and the question around it is not, so
+                // the two halves are drawn in different faces.
+                text = scriptedText(strings.askMeaning(question.choice.question.prompt)),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -173,7 +176,9 @@ private fun AnswerRow(
             }
 
             Text(
-                text = text,
+                // An answer is a word in the language being studied; the canvas has no system font
+                // to fall back on when the default face does not carry its script.
+                text = scriptedText(text),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )

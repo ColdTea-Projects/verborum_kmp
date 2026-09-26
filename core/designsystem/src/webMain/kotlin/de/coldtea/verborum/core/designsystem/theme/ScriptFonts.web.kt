@@ -2,6 +2,14 @@ package de.coldtea.verborum.core.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -54,46 +62,98 @@ internal actual fun verborumTypography(): Typography {
 }
 
 /**
- * The family that can draw [languageCode], or null when the app's default already covers it.
+ * Holds the script faces this session has needed, and takes requests for the ones it has not.
  *
- * Anything written in the Latin, Greek or Cyrillic alphabets is already covered; the scripts that
- * need their own face are Arabic (shared with Persian) and the three CJK writing systems.
+ * [ProvideScriptFonts] provides it, so the theme is what ends up asking for a face — which, as that
+ * function explains, is the whole point.
+ */
+private data class ScriptFonts(
+    val families: Map<String, FontFamily>,
+    val request: (script: String) -> Unit,
+)
+
+private val LocalScriptFonts = compositionLocalOf<ScriptFonts> {
+    error("No script fonts provided. Every entry point wraps its content in VerborumTheme.")
+}
+
+/**
+ * Loads a script's face once for the whole session, on request, and keeps it loaded.
+ *
+ * `Font(Res.font.x)` starts an asynchronous fetch whose lifetime belongs to **the composition that
+ * asked for it**, while the in-flight load itself is cached globally by path. A word row in a list is
+ * about the shortest-lived composition there is: when it goes away — scrolled out, or replaced
+ * because the URL deep-linked to another screen — its scope is cancelled, and that cancels the shared
+ * load every other row is already waiting on. Those rows keep skiko's default face, which carries no
+ * CJK or Arabic glyph at all, so they draw empty boxes and nothing recomposes them into the real
+ * font. The Latin faces never showed this because they are asked for by [verborumTypography], here in
+ * the theme, which lives as long as the app.
+ *
+ * So the theme asks for the script faces too, and a load that starts is a load that finishes. Still
+ * lazily: a face is fetched the first time something renders its script, which is what keeps the CJK
+ * faces — 17MB of the 18MB — out of a session that never shows them.
  */
 @Composable
-fun fontFamilyForLanguage(languageCode: String): FontFamily? =
-    when (languageCode.lowercase()) {
-        "ar", "fa" -> FontFamily(Font(Res.font.noto_sans_arabic))
-        "ja" -> FontFamily(Font(Res.font.noto_sans_jp))
-        "ko" -> FontFamily(Font(Res.font.noto_sans_kr))
-        "zh" -> FontFamily(Font(Res.font.noto_sans_sc))
-        else -> null
+internal actual fun ProvideScriptFonts(content: @Composable () -> Unit) {
+    // Only ever grows: one entry per script the session has shown.
+    var requested by remember { mutableStateOf(emptySet<String>()) }
+    val request = remember { { script: String -> requested = requested + script } }
+
+    val families = mutableMapOf<String, FontFamily>()
+
+    requested.forEach { script ->
+        // Keyed by the script so each face keeps its own loading state across recompositions,
+        // whatever order the set iterates in.
+        key(script) {
+            scriptFamily(script)?.let { families[script] = it }
+        }
     }
 
-/**
- * The family that can draw [text], falling back to [fallbackLanguageCode] while it is still empty.
- *
- * Content rather than language, because a field's language does not always describe what is in it: a
- * dictionary called "German Basics" may be typed with the Arabic keyboard open, and the Arabic face
- * carries no Latin whatsoever — every letter would be an empty box. Reading the script off the text
- * is exact for the single-script strings this app stores.
- */
-@Composable
-fun fontFamilyForText(text: String, fallbackLanguageCode: String = ""): FontFamily? =
-    fontFamilyForLanguage(scriptCodeOf(text) ?: fallbackLanguageCode)
+    CompositionLocalProvider(
+        LocalScriptFonts provides ScriptFonts(families = families, request = request),
+        content = content,
+    )
+}
 
 /**
- * The language code whose face can draw [text], or null where the default already can.
- *
- * Kana settles Japanese before the shared Han range is consulted, since a Japanese sentence written
- * mostly in kanji would otherwise be drawn with Chinese letterforms.
+ * Latin, Greek and Cyrillic are already in the type scale's own family; the scripts that need a face
+ * of their own are Arabic (shared with Persian) and the three CJK writing systems. The face itself
+ * comes from [ProvideScriptFonts], which is the only composition allowed to ask for one.
  */
-fun scriptCodeOf(text: String): String? = when {
-    text.any { it.code in 0x3040..0x30FF } -> "ja"
-    text.any { it.code in 0xAC00..0xD7A3 || it.code in 0x3130..0x318F } -> "ko"
-    text.any { it.code in 0x4E00..0x9FFF || it.code in 0x3400..0x4DBF || it.code in 0x3105..0x312F } -> "zh"
-    text.any { it.code in 0x0600..0x06FF } -> "ar"
+@Composable
+actual fun fontFamilyForLanguage(languageCode: String): FontFamily? {
+    val script = scriptOf(languageCode) ?: return null
+    val scriptFonts = LocalScriptFonts.current
+    val family = scriptFonts.families[script]
+
+    // Not loaded yet: ask the theme for it and draw this one frame with the default face. Asking from
+    // a side effect keeps the request out of composition, where writing the set it was just read from
+    // would be writing state mid-composition.
+    if (family == null) SideEffect { scriptFonts.request(script) }
+
+    return family
+}
+
+/** The script [languageCode] is written in, using the same codes [scriptCodeOf] reports. */
+private fun scriptOf(languageCode: String): String? = when (languageCode.lowercase()) {
+    "ar", "fa" -> "ar"
+    "ja" -> "ja"
+    "ko" -> "ko"
+    "zh" -> "zh"
     else -> null
 }
+
+@Composable
+private fun scriptFamily(script: String): FontFamily? = when (script) {
+    "ar" -> FontFamily(Font(Res.font.noto_sans_arabic))
+    "ja" -> FontFamily(Font(Res.font.noto_sans_jp))
+    "ko" -> FontFamily(Font(Res.font.noto_sans_kr))
+    "zh" -> FontFamily(Font(Res.font.noto_sans_sc))
+    else -> null
+}
+
+@Composable
+actual fun fontFamilyForText(text: String, fallbackLanguageCode: String): FontFamily? =
+    fontFamilyForLanguage(scriptCodeOf(text) ?: fallbackLanguageCode)
 
 @Composable
 private fun notoSans(): FontFamily = FontFamily(

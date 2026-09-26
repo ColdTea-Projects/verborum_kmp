@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import de.coldtea.verborum.core.designsystem.theme.scriptedText
 import de.coldtea.verborum.core.localization.strings
 
 /**
@@ -20,7 +21,9 @@ internal fun DeleteDictionaryDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(strings.deleteDictionary) },
-        text = { Text(strings.deleteDictionaryWarning(dictionaryName)) },
+        // The warning quotes the dictionary's name, which is written in whatever script its owner
+        // studies; on web that is a script the sentence around it may have no face for.
+        text = { Text(scriptedText(strings.deleteDictionaryWarning(dictionaryName))) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(text = strings.delete, color = MaterialTheme.colorScheme.error)
