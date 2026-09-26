@@ -6,6 +6,30 @@ package de.coldtea.verborum.core.common
  */
 expect fun browserOrigin(): String
 
+/** `window.location.hash`, including the leading `#`, or empty when the URL carries no fragment. */
+expect fun browserFragment(): String
+
+/**
+ * What the history entry the page was loaded on has stored against it, or empty when it has none —
+ * a fresh tab, or a link someone else sent. A reload keeps it, which is what makes it worth reading.
+ *
+ * Only a string is returned: anything else stored there belongs to someone other than this app.
+ */
+expect fun browserHistoryState(): String
+
+/** `decodeURIComponent`, for values that were escaped on their way into a URL. */
+expect fun decodeUriComponent(value: String): String
+
+/**
+ * Drops the fragment from the address bar without navigating, keeping the history entry's state — the
+ * serialized nav back stack lives there, and replacing it with null would lose the stack a reload is
+ * about to restore.
+ *
+ * Narrow on purpose: it takes no URL, so there is no caller-supplied target that would have to be
+ * validated against the app's own origin.
+ */
+expect fun clearBrowserFragment()
+
 /**
  * Whether [origin] is a local development origin, which decides whether the app talks to local
  * services or to the deployed ones behind the reverse proxy.

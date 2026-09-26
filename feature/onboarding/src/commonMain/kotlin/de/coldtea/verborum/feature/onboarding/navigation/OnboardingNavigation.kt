@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import de.coldtea.verborum.feature.onboarding.ui.OnboardingScreen
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,7 +15,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object OnboardingGraph
 
+/** `#tour` in the browser's address bar, and bookmarkable there — web is the platform that navigates here. */
 @Serializable
+@SerialName("tour")
 private data object OnboardingHomeRoute
 
 fun NavGraphBuilder.onboardingGraph(onDone: () -> Unit) {

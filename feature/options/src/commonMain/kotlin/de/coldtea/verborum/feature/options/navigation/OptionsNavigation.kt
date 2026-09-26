@@ -5,13 +5,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import de.coldtea.verborum.feature.options.ui.OptionsScreen
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /** The graph the shell references; its screens stay private to this feature. */
 @Serializable
 data object OptionsGraph
 
+/** `#settings` in the browser's address bar; the name is part of the web app's URL contract. */
 @Serializable
+@SerialName("settings")
 private data object OptionsHomeRoute
 
 /**
@@ -19,6 +22,7 @@ private data object OptionsHomeRoute
  * language inline in a dropdown and never navigates here.
  */
 @Serializable
+@SerialName("language")
 internal data object LanguagePickerRoute
 
 /**

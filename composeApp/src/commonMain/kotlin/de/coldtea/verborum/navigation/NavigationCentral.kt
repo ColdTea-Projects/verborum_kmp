@@ -83,6 +83,47 @@ internal fun NavHostController.switchTab(destination: TopLevelDestination) {
     }
 }
 
+/**
+ * Records that the tab the app starts in has nothing saved under it, before a URL can deep-link out
+ * of that tab. Only the web app calls it — it is the platform whose launch URL can name any
+ * destination — and it has to run while the back stack is still untouched, before the deep link.
+ *
+ * [switchTab] asks navigation to save each tab's back stack and restore it on return. The map behind
+ * that is written by the *pop*, against the destination popped up to and every parent it starts —
+ * here the library, the graph around it and the root. Leaving Bibliotheca through the UI therefore
+ * records "nothing saved" against all three, and every later tab switch sees those entries already
+ * present and leaves them alone.
+ *
+ * A URL that boots straight into another tab never pops anything, so those entries are missing, and
+ * the first tab click writes them pointing at the stack it is *leaving*: clicking Bibliotheca then
+ * restores Options, and the button looks dead. Popping to the start destination here writes them with
+ * nothing to pop, which navigates nowhere and changes no screen.
+ */
+internal fun NavHostController.recordStartTabLeft() {
+    val startRoute = graph.findStartDestination().route ?: return
+
+    popBackStack(startRoute, inclusive = false, saveState = true)
+}
+
+/**
+ * Puts [routes] back on the stack in order, above wherever the host has just started.
+ *
+ * Returns false when one of them names a destination the graph no longer has — a screen dropped
+ * since the path was recorded — having restored everything before it. Only the web app has a path to
+ * restore; [de.coldtea.verborum.navigation.VerborumAppScaffold]'s web actual says where it comes from.
+ */
+internal fun NavHostController.restoreBackStack(routes: List<String>): Boolean {
+    routes.forEach { route ->
+        try {
+            navigate(route)
+        } catch (unknownRoute: IllegalArgumentException) {
+            return false
+        }
+    }
+
+    return true
+}
+
 /** True while anywhere inside [destination]'s graph, which is what marks its tab as selected. */
 internal fun NavDestination?.isIn(destination: TopLevelDestination): Boolean =
     this?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true

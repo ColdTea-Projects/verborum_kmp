@@ -2,6 +2,9 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     id("verborum.kmp.compose")
+    // The shell declares no routes of its own, but its navigation tests do: a route is a
+    // `@Serializable` type, so the plugin that generates their serializers is needed here too.
+    id("verborum.kmp.serialization")
 }
 
 // The dev server port below (8280) is part of the OAuth setup, not just a preference: this origin
