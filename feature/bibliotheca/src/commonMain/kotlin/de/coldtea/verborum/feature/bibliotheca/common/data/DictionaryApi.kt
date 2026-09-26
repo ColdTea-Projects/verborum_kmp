@@ -39,4 +39,19 @@ internal class DictionaryApi(private val client: HttpClient) {
     suspend fun delete(dictionaryId: String): Outcome<Unit> = statusApiCall {
         client.delete("dictionaries/${dictionaryId.asPathSegment()}")
     }
+
+    suspend fun tagsOf(dictionaryId: String): Outcome<List<DictionaryTagDto>> = plainApiCall {
+        client.get("dictionaries/${dictionaryId.asPathSegment()}/tags")
+    }
+
+    suspend fun addTag(dictionaryId: String, tag: String): Outcome<Unit> = statusApiCall {
+        client.post("dictionaries/${dictionaryId.asPathSegment()}/tags") {
+            contentType(ContentType.Application.Json)
+            setBody(DictionaryTagRequest(tag))
+        }
+    }
+
+    suspend fun removeTag(dictionaryId: String, tag: String): Outcome<Unit> = statusApiCall {
+        client.delete("dictionaries/${dictionaryId.asPathSegment()}/tags/${tag.asPathSegment()}")
+    }
 }

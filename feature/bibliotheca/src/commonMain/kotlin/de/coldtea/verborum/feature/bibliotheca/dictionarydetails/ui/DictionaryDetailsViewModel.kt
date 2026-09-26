@@ -47,6 +47,9 @@ internal class DictionaryDetailsViewModel(
 
     private var observeJob: Job? = null
 
+    /** Until something has been downloaded, "not in the store" says nothing about what exists. */
+    private var hasPulled = false
+
     init {
         observeDetails()
         refresh()
@@ -63,7 +66,9 @@ internal class DictionaryDetailsViewModel(
                 // state so the screen leaves once, instead of re-rendering a header for a row that
                 // no longer exists.
                 if (dictionary == null) {
-                    DictionaryDetailsState.Deleted
+                    // Before the first pull this is a store nothing has filled yet — a link someone
+                    // shared opens this screen with one — and not a row that went away.
+                    if (hasPulled) DictionaryDetailsState.Deleted else DictionaryDetailsState.Loading
                 } else {
                     DictionaryDetailsState.Success(
                         name = dictionary.name,
@@ -83,6 +88,7 @@ internal class DictionaryDetailsViewModel(
     /** Re-subscribes after a failure — the observed flow terminates when it errors. */
     fun retry() {
         setState { copy(details = DictionaryDetailsState.Loading) }
+        hasPulled = false
         observeDetails()
         refresh()
     }
@@ -91,12 +97,25 @@ internal class DictionaryDetailsViewModel(
         setState { copy(isRefreshing = true) }
 
         viewModelScope.launch {
-            val outcome = syncService.syncDictionaryWords(dictionaryId)
+            // A dictionary this screen has never seen is not missing its words — the row itself was
+            // never downloaded, which is what a link opened from somewhere else arrives to.
+            val outcome = if (dictionaryService.dictionary(dictionaryId) == null) {
+                syncService.syncDictionaries()
+            } else {
+                syncService.syncDictionary(dictionaryId)
+            }
 
+            hasPulled = true
             setState { copy(isRefreshing = false) }
 
-            if (outcome is Outcome.Failure && currentState.details is DictionaryDetailsState.Loading) {
-                setState { copy(details = DictionaryDetailsState.Failed) }
+            when {
+                outcome is Outcome.Failure && currentState.details is DictionaryDetailsState.Loading ->
+                    setState { copy(details = DictionaryDetailsState.Failed) }
+
+                // Downloaded, and still not there: now it really is gone. The observed flow will not
+                // say so on its own, having never had a row to lose.
+                outcome is Outcome.Success && dictionaryService.dictionary(dictionaryId) == null ->
+                    setState { copy(details = DictionaryDetailsState.Deleted) }
             }
         }
     }

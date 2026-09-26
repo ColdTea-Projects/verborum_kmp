@@ -67,7 +67,7 @@ internal class SelfPracticeViewModel(
 
     init {
         observeWords()
-        viewModelScope.launch { syncService.syncDictionaryWords(dictionaryId) }
+        viewModelScope.launch { syncService.syncDictionary(dictionaryId) }
     }
 
     private fun observeWords() {

@@ -1,13 +1,14 @@
 package de.coldtea.verborum.feature.bibliotheca.common.domain
 
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryRepository
 import de.coldtea.verborum.feature.bibliotheca.common.data.WordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 
 /**
  * Brings local state and the server together. One entry point per thing a screen opens, so callers do
  * not have to know which requests that takes: the list asks for [syncDictionaries], the details screen
- * for [syncDictionaryWords], and both are also the pull-to-refresh action.
+ * for [syncDictionary], and both are also the pull-to-refresh action.
  *
  * Errors are values here, not exceptions: a sync that could not reach the server reports a failure and
  * leaves local state untouched, so a screen can decide whether that is worth showing.
@@ -15,6 +16,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendi
 internal class SyncService(
     private val activeUser: ActiveUserUseCase,
     private val syncDictionariesUseCase: SyncUserDictionariesUseCase,
+    private val dictionaryRepository: DictionaryRepository,
     private val wordRepository: WordRepository,
     private val uploadPendingChanges: UploadPendingChangesUseCase,
 ) {
@@ -39,12 +41,18 @@ internal class SyncService(
         }
     }
 
-    /** Downloads one dictionary's words, for the details screen. */
-    suspend fun syncDictionaryWords(dictionaryId: String): Outcome<Unit> {
+    /**
+     * Downloads everything one dictionary is made of: its words, and its tags — which the service
+     * keeps as a resource of their own, so nothing else brings them.
+     *
+     * The words decide the outcome. A dictionary whose tags could not be read still shows its words,
+     * which is the screen's reason for existing.
+     */
+    suspend fun syncDictionary(dictionaryId: String): Outcome<Unit> {
         activeUser() ?: return Outcome.Success(Unit)
 
         uploadPendingChanges()
 
-        return wordRepository.pullWords(dictionaryId)
+        return wordRepository.pullWords(dictionaryId).also { dictionaryRepository.pullTags(dictionaryId) }
     }
 }

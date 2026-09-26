@@ -12,6 +12,7 @@ internal val createDictionaryModule: Module = module {
             languageSettings = get(),
             dictionaryId = parameters.getOrNull(),
             dictionaryService = get(),
+            syncService = get(),
             activeUser = get(),
         )
     }

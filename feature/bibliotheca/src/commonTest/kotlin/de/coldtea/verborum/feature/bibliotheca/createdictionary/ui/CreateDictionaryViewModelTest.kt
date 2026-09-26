@@ -3,9 +3,13 @@ package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
@@ -135,7 +139,10 @@ class CreateDictionaryViewModelTest {
     }
 
     @Test
-    fun `an unknown id says so and leaves a usable blank form`() = runTest {
+    fun `an unknown id says so and refuses the form rather than emptying it`() = runTest {
+        // This used to leave a usable blank form, which was harmless while the only way in was the
+        // list. A URL makes it dangerous: the form no longer knows which dictionary it was opened
+        // for, so saving writes a second one and leaves the first untouched.
         val viewModel = viewModel(FakeDictionaryRepository(), dictionaryId = "missing")
         val messages = mutableListOf<String>()
         val job = launch { viewModel.messages.toList(messages) }
@@ -143,15 +150,47 @@ class CreateDictionaryViewModelTest {
         advanceUntilIdle()
 
         assertEquals(1, messages.size)
+        assertTrue(viewModel.state.value.hasFailed)
         assertFalse(viewModel.state.value.isEditing)
         assertEquals("", viewModel.state.value.name)
         assertNull(viewModel.state.value.fromLanguage)
         job.cancel()
     }
 
+    @Test
+    fun `an edit opened before anything has been downloaded pulls the dictionary in`() = runTest {
+        // What a shared link or a reload arrives to on web, where nothing is kept between visits.
+        val repository = FakeDictionaryRepository(
+            pullResult = Outcome.Success(listOf(dictionary(id = "dict-1", name = "Beginner Spanish"))),
+        )
+        val viewModel = viewModel(repository, dictionaryId = "dict-1")
+
+        advanceUntilIdle()
+
+        assertEquals("Beginner Spanish", viewModel.state.value.name)
+        assertTrue(viewModel.state.value.isEditing)
+        assertFalse(viewModel.state.value.hasFailed)
+    }
+
+    @Test
+    fun `an edit shows the tags the service holds and not the empty row it pulled`() = runTest {
+        // Tags are their own resource: the dictionary payload never carries them, so a form that
+        // trusted the pulled row alone showed no chips at all after a reload.
+        val repository = FakeDictionaryRepository(
+            pullResult = Outcome.Success(listOf(dictionary(id = "dict-1"))),
+            remoteTags = mapOf("dict-1" to listOf("A1", "TRAVEL")),
+        )
+        val viewModel = viewModel(repository, dictionaryId = "dict-1")
+
+        advanceUntilIdle()
+
+        assertEquals(listOf("A1", "TRAVEL"), viewModel.state.value.tags)
+    }
+
     private fun viewModel(
         repository: FakeDictionaryRepository,
         dictionaryId: String?,
+        words: FakeWordRepository = FakeWordRepository(),
     ) = CreateDictionaryViewModel(
         languageSettings = testLanguageSettings(),
         dictionaryId = dictionaryId,
@@ -160,6 +199,13 @@ class CreateDictionaryViewModelTest {
             observeDictionaryUseCase = ObserveDictionaryUseCase(repository),
             deleteDictionaryUseCase = DeleteDictionaryUseCase(repository),
             repository = repository,
+        ),
+        syncService = SyncService(
+            activeUser = ActiveUserUseCase { "user-42" },
+            syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
+            dictionaryRepository = repository,
+            wordRepository = words,
+            uploadPendingChanges = UploadPendingChangesUseCase(repository, words),
         ),
         activeUser = ActiveUserUseCase { "user-42" },
     )

@@ -11,6 +11,7 @@ import de.coldtea.verborum.core.common.TimeProvider
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -26,6 +27,9 @@ internal data class CreateDictionaryUiState(
     val tags: List<String> = emptyList(),
     val isEditing: Boolean = false,
     val isSaving: Boolean = false,
+    /** Only ever true on the way to an edit; a new dictionary has nothing to wait for. */
+    val isLoading: Boolean = false,
+    val hasFailed: Boolean = false,
 ) {
     /** A dictionary needs a name and both directions before it can be saved. */
     val canSave: Boolean
@@ -39,6 +43,7 @@ internal class CreateDictionaryViewModel(
     private val languageSettings: LanguageSettings,
     private val dictionaryId: String?,
     private val dictionaryService: DictionaryService,
+    private val syncService: SyncService,
     private val activeUser: ActiveUserUseCase,
     private val time: TimeProvider = SystemTimeProvider,
 ) : BaseViewModel<CreateDictionaryUiState, Nothing>(CreateDictionaryUiState()) {
@@ -59,20 +64,34 @@ internal class CreateDictionaryViewModel(
 
     private var editing: Dictionary? = null
 
+    /** One pull per attempt; [retry] starts a fresh one. */
+    private var hasPulled = false
+
     init {
         if (dictionaryId != null) prefill(dictionaryId)
     }
 
     private fun prefill(dictionaryId: String) {
-        viewModelScope.launch {
-            val dictionary = dictionaryService.dictionary(dictionaryId)
+        setState { copy(isLoading = true) }
 
-            if (dictionary == null) {
-                // The form stays usable as a blank create form rather than blocking on a row the
-                // store does not have.
+        viewModelScope.launch {
+            // A link can open this form before anything has been downloaded — one someone shared, or
+            // a reload, after which the web app remembers nothing between visits.
+            val row = dictionaryService.dictionary(dictionaryId) ?: pulled(dictionaryId)
+
+            if (row == null) {
+                // Emphatically *not* a blank create form: this screen was opened to change one
+                // dictionary, and a form that forgot which would save a second one beside it.
                 _messages.emit(strings.dictionaryLoadFailed)
+                setState { copy(isLoading = false, hasFailed = true) }
                 return@launch
             }
+
+            // Tags live beside the dictionary rather than inside it, so the row alone never carries
+            // them: however it was found, the chips would come up empty without this.
+            syncService.syncDictionary(dictionaryId)
+
+            val dictionary = dictionaryService.dictionary(dictionaryId) ?: row
 
             editing = dictionary
             setState {
@@ -82,6 +101,8 @@ internal class CreateDictionaryViewModel(
                     toLanguage = SupportedLanguage.fromCode(dictionary.toLang),
                     tags = dictionary.tags,
                     isEditing = true,
+                    isLoading = false,
+                    hasFailed = false,
                 )
             }
         }
@@ -98,6 +119,22 @@ internal class CreateDictionaryViewModel(
     }
 
     @OptIn(ExperimentalUuidApi::class)
+    /** The account, downloaded once per attempt, for a store that has never held this row. */
+    private suspend fun pulled(dictionaryId: String): Dictionary? {
+        if (hasPulled) return null
+
+        hasPulled = true
+        syncService.syncDictionaries()
+
+        return dictionaryService.dictionary(dictionaryId)
+    }
+
+    fun retry() {
+        hasPulled = false
+        setState { copy(hasFailed = false) }
+        dictionaryId?.let(::prefill)
+    }
+
     fun save() {
         val state = currentState
         val fromLanguage = state.fromLanguage ?: return

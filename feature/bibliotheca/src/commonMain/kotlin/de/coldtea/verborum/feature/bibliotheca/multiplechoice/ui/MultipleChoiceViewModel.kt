@@ -76,7 +76,7 @@ internal class MultipleChoiceViewModel(
 
     init {
         observeWords()
-        viewModelScope.launch { syncService.syncDictionaryWords(dictionaryId) }
+        viewModelScope.launch { syncService.syncDictionary(dictionaryId) }
     }
 
     private fun observeWords() {

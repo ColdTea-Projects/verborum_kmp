@@ -79,6 +79,7 @@ class DictionaryListViewModelTest {
             syncService = SyncService(
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
+                dictionaryRepository = repository,
                 wordRepository = wordRepository,
                 uploadPendingChanges = UploadPendingChangesUseCase(repository, wordRepository),
             ),

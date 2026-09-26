@@ -42,7 +42,24 @@ internal data class DictionaryDto(
     )
 }
 
-/** The create/update payload. Tags are a separate sub-resource, so they are absent here. */
+/**
+ * One tag of one dictionary, as its own resource.
+ *
+ * The service keeps tags beside the dictionary rather than inside it, which is why they are absent
+ * from [DictionaryDto]: only [tag] matters here, the rest being the row's own bookkeeping.
+ */
+@Serializable
+internal data class DictionaryTagDto(
+    @SerialName("tagId") val tagId: String? = null,
+    @SerialName("dictionaryId") val dictionaryId: String? = null,
+    @SerialName("tag") val tag: String,
+)
+
+/** Adding one tag; the service takes them one at a time and removes them by name. */
+@Serializable
+internal data class DictionaryTagRequest(@SerialName("tag") val tag: String)
+
+/** The create/update payload. Tags are their own sub-resource, so they are absent here. */
 @Serializable
 internal data class DictionaryRequest(
     @SerialName("dictionaryId") val dictionaryId: String,

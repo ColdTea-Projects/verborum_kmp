@@ -48,9 +48,12 @@ class DictionaryDetailsViewModelTest {
         dictionaries: List<de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary> =
             listOf(dictionary(dictionaryId, name = "Beginner Spanish", fromLang = "en", toLang = "es")),
         deleteResult: Outcome<Unit> = Outcome.Success(Unit),
+        /** What a pull brings back, for a store that holds nothing until it syncs. */
+        pulled: List<de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary>? = null,
     ): Pair<DictionaryDetailsViewModel, FakeWordRepository> {
         val dictionaryRepository = FakeDictionaryRepository(
             initial = dictionaries,
+            pullResult = pulled?.let { Outcome.Success(it) },
             deleteResult = deleteResult,
         )
         val wordRepository = FakeWordRepository(initial = words, deleteResult = deleteResult)
@@ -69,12 +72,36 @@ class DictionaryDetailsViewModelTest {
             syncService = SyncService(
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaryRepository),
+                dictionaryRepository = dictionaryRepository,
                 wordRepository = wordRepository,
                 uploadPendingChanges = UploadPendingChangesUseCase(dictionaryRepository, wordRepository),
             ),
         )
 
         return viewModel to wordRepository
+    }
+
+    @Test
+    fun `a dictionary not downloaded yet is pulled rather than called deleted`() = runTest(mainDispatcher) {
+        // How a shared link opens this screen: nothing has been fetched, so the row is absent for a
+        // reason that has nothing to do with it having been deleted.
+        val (viewModel, _) = viewModel(
+            dictionaries = emptyList(),
+            pulled = listOf(dictionary(dictionaryId, name = "Beginner Spanish")),
+        )
+
+        advanceUntilIdle()
+
+        assertEquals("Beginner Spanish", viewModel.success().name)
+    }
+
+    @Test
+    fun `a dictionary that is gone after a pull is reported deleted`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel(dictionaries = emptyList(), pulled = emptyList())
+
+        advanceUntilIdle()
+
+        assertEquals(DictionaryDetailsState.Deleted, viewModel.state.value.details)
     }
 
     private fun DictionaryDetailsViewModel.success() =

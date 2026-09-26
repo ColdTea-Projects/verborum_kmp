@@ -54,6 +54,8 @@ internal fun word(
 internal class FakeDictionaryRepository(
     initial: List<Dictionary> = emptyList(),
     private val pullResult: Outcome<List<Dictionary>>? = null,
+    /** Tags the service holds, per dictionary — they arrive only through their own resource. */
+    private val remoteTags: Map<String, List<String>> = emptyMap(),
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
     private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
     private val uploadResult: Outcome<Unit> = Outcome.Success(Unit),
@@ -86,6 +88,19 @@ internal class FakeDictionaryRepository(
         if (outcome is Outcome.Success) rows.value = outcome.data
 
         return outcome
+    }
+
+    /** What [reconcileTags]-style writes left behind, per dictionary, for a test to read back. */
+    val savedTags = mutableMapOf<String, List<String>>()
+
+    override suspend fun pullTags(dictionaryId: String): Outcome<List<String>> {
+        val tags = remoteTags[dictionaryId].orEmpty()
+
+        rows.value = rows.value.map { row ->
+            if (row.dictionaryId == dictionaryId) row.copy(tags = tags) else row
+        }
+
+        return Outcome.Success(tags)
     }
 
     override suspend fun findDictionary(dictionaryId: String): Dictionary? =
@@ -145,6 +160,8 @@ internal class FakeDictionaryRepository(
 internal class FakeWordRepository(
     initial: List<Word> = emptyList(),
     private val pullResult: Outcome<Unit>? = null,
+    /** Rows the server hands over, for a test whose store holds nothing until it syncs. */
+    private val pulled: List<Word> = emptyList(),
     private val deleteResult: Outcome<Unit> = Outcome.Success(Unit),
     private val updateResult: Outcome<Unit> = Outcome.Success(Unit),
     private val saveResult: Outcome<Unit> = Outcome.Success(Unit),
@@ -181,13 +198,19 @@ internal class FakeWordRepository(
     override suspend fun pullWords(dictionaryId: String): Outcome<Unit> {
         pulledDictionaryId = dictionaryId
 
-        return pullResult ?: Outcome.Success(Unit)
+        val outcome = pullResult ?: Outcome.Success(Unit)
+        if (outcome is Outcome.Success) rows.value = (rows.value + pulled).distinctBy(Word::wordId)
+
+        return outcome
     }
 
     override suspend fun pullAllWords(userId: String): Outcome<Unit> {
         pulledUserId = userId
 
-        return pullResult ?: Outcome.Success(Unit)
+        val outcome = pullResult ?: Outcome.Success(Unit)
+        if (outcome is Outcome.Success) rows.value = (rows.value + pulled).distinctBy(Word::wordId)
+
+        return outcome
     }
 
     override suspend fun findWord(wordId: String): Word? =

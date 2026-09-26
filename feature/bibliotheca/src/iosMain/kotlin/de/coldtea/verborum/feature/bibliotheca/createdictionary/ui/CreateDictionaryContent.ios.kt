@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
+import de.coldtea.verborum.core.designsystem.component.ErrorState
+import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
@@ -34,12 +36,25 @@ internal actual fun CreateDictionaryContent(
     onToLanguageChanged: (SupportedLanguage) -> Unit,
     onTagToggled: (String) -> Unit,
     onSave: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier,
 ) {
     RegisterTopBar(
         title = if (state.isEditing) strings.editDictionaryTitle else strings.newDictionary,
         showBackButton = true,
     )
+
+    // The row is on the device here rather than a page away, so this only shows when it really is
+    // gone — but an empty form would save a second dictionary, which is worth refusing on both.
+    if (state.hasFailed) {
+        ErrorState(message = strings.dictionaryLoadFailed, modifier = modifier, onRetry = onRetry)
+        return
+    }
+
+    if (state.isLoading) {
+        LoadingState(modifier)
+        return
+    }
 
     ContentColumn(modifier = modifier) {
         Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {

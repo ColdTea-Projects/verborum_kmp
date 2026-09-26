@@ -85,6 +85,7 @@ val bibliothecaModule: Module = module {
         SyncService(
             activeUser = get(),
             syncDictionariesUseCase = get(),
+            dictionaryRepository = get(),
             wordRepository = get(),
             uploadPendingChanges = get(),
         )

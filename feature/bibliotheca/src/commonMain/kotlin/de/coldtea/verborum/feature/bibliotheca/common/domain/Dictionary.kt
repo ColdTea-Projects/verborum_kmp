@@ -20,8 +20,9 @@ data class Dictionary(
     val isSynced: Boolean = false,
     val isDeleted: Boolean = false,
     /**
-     * Tag codes. The API keeps tags in their own sub-resource, so they arrive empty here until that
-     * endpoint is wired up; kept on the model so the shape does not change when it is.
+     * Tag codes. The API keeps tags in a sub-resource of their own, so they never come with the
+     * dictionary itself: they are fetched and written separately, and a row read straight from a
+     * dictionary pull carries whatever the device already knew.
      */
     val tags: List<String> = emptyList(),
 )

@@ -37,6 +37,7 @@ internal fun CreateDictionaryScreen(
         onToLanguageChanged = viewModel::onToLanguageChanged,
         onTagToggled = viewModel::onTagToggled,
         onSave = viewModel::save,
+        onRetry = viewModel::retry,
         modifier = modifier,
     )
 }
@@ -55,5 +56,6 @@ internal expect fun CreateDictionaryContent(
     onToLanguageChanged: (SupportedLanguage) -> Unit,
     onTagToggled: (String) -> Unit,
     onSave: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier,
 )

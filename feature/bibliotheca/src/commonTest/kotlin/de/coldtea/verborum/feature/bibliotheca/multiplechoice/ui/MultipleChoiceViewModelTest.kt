@@ -59,6 +59,7 @@ class MultipleChoiceViewModelTest {
             syncService = SyncService(
                 activeUser = ActiveUserUseCase { "user-42" },
                 syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
+                dictionaryRepository = dictionaries,
                 wordRepository = wordRepository,
                 uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
             ),

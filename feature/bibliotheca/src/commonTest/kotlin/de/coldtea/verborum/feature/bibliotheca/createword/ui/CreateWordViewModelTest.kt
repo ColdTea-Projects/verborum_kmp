@@ -7,7 +7,12 @@ import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.UploadPendingChangesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
@@ -262,6 +267,35 @@ class CreateWordViewModelTest {
         assertTrue(viewModel.state.value.hasFailed)
     }
 
+    @Test
+    fun `a form opened before anything has been downloaded pulls instead of failing`() = runTest {
+        // What a shared link arrives to: the web app keeps nothing between visits, so until the
+        // account has been downloaded the store knows neither the dictionary nor the word.
+        val viewModel = viewModel(
+            dictionaries = FakeDictionaryRepository(
+                pullResult = Outcome.Success(listOf(dictionary(id = "dict-1"))),
+            ),
+            words = FakeWordRepository(pulled = listOf(word(id = "word-1", dictionaryId = "dict-1"))),
+            wordId = "word-1",
+        )
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.hasFailed)
+        assertTrue(viewModel.state.value.isEditing)
+    }
+
+    @Test
+    fun `editing a word that is not there fails instead of offering an empty form`() = runTest {
+        // An empty form here would save a second word rather than change the one that was asked for.
+        val viewModel = viewModel(wordId = "no-such-word")
+
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.hasFailed)
+        assertFalse(viewModel.state.value.isEditing)
+    }
+
     private fun viewModel(
         dictionaries: FakeDictionaryRepository = FakeDictionaryRepository(
             initial = listOf(dictionary(id = "dict-1", fromLang = "en", toLang = "de")),
@@ -279,5 +313,12 @@ class CreateWordViewModelTest {
             repository = dictionaries,
         ),
         wordService = WordService(repository = words),
+        syncService = SyncService(
+            activeUser = ActiveUserUseCase { "user-42" },
+            syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
+            dictionaryRepository = dictionaries,
+            wordRepository = words,
+            uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, words),
+        ),
     )
 }

@@ -6,6 +6,7 @@ import de.coldtea.verborum.core.common.TimeProvider
 import de.coldtea.verborum.core.common.map
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 /**
@@ -25,8 +26,21 @@ internal interface DictionaryRepository {
     /** Suspending because the local copy may be a database, which cannot answer on the spot. */
     suspend fun findDictionary(dictionaryId: String): Dictionary?
 
-    /** Saves a new dictionary and returns its id, or updates an existing one. */
+    /**
+     * Saves a new dictionary and returns its id, or updates an existing one. Its tags go with it:
+     * the service keeps them as their own resource, so they are reconciled separately here rather
+     * than by every caller.
+     */
     suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit>
+
+    /**
+     * Downloads one dictionary's tags and puts them on the stored row.
+     *
+     * Tags do not come with the dictionary itself, and a pull replaces the row with the server's
+     * version — so without this a synced dictionary has no tags at all, and any held locally are
+     * lost the next time the list refreshes.
+     */
+    suspend fun pullTags(dictionaryId: String): Outcome<List<String>>
 
     /** Rows the server has not seen yet, and rows whose delete it has not confirmed. */
     suspend fun pendingUploads(): List<Dictionary>
@@ -63,11 +77,17 @@ internal class NetworkDictionaryRepository(
         val known = store.knownTimestamps()
         val now = time.nowEpochMillis()
 
+        // The dictionary payload has no tags in it, and this replaces every synced row with what the
+        // server sent — so without carrying them over, one list sync drops every tag on the device.
+        // [pullTags] is what refreshes them; until it runs, what is already known beats nothing.
+        val knownTags = store.dictionaries.first().associate { it.dictionaryId to it.tags }
+
         return api.dictionariesOf(userId)
             .map { dtos ->
                 dtos.map { dto ->
                     val (createdAt, updatedAt) = known[dto.dictionaryId] ?: (now to now)
                     dto.toDictionary(fallbackCreatedAt = createdAt, fallbackUpdatedAt = updatedAt)
+                        .copy(tags = knownTags[dto.dictionaryId].orEmpty())
                 }
             }
             .also { outcome ->
@@ -80,6 +100,33 @@ internal class NetworkDictionaryRepository(
     override suspend fun findDictionary(dictionaryId: String): Dictionary? =
         store.find(dictionaryId)
 
+    override suspend fun pullTags(dictionaryId: String): Outcome<List<String>> =
+        api.tagsOf(dictionaryId)
+            .map { dtos -> dtos.map(DictionaryTagDto::tag) }
+            .also { outcome ->
+                if (outcome is Outcome.Success) {
+                    store.find(dictionaryId)?.let { row -> store.upsert(row.copy(tags = outcome.data)) }
+                }
+            }
+
+    /**
+     * Brings the service's tags for [dictionary] in line with the ones it carries, one call per
+     * difference — which is all the service offers.
+     *
+     * Read before writing, because the row this came from may have been edited elsewhere, and a
+     * blind re-add of every tag would answer with a conflict rather than the state asked for.
+     */
+    private suspend fun reconcileTags(dictionary: Dictionary) {
+        val remote = api.tagsOf(dictionary.dictionaryId)
+        if (remote !is Outcome.Success) return
+
+        val current = remote.data.map(DictionaryTagDto::tag).toSet()
+        val wanted = dictionary.tags.toSet()
+
+        (wanted - current).forEach { tag -> api.addTag(dictionary.dictionaryId, tag) }
+        (current - wanted).forEach { tag -> api.removeTag(dictionary.dictionaryId, tag) }
+    }
+
     override suspend fun save(dictionary: Dictionary, isNew: Boolean): Outcome<Unit> {
         val previous = store.find(dictionary.dictionaryId)
 
@@ -91,6 +138,8 @@ internal class NetworkDictionaryRepository(
 
         return when {
             outcome is Outcome.Success -> {
+                // Tags are a resource of their own, so the row landing says nothing about them yet.
+                reconcileTags(dictionary)
                 store.upsert(dictionary.copy(isSynced = true))
                 outcome
             }

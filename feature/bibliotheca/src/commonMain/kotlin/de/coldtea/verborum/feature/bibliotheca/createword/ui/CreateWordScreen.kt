@@ -25,7 +25,8 @@ internal fun CreateWordScreen(
     wordId: String?,
     onSaved: (wasEditing: Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CreateWordViewModel = koinViewModel { parametersOf(dictionaryId, wordId) },
+    // One argument rather than two strings; [WordFormArgs] says what that is worth.
+    viewModel: CreateWordViewModel = koinViewModel { parametersOf(WordFormArgs(dictionaryId, wordId)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val wordCountChanged by viewModel.wordCountChanged.collectAsStateWithLifecycle()

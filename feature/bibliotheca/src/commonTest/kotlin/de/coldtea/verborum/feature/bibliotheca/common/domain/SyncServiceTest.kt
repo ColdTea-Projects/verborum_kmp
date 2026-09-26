@@ -22,6 +22,7 @@ class SyncServiceTest {
     ) = SyncService(
         activeUser = ActiveUserUseCase { signedInAs },
         syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
+        dictionaryRepository = repository,
         wordRepository = wordRepository,
         uploadPendingChanges = UploadPendingChangesUseCase(repository, wordRepository),
     )
@@ -74,7 +75,7 @@ class SyncServiceTest {
     fun `the details screen syncs just its own dictionary's words`() = runTest {
         val service = syncService(FakeDictionaryRepository(), signedInAs = "user-42")
 
-        assertEquals(Outcome.Success(Unit), service.syncDictionaryWords("dictionary-7"))
+        assertEquals(Outcome.Success(Unit), service.syncDictionary("dictionary-7"))
         assertEquals("dictionary-7", words.pulledDictionaryId)
     }
 
@@ -82,7 +83,7 @@ class SyncServiceTest {
     fun `signed out there are no words to pull either`() = runTest {
         val service = syncService(FakeDictionaryRepository(), signedInAs = null)
 
-        assertEquals(Outcome.Success(Unit), service.syncDictionaryWords("dictionary-7"))
+        assertEquals(Outcome.Success(Unit), service.syncDictionary("dictionary-7"))
         assertNull(words.pulledDictionaryId)
     }
 }

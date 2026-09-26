@@ -38,6 +38,7 @@ internal actual fun CreateDictionaryContent(
     onToLanguageChanged: (SupportedLanguage) -> Unit,
     onTagToggled: (String) -> Unit,
     onSave: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier,
 ) {
     // Registers the chrome as well as the way back: an unregistered screen reads to the shell as one
@@ -47,6 +48,18 @@ internal actual fun CreateDictionaryContent(
         showBackButton = true,
         backLabel = strings.backToDictionaries,
     )
+
+    // A form that could not read the dictionary it was opened for has nothing to show and must not
+    // offer to save: an empty form here writes a second dictionary rather than changing this one.
+    if (state.hasFailed) {
+        ErrorState(message = strings.dictionaryLoadFailed, modifier = modifier, onRetry = onRetry)
+        return
+    }
+
+    if (state.isLoading) {
+        LoadingState(modifier)
+        return
+    }
 
     val keyboardController = remember { KeyboardController() }
 

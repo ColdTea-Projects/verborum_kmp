@@ -10,6 +10,7 @@ import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.common.TimeProvider
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,19 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+
+/**
+ * What the word form is opened with: the dictionary it belongs to, and the word when one is being
+ * edited.
+ *
+ * Passed as one value rather than two strings because of how Koin hands parameters to a view model.
+ * It rebuilds the holder from its values alone — `AndroidParametersHolder` — so an optional
+ * parameter is looked for by position and, finding nothing there, falls back to the first value of
+ * the same type. Two strings therefore meant "Add word" received the *dictionary* id as the word id
+ * and went looking for a word nobody had asked for. One argument of its own type cannot be confused
+ * with anything else.
+ */
+internal data class WordFormArgs(val dictionaryId: String, val wordId: String?)
 
 /** Which language side an edit applies to. */
 internal enum class WordSide { SOURCE, TARGET }
@@ -68,6 +82,7 @@ internal class CreateWordViewModel(
     private val wordId: String?,
     private val dictionaryService: DictionaryService,
     private val wordService: WordService,
+    private val syncService: SyncService,
     private val time: TimeProvider = SystemTimeProvider,
 ) : BaseViewModel<CreateWordUiState, Nothing>(CreateWordUiState()) {
 
@@ -87,6 +102,9 @@ internal class CreateWordViewModel(
     val wordCountChanged: StateFlow<Int> = _wordCountChanged.asStateFlow()
 
     private var editing: Word? = null
+
+    /** One pull per attempt, however many reads come up empty; [retry] starts a fresh attempt. */
+    private var hasPulled = false
     private var hasLoadedInitialCount = false
 
     init {
@@ -96,14 +114,22 @@ internal class CreateWordViewModel(
 
     private fun load() {
         viewModelScope.launch {
-            val dictionary = dictionaryService.dictionary(dictionaryId)
+            val dictionary = fetched { dictionaryService.dictionary(dictionaryId) }
 
             if (dictionary == null) {
                 setState { copy(hasFailed = true) }
                 return@launch
             }
 
-            val word = wordId?.let { wordService.word(it) }
+            val word = wordId?.let { id -> fetched { wordService.word(id) } }
+
+            // An edit whose word is not there is not an empty form: saving one would write a second
+            // word instead of changing this one. Better to say the word could not be loaded.
+            if (wordId != null && word == null) {
+                setState { copy(hasFailed = true) }
+                return@launch
+            }
+
             editing = word
 
             setState {
@@ -128,6 +154,22 @@ internal class CreateWordViewModel(
         }
     }
 
+    /**
+     * [read] again once the account has been downloaded, when it comes back with nothing.
+     *
+     * A link can open this form before anything has been fetched — one someone shared, or a reload,
+     * after which the web app remembers nothing between visits — and an empty store is not the same
+     * as a word that does not exist.
+     */
+    private suspend fun <T> fetched(read: suspend () -> T?): T? =
+        read() ?: run {
+            if (hasPulled) return@run null
+
+            hasPulled = true
+            syncService.syncDictionaries()
+            read()
+        }
+
     private fun observeWordCount() {
         viewModelScope.launch {
             wordService.observeWords(dictionaryId).collect { words ->
@@ -144,6 +186,7 @@ internal class CreateWordViewModel(
 
     fun retry() {
         setState { copy(hasFailed = false) }
+        hasPulled = false
         load()
     }
 
