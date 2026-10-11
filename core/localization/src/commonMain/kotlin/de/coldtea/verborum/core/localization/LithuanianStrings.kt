@@ -262,4 +262,22 @@ internal object LithuanianStrings : Strings {
     override val onboardingTestBody = "Laikykite testus su atsakymų variantais. Kiekviena įvesta forma tampa atskiru klausimu, o teisingi atsakymai kelia žodžio lygį."
     override val onboardingPracticeSwipeBody = "Praktikuodamiesi bakstelėkite kortelę, kad pamatytumėte vertimą, tada braukite dešinėn, jei žinojote, ir kairėn, jei ne — lygis pasikeis bet kuriuo atveju."
     override val onboardingPracticeFlipBody = "Praktikuodamiesi spustelėkite kortelę, kad ją apverstumėte. Tada pažymėkite teisingai arba neteisingai — lygis pasikeis bet kuriuo atveju."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profilis"
+    override val profileEmailLabel = "El. paštas"
+    override val profileDisplayNameLabel = "Rodomas vardas"
+    override val profileDisplayNameSupporting = "Rodomas kitiems prie žodynų, kuriais dalijatės Forum"
+    override val profileDisplayNameRequired = "Norint sutikti su Forum sąlygomis, reikia rodomo vardo"
+    override val profileTermsTitle = "Forum sąlygos"
+    override val profileTermsShow = "Rodyti sąlygas"
+    override val profileTermsHide = "Slėpti sąlygas"
+    override val profileTermsAgree = "Sutinku su Forum sąlygomis"
+    override val profileUpdate = "Atnaujinti"
+    override val profileUpdated = "Profilis atnaujintas"
+    override val profileUpdateError = "Nepavyko atnaujinti profilio. Bandykite dar kartą."
+    override val leaveForumDialogTitle = "Palikti Forum?"
+    override val leaveForumDialogMessage = "Visi jūsų žodynai taps privatūs, o juos atsisiuntę praras prieigą. Galite vėl prisijungti bet kada."
+    override val leaveForumDialogConfirm = "Palikti Forum"
+    override val leaveForumDialogCancel = "Likti"
 }

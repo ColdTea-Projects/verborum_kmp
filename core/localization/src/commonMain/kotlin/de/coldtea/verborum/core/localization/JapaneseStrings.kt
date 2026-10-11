@@ -261,4 +261,22 @@ internal object JapaneseStrings : Strings {
     override val onboardingTestBody = "単語の選択式テストに挑戦しましょう。入力した各形がそれぞれ問題になり、正解すると単語のレベルが上がります。"
     override val onboardingPracticeSwipeBody = "自習ではカードをタップして訳を表示し、わかったら右へ、わからなければ左へスワイプします。どちらでもレベルは動きます。"
     override val onboardingPracticeFlipBody = "自習ではカードをクリックして裏返します。わかったら正解、わからなければ不正解を選びます。どちらでもレベルは動きます。"
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "プロフィール"
+    override val profileEmailLabel = "メールアドレス"
+    override val profileDisplayNameLabel = "表示名"
+    override val profileDisplayNameSupporting = "Forumで共有した辞書で他のユーザーに表示されます"
+    override val profileDisplayNameRequired = "Forumの規約に同意するには表示名が必要です"
+    override val profileTermsTitle = "Forumの規約"
+    override val profileTermsShow = "規約を表示"
+    override val profileTermsHide = "規約を隠す"
+    override val profileTermsAgree = "Forumの規約に同意します"
+    override val profileUpdate = "更新"
+    override val profileUpdated = "プロフィールを更新しました"
+    override val profileUpdateError = "プロフィールを更新できませんでした。もう一度お試しください。"
+    override val leaveForumDialogTitle = "Forum から退出しますか？"
+    override val leaveForumDialogMessage = "すべての辞書が非公開になり、ダウンロードした人はアクセスできなくなります。いつでも再度参加できます。"
+    override val leaveForumDialogConfirm = "Forum から退出"
+    override val leaveForumDialogCancel = "とどまる"
 }

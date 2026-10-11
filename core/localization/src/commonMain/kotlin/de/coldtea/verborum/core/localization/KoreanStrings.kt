@@ -261,4 +261,22 @@ internal object KoreanStrings : Strings {
     override val onboardingTestBody = "단어로 객관식 테스트를 보세요. 입력한 각 형태가 하나의 문제가 되고, 정답을 맞히면 단어의 수준이 올라갑니다."
     override val onboardingPracticeSwipeBody = "자율 학습에서는 카드를 눌러 번역을 보고, 알았으면 오른쪽으로 몰랐으면 왼쪽으로 넘기세요 — 어느 쪽이든 수준이 바뀝니다."
     override val onboardingPracticeFlipBody = "자율 학습에서는 카드를 클릭해 뒤집은 뒤 정답 또는 오답으로 표시하세요 — 어느 쪽이든 단어의 수준이 바뀝니다."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "프로필"
+    override val profileEmailLabel = "이메일"
+    override val profileDisplayNameLabel = "표시 이름"
+    override val profileDisplayNameSupporting = "Forum에서 공유하는 사전에 다른 사용자에게 표시됩니다"
+    override val profileDisplayNameRequired = "Forum 약관에 동의하려면 표시 이름이 필요합니다"
+    override val profileTermsTitle = "Forum 약관"
+    override val profileTermsShow = "약관 보기"
+    override val profileTermsHide = "약관 숨기기"
+    override val profileTermsAgree = "Forum 약관에 동의합니다"
+    override val profileUpdate = "업데이트"
+    override val profileUpdated = "프로필이 업데이트되었습니다"
+    override val profileUpdateError = "프로필을 업데이트하지 못했습니다. 다시 시도해 주세요."
+    override val leaveForumDialogTitle = "Forum에서 나갈까요?"
+    override val leaveForumDialogMessage = "모든 사전이 비공개로 전환되고, 다운로드한 사람은 더 이상 볼 수 없습니다. 언제든 다시 참여할 수 있습니다."
+    override val leaveForumDialogConfirm = "Forum 나가기"
+    override val leaveForumDialogCancel = "머무르기"
 }

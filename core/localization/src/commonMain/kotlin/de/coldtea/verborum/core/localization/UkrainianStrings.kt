@@ -262,4 +262,22 @@ internal object UkrainianStrings : Strings {
     override val onboardingTestBody = "Проходьте тести з варіантами відповідей. Кожна введена форма стає окремим питанням, а правильні відповіді підвищують рівень слова."
     override val onboardingPracticeSwipeBody = "Під час практики торкніться картки, щоб побачити переклад, потім проведіть праворуч, якщо знали, або ліворуч, якщо ні — рівень зміниться в будь-якому разі."
     override val onboardingPracticeFlipBody = "Під час практики клацніть картку, щоб перевернути її. Потім позначте як правильну чи неправильну — рівень слова зміниться в будь-якому разі."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Профіль"
+    override val profileEmailLabel = "Ел. пошта"
+    override val profileDisplayNameLabel = "Відображуване ім’я"
+    override val profileDisplayNameSupporting = "Показується іншим у словниках, якими ви ділитеся у Forum"
+    override val profileDisplayNameRequired = "Щоб прийняти умови Forum, потрібне відображуване ім’я"
+    override val profileTermsTitle = "Умови Forum"
+    override val profileTermsShow = "Показати умови"
+    override val profileTermsHide = "Сховати умови"
+    override val profileTermsAgree = "Я приймаю умови Forum"
+    override val profileUpdate = "Оновити"
+    override val profileUpdated = "Профіль оновлено"
+    override val profileUpdateError = "Не вдалося оновити профіль. Спробуйте ще раз."
+    override val leaveForumDialogTitle = "Вийти з Forum?"
+    override val leaveForumDialogMessage = "Усі ваші словники стануть приватними, а ті, хто їх завантажив, втратять доступ. Ви можете повернутися будь-коли."
+    override val leaveForumDialogConfirm = "Вийти з Forum"
+    override val leaveForumDialogCancel = "Залишитися"
 }

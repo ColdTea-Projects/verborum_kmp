@@ -262,4 +262,22 @@ internal object ItalianStrings : Strings {
     override val onboardingTestBody = "Fai test a scelta multipla. Ogni forma inserita diventa una domanda e le risposte corrette alzano il livello di una parola."
     override val onboardingPracticeSwipeBody = "Durante l'esercizio tocca una carta per vedere la traduzione, poi scorri a destra se la sapevi e a sinistra se no — in entrambi i casi il livello cambia."
     override val onboardingPracticeFlipBody = "Durante l'esercizio clicca una carta per girarla. Poi segnala come corretta o sbagliata — in entrambi i casi il livello della parola cambia."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profilo"
+    override val profileEmailLabel = "E-mail"
+    override val profileDisplayNameLabel = "Nome visualizzato"
+    override val profileDisplayNameSupporting = "Mostrato agli altri sui dizionari che condividi nel Forum"
+    override val profileDisplayNameRequired = "Serve un nome visualizzato per accettare i termini del Forum"
+    override val profileTermsTitle = "Termini del Forum"
+    override val profileTermsShow = "Mostra i termini"
+    override val profileTermsHide = "Nascondi i termini"
+    override val profileTermsAgree = "Accetto i termini del Forum"
+    override val profileUpdate = "Aggiorna"
+    override val profileUpdated = "Profilo aggiornato"
+    override val profileUpdateError = "Impossibile aggiornare il profilo. Riprova."
+    override val leaveForumDialogTitle = "Lasciare il Forum?"
+    override val leaveForumDialogMessage = "Tutti i tuoi dizionari diventeranno privati e chi li ha scaricati perderà l’accesso. Puoi unirti di nuovo in qualsiasi momento."
+    override val leaveForumDialogConfirm = "Lascia il Forum"
+    override val leaveForumDialogCancel = "Resta"
 }

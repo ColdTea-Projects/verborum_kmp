@@ -24,15 +24,23 @@ object JwtClaims {
 
     /** Null for anything that is not a decodable JWT with a `sub` claim. */
     fun identityOf(accessToken: String?, idToken: String? = null): UserIdentity? {
-        val subject = claims(accessToken)?.string("sub") ?: return null
+        val access = claims(accessToken)
+        val subject = access?.string("sub") ?: return null
+
+        // The ID token is where the profile claims belong, so it wins — but Keycloak also puts
+        // `email` and `name` on the access token, and the profile the Forum needs cannot be created
+        // without an email. Falling back costs nothing and is the difference between a user who can
+        // join and one stuck on "No email claim" because the ID token was not kept.
         val profile = claims(idToken)
 
         return UserIdentity(
             subject = subject,
-            email = profile?.string("email"),
-            displayName = profile?.string("name") ?: profile?.string("preferred_username"),
+            email = profile?.string("email") ?: access.string("email"),
+            displayName = profile?.name() ?: access.name(),
         )
     }
+
+    private fun JsonObject.name(): String? = string("name") ?: string("preferred_username")
 
     @OptIn(ExperimentalEncodingApi::class)
     private fun claims(jwt: String?): JsonObject? {

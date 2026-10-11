@@ -336,6 +336,38 @@ interface Strings {
         else -> null
     }
 
+    // ---- profile -------------------------------------------------------------------------------
+    val optionsProfile: String get() = "Profile"
+    val profileEmailLabel: String get() = "Email"
+    val profileDisplayNameLabel: String get() = "Display name"
+    val profileDisplayNameSupporting: String get() = "Shown to others on the dictionaries you share in the Forum"
+    val profileDisplayNameRequired: String get() = "A display name is required to accept the Forum terms"
+    val profileTermsTitle: String get() = "Forum terms"
+    val profileTermsShow: String get() = "Show the terms"
+    val profileTermsHide: String get() = "Hide the terms"
+    val profileTermsAgree: String get() = "I agree to the Forum terms"
+
+    /**
+     * Deliberately **not** translated, and the one string here that is not: it stands in for legal
+     * terms that do not exist yet, and a translated placeholder would read as a translated contract.
+     * It goes to a lawyer before it goes to a translator.
+     */
+    val profileTermsText: String
+        get() = "To use the Forum you agree that the dictionaries you choose to share are visible to " +
+            "other Verborum users, together with your display name, and that they can import them. " +
+            "You can withdraw at any time from your profile: your shared dictionaries then stop " +
+            "appearing in the Forum. This is placeholder text; the full terms will follow."
+
+    val profileUpdate: String get() = "Update"
+    val profileUpdated: String get() = "Profile updated"
+    val profileUpdateError: String get() = "Couldn\u2019t update your profile. Please try again."
+    val leaveForumDialogTitle: String get() = "Leave the Forum?"
+    val leaveForumDialogMessage: String
+        get() = "All your dictionaries will become private, and people who downloaded them will " +
+            "lose access. You can join again anytime."
+    val leaveForumDialogConfirm: String get() = "Leave the Forum"
+    val leaveForumDialogCancel: String get() = "Stay"
+
     // ---- sort ----------------------------------------------------------------------------------
     val sortNameAsc: String get() = "Name A–Z"
     val sortNameDesc: String get() = "Name Z–A"

@@ -1,4 +1,4 @@
-package de.coldtea.verborum.feature.bibliotheca.common.data
+package de.coldtea.verborum.core.network
 
 import io.ktor.http.encodeURLPathPart
 
@@ -12,4 +12,4 @@ import io.ktor.http.encodeURLPathPart
  *
  * A UUID passes through untouched, so this costs nothing in the case that is always expected.
  */
-internal fun String.asPathSegment(): String = encodeURLPathPart()
+fun String.asPathSegment(): String = encodeURLPathPart()

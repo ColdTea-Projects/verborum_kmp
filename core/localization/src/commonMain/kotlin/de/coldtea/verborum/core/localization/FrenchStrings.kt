@@ -262,4 +262,22 @@ internal object FrenchStrings : Strings {
     override val onboardingTestBody = "Passez des tests à choix multiples. Chaque forme saisie devient une question, et les bonnes réponses font monter le niveau d'un mot."
     override val onboardingPracticeSwipeBody = "En entraînement, touchez une carte pour voir la traduction, puis glissez à droite si vous saviez, à gauche sinon — dans les deux cas le niveau bouge."
     override val onboardingPracticeFlipBody = "En entraînement, cliquez sur une carte pour la retourner. Marquez-la ensuite correcte ou incorrecte — dans les deux cas le niveau du mot bouge."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profil"
+    override val profileEmailLabel = "E-mail"
+    override val profileDisplayNameLabel = "Nom d’affichage"
+    override val profileDisplayNameSupporting = "Affiché aux autres sur les dictionnaires que vous partagez dans le Forum"
+    override val profileDisplayNameRequired = "Un nom d’affichage est requis pour accepter les conditions du Forum"
+    override val profileTermsTitle = "Conditions du Forum"
+    override val profileTermsShow = "Afficher les conditions"
+    override val profileTermsHide = "Masquer les conditions"
+    override val profileTermsAgree = "J’accepte les conditions du Forum"
+    override val profileUpdate = "Mettre à jour"
+    override val profileUpdated = "Profil mis à jour"
+    override val profileUpdateError = "Impossible de mettre à jour votre profil. Veuillez réessayer."
+    override val leaveForumDialogTitle = "Quitter le Forum ?"
+    override val leaveForumDialogMessage = "Tous vos dictionnaires deviendront privés et les personnes qui les ont téléchargés n’y auront plus accès. Vous pouvez rejoindre le Forum à tout moment."
+    override val leaveForumDialogConfirm = "Quitter le Forum"
+    override val leaveForumDialogCancel = "Rester"
 }

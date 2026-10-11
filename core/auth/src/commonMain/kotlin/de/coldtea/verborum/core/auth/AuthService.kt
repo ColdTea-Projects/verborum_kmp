@@ -37,6 +37,12 @@ class AuthService(
     private val client: KeycloakAuthClient,
     private val launcher: AuthorizationLauncher,
     private val pendingStore: PendingAuthorizationStore,
+    /**
+     * Resolved at sign-out rather than held, so building this service never walks the graph of
+     * everything a session leaves behind. Those stores may read the session themselves — which is
+     * exactly how an eagerly resolved list turns into a dependency cycle.
+     */
+    private val postLogoutHooks: () -> List<PostLogoutHook> = ::emptyList,
 ) {
 
     private val _lastFailure = MutableStateFlow<SignInFailure?>(null)
@@ -82,6 +88,9 @@ class AuthService(
         session.currentRefreshToken()?.let { refreshToken -> client.endSession(refreshToken) }
         session.signOut()
         _lastFailure.value = null
+
+        // After the tokens, so a hook cannot accidentally make a call as the user who just left.
+        postLogoutHooks().runAll()
     }
 
     private suspend fun complete(result: AuthorizationResult): Outcome<Unit> = when (result) {

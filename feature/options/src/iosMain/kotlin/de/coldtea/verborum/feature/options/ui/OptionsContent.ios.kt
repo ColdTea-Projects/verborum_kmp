@@ -27,6 +27,7 @@ internal actual fun OptionsContent(
     onSignOut: () -> Unit,
     onHowToUseApp: (() -> Unit)?,
     onOpenLanguagePicker: () -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier,
 ) {
     val strings = LocalStrings.current
@@ -37,6 +38,13 @@ internal actual fun OptionsContent(
             icon = VerborumIcons.Storefront,
             label = languageLabel(strings, language, chosenLanguage),
             onClick = onOpenLanguagePicker,
+        )
+
+        OptionRow(
+            icon = VerborumIcons.Settings,
+            label = strings.optionsProfile,
+            onClick = onOpenProfile,
+            modifier = Modifier.padding(top = Spacing.medium),
         )
 
         onHowToUseApp?.let { openTour ->

@@ -279,4 +279,22 @@ internal object GermanStrings : Strings {
     override val onboardingTestBody = "Teste dich per Multiple Choice. Jede eingetragene Form wird zu einer eigenen Frage, und richtige Antworten heben das Niveau eines Wortes."
     override val onboardingPracticeSwipeBody = "Tippe beim Üben auf eine Karte, um die Übersetzung zu sehen, und wische nach rechts, wenn du sie wusstest, sonst nach links — so oder so bewegt sich das Niveau."
     override val onboardingPracticeFlipBody = "Klicke beim Üben auf eine Karte, um sie umzudrehen. Markiere sie dann als richtig oder falsch — so oder so bewegt sich das Niveau des Wortes."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profil"
+    override val profileEmailLabel = "E-Mail"
+    override val profileDisplayNameLabel = "Anzeigename"
+    override val profileDisplayNameSupporting = "Wird anderen bei den Wörterbüchern angezeigt, die du im Forum teilst"
+    override val profileDisplayNameRequired = "Ein Anzeigename ist erforderlich, um die Forum-Bedingungen zu akzeptieren"
+    override val profileTermsTitle = "Forum-Bedingungen"
+    override val profileTermsShow = "Bedingungen anzeigen"
+    override val profileTermsHide = "Bedingungen ausblenden"
+    override val profileTermsAgree = "Ich stimme den Forum-Bedingungen zu"
+    override val profileUpdate = "Aktualisieren"
+    override val profileUpdated = "Profil aktualisiert"
+    override val profileUpdateError = "Profil konnte nicht aktualisiert werden. Bitte versuche es erneut."
+    override val leaveForumDialogTitle = "Das Forum verlassen?"
+    override val leaveForumDialogMessage = "Alle deine Wörterbücher werden privat, und wer sie heruntergeladen hat, verliert den Zugriff. Du kannst jederzeit wieder beitreten."
+    override val leaveForumDialogConfirm = "Forum verlassen"
+    override val leaveForumDialogCancel = "Bleiben"
 }

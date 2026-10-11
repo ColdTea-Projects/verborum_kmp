@@ -261,4 +261,22 @@ internal object ChineseStrings : Strings {
     override val onboardingTestBody = "用你的单词做选择题测验。你录入的每个形式都会成为一道题，答对可以提升单词的等级。"
     override val onboardingPracticeSwipeBody = "自主练习时点按卡片查看翻译，记得就向右滑，不记得就向左滑——无论哪种，等级都会变化。"
     override val onboardingPracticeFlipBody = "自主练习时点击卡片将其翻转，然后标记正确或错误——无论哪种，单词的等级都会变化。"
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "个人资料"
+    override val profileEmailLabel = "电子邮箱"
+    override val profileDisplayNameLabel = "显示名称"
+    override val profileDisplayNameSupporting = "在你于 Forum 分享的词典上向他人显示"
+    override val profileDisplayNameRequired = "接受 Forum 条款需要先填写显示名称"
+    override val profileTermsTitle = "Forum 条款"
+    override val profileTermsShow = "显示条款"
+    override val profileTermsHide = "隐藏条款"
+    override val profileTermsAgree = "我同意 Forum 条款"
+    override val profileUpdate = "更新"
+    override val profileUpdated = "个人资料已更新"
+    override val profileUpdateError = "无法更新个人资料，请重试。"
+    override val leaveForumDialogTitle = "要退出 Forum 吗？"
+    override val leaveForumDialogMessage = "你的所有词典都将变为私有，已下载的人将无法再访问。你可以随时重新加入。"
+    override val leaveForumDialogConfirm = "退出 Forum"
+    override val leaveForumDialogCancel = "留下"
 }

@@ -262,4 +262,22 @@ internal object RussianStrings : Strings {
     override val onboardingTestBody = "Проходите тесты с вариантами ответов. Каждая введённая форма становится отдельным вопросом, а верные ответы повышают уровень слова."
     override val onboardingPracticeSwipeBody = "На тренировке коснитесь карточки, чтобы увидеть перевод, затем смахните вправо, если знали, или влево, если нет — уровень изменится в любом случае."
     override val onboardingPracticeFlipBody = "На тренировке нажмите на карточку, чтобы перевернуть её. Затем отметьте как верную или неверную — уровень слова изменится в любом случае."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Профиль"
+    override val profileEmailLabel = "Эл. почта"
+    override val profileDisplayNameLabel = "Отображаемое имя"
+    override val profileDisplayNameSupporting = "Показывается другим в словарях, которыми вы делитесь в Forum"
+    override val profileDisplayNameRequired = "Чтобы принять условия Forum, нужно отображаемое имя"
+    override val profileTermsTitle = "Условия Forum"
+    override val profileTermsShow = "Показать условия"
+    override val profileTermsHide = "Скрыть условия"
+    override val profileTermsAgree = "Я принимаю условия Forum"
+    override val profileUpdate = "Обновить"
+    override val profileUpdated = "Профиль обновлён"
+    override val profileUpdateError = "Не удалось обновить профиль. Попробуйте ещё раз."
+    override val leaveForumDialogTitle = "Выйти из Forum?"
+    override val leaveForumDialogMessage = "Все ваши словари станут приватными, а скачавшие их потеряют доступ. Вы можете вернуться в любой момент."
+    override val leaveForumDialogConfirm = "Выйти из Forum"
+    override val leaveForumDialogCancel = "Остаться"
 }

@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.common.data
 
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.network.asPathSegment
 import de.coldtea.verborum.core.network.plainApiCall
 import de.coldtea.verborum.core.network.statusApiCall
 import io.ktor.client.HttpClient

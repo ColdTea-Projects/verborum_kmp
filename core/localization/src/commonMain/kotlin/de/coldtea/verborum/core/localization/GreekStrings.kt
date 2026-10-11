@@ -262,4 +262,22 @@ internal object GreekStrings : Strings {
     override val onboardingTestBody = "Κάντε τεστ πολλαπλής επιλογής. Κάθε τύπος που καταχωρίσατε γίνεται δική του ερώτηση, και οι σωστές απαντήσεις ανεβάζουν το επίπεδο μιας λέξης."
     override val onboardingPracticeSwipeBody = "Στην εξάσκηση πατήστε μια κάρτα για να δείτε τη μετάφραση και σύρετε δεξιά αν την ξέρατε, αριστερά αν όχι — έτσι κι αλλιώς το επίπεδο αλλάζει."
     override val onboardingPracticeFlipBody = "Στην εξάσκηση κάντε κλικ σε μια κάρτα για να τη γυρίσετε. Μετά σημειώστε σωστό ή λάθος — έτσι κι αλλιώς το επίπεδο της λέξης αλλάζει."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Προφίλ"
+    override val profileEmailLabel = "Email"
+    override val profileDisplayNameLabel = "Εμφανιζόμενο όνομα"
+    override val profileDisplayNameSupporting = "Εμφανίζεται σε άλλους στα λεξικά που μοιράζεστε στο Forum"
+    override val profileDisplayNameRequired = "Απαιτείται εμφανιζόμενο όνομα για την αποδοχή των όρων του Forum"
+    override val profileTermsTitle = "Όροι του Forum"
+    override val profileTermsShow = "Εμφάνιση των όρων"
+    override val profileTermsHide = "Απόκρυψη των όρων"
+    override val profileTermsAgree = "Αποδέχομαι τους όρους του Forum"
+    override val profileUpdate = "Ενημέρωση"
+    override val profileUpdated = "Το προφίλ ενημερώθηκε"
+    override val profileUpdateError = "Δεν ήταν δυνατή η ενημέρωση του προφίλ. Δοκιμάστε ξανά."
+    override val leaveForumDialogTitle = "Αποχώρηση από το Forum;"
+    override val leaveForumDialogMessage = "Όλα τα λεξικά σας θα γίνουν ιδιωτικά και όσοι τα κατέβασαν θα χάσουν την πρόσβαση. Μπορείτε να εγγραφείτε ξανά οποτεδήποτε."
+    override val leaveForumDialogConfirm = "Αποχώρηση"
+    override val leaveForumDialogCancel = "Παραμονή"
 }

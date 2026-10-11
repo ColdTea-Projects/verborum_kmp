@@ -8,6 +8,7 @@ import de.coldtea.verborum.core.auth.AuthorizationLauncher
 import de.coldtea.verborum.core.auth.KeycloakAuthClient
 import de.coldtea.verborum.core.auth.PendingAuthorizationStore
 import de.coldtea.verborum.core.auth.TokenRefresher
+import de.coldtea.verborum.core.auth.PostLogoutHooks
 import de.coldtea.verborum.core.auth.TokenStorage
 import de.coldtea.verborum.core.auth.createAuthHttpClient
 import de.coldtea.verborum.core.auth.createAuthorizationLauncher
@@ -25,6 +26,9 @@ import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.network.BearerTokenProvider
 import de.coldtea.verborum.core.network.createHttpClient
 import de.coldtea.verborum.core.network.defaultApiConfig
+import de.coldtea.verborum.core.profile.di.profileModule
+import de.coldtea.verborum.core.profile.domain.ProfileService
+import de.coldtea.verborum.core.profile.domain.asPostLogoutHook
 import de.coldtea.verborum.feature.auth.di.authFeatureModule
 import de.coldtea.verborum.feature.bibliotheca.di.bibliothecaModule
 import de.coldtea.verborum.feature.forum.di.forumModule
@@ -67,6 +71,11 @@ val coreModule: Module = module {
     single { AuthSession(storage = get(), refresher = get()) }
     single<BearerTokenProvider> { get<AuthSession>() }
 
+    // What a session leaves behind on the device. Declared here rather than inside `core:auth`,
+    // which must not know what stores exist, or inside each store, which would have to reach back
+    // into auth to register.
+    single { PostLogoutHooks(listOf(get<ProfileService>().asPostLogoutHook())) }
+
     single {
         AuthService(
             config = get(),
@@ -74,15 +83,27 @@ val coreModule: Module = module {
             client = get(),
             launcher = get(),
             pendingStore = get(),
+            postLogoutHooks = { get<PostLogoutHooks>().hooks },
         )
     }
 
-    single<HttpClient> { createHttpClient(config = get(), tokenProvider = get()) }
+    // The `ms_dictionary` client, and the unnamed one: it is what a feature gets by asking for an
+    // `HttpClient`. The other two services have named clients of their own, in their own modules.
+    single<HttpClient> {
+        val config = get<ApiConfig>()
+
+        createHttpClient(
+            baseUrl = config.baseUrl,
+            enableLogging = config.enableLogging,
+            tokenProvider = get(),
+        )
+    }
 }
 
 val appModules: List<Module> =
     listOf(
         coreModule,
+        profileModule,
         authFeatureModule,
         bibliothecaModule,
         forumModule,

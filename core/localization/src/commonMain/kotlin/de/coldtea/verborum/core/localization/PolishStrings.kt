@@ -262,4 +262,22 @@ internal object PolishStrings : Strings {
     override val onboardingTestBody = "Rozwiązuj testy wielokrotnego wyboru. Każda wprowadzona forma ma własne pytanie, a poprawne odpowiedzi podnoszą poziom słowa."
     override val onboardingPracticeSwipeBody = "Podczas nauki dotknij karty, aby zobaczyć tłumaczenie, potem przesuń w prawo, jeśli wiedziałeś, lub w lewo, jeśli nie — poziom i tak się zmieni."
     override val onboardingPracticeFlipBody = "Podczas nauki kliknij kartę, aby ją odwrócić. Następnie oznacz ją jako poprawną lub błędną — poziom słowa i tak się zmieni."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profil"
+    override val profileEmailLabel = "E-mail"
+    override val profileDisplayNameLabel = "Nazwa wyświetlana"
+    override val profileDisplayNameSupporting = "Widoczna dla innych przy słownikach udostępnianych na Forum"
+    override val profileDisplayNameRequired = "Aby zaakceptować warunki Forum, wymagana jest nazwa wyświetlana"
+    override val profileTermsTitle = "Warunki Forum"
+    override val profileTermsShow = "Pokaż warunki"
+    override val profileTermsHide = "Ukryj warunki"
+    override val profileTermsAgree = "Akceptuję warunki Forum"
+    override val profileUpdate = "Aktualizuj"
+    override val profileUpdated = "Profil zaktualizowany"
+    override val profileUpdateError = "Nie udało się zaktualizować profilu. Spróbuj ponownie."
+    override val leaveForumDialogTitle = "Opuścić Forum?"
+    override val leaveForumDialogMessage = "Wszystkie Twoje słowniki staną się prywatne, a osoby, które je pobrały, stracą dostęp. Możesz dołączyć ponownie w dowolnej chwili."
+    override val leaveForumDialogConfirm = "Opuść Forum"
+    override val leaveForumDialogCancel = "Zostań"
 }

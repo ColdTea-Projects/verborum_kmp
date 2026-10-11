@@ -39,6 +39,7 @@ internal actual fun OptionsContent(
     onSignOut: () -> Unit,
     onHowToUseApp: (() -> Unit)?,
     @Suppress("UNUSED_PARAMETER") onOpenLanguagePicker: () -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier,
 ) {
     val strings = LocalStrings.current
@@ -49,6 +50,13 @@ internal actual fun OptionsContent(
             chosen = chosenLanguage,
             onChoose = onLanguageChosen,
             onFollowSystem = onFollowSystemLanguage,
+        )
+
+        OptionRow(
+            icon = VerborumIcons.Settings,
+            label = strings.optionsProfile,
+            onClick = onOpenProfile,
+            modifier = Modifier.padding(top = Spacing.medium),
         )
 
         onHowToUseApp?.let { openTour ->

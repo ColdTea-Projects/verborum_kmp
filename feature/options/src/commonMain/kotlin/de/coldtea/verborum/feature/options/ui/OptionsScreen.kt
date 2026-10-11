@@ -31,13 +31,13 @@ import de.coldtea.verborum.core.localization.strings
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * The Options tab. It holds only "Sign out" today, but is built as a list of [OptionRow]s so the next
- * entry — profile, preferences, about — is a one-line addition rather than a new layout.
+ * The Options tab: a list of [OptionRow]s, so a new entry is a line rather than a layout.
  */
 @Composable
 internal fun OptionsScreen(
     onHowToUseApp: (() -> Unit)?,
     onOpenLanguagePicker: () -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OptionsViewModel = koinViewModel(),
 ) {
@@ -59,6 +59,7 @@ internal fun OptionsScreen(
         onSignOut = viewModel::signOut,
         onHowToUseApp = onHowToUseApp,
         onOpenLanguagePicker = onOpenLanguagePicker,
+        onOpenProfile = onOpenProfile,
         modifier = modifier,
     )
 }
@@ -89,6 +90,8 @@ internal expect fun OptionsContent(
      * uses it.
      */
     onOpenLanguagePicker: () -> Unit,
+    /** Opens the profile — email, display name, and the Forum terms that decide membership. */
+    onOpenProfile: () -> Unit,
     modifier: Modifier,
 )
 

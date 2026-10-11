@@ -10,6 +10,8 @@ kotlin {
             implementation(project(":core:auth"))
             // ...and empties the on-device library along with it.
             implementation(project(":core:database"))
+            // The Profile screen edits the session profile: the display name and the Forum terms.
+            implementation(project(":core:profile"))
         }
         commonTest.dependencies {
             // Only to construct an AuthService; signing out never reaches the network here.

@@ -262,4 +262,22 @@ internal object AzerbaijaniStrings : Strings {
     override val onboardingTestBody = "Sözlərinizlə çoxseçimli testlər keçin. Daxil etdiyiniz hər forma öz sualını alır və doğru cavablar sözün səviyyəsini qaldırır."
     override val onboardingPracticeSwipeBody = "Məşq zamanı karta toxunub tərcüməni görün, bilirdinizsə sağa, bilmirdinizsə sola sürüşdürün — hər halda səviyyə dəyişir."
     override val onboardingPracticeFlipBody = "Məşq zamanı karta klikləyib çevirin. Sonra doğru və ya yanlış işarələyin — hər halda sözün səviyyəsi dəyişir."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profil"
+    override val profileEmailLabel = "E-poçt"
+    override val profileDisplayNameLabel = "Görünən ad"
+    override val profileDisplayNameSupporting = "Forum-da paylaşdığınız lüğətlərdə başqalarına göstərilir"
+    override val profileDisplayNameRequired = "Forum şərtlərini qəbul etmək üçün görünən ad tələb olunur"
+    override val profileTermsTitle = "Forum şərtləri"
+    override val profileTermsShow = "Şərtləri göstər"
+    override val profileTermsHide = "Şərtləri gizlət"
+    override val profileTermsAgree = "Forum şərtlərini qəbul edirəm"
+    override val profileUpdate = "Yenilə"
+    override val profileUpdated = "Profil yeniləndi"
+    override val profileUpdateError = "Profilinizi yeniləmək mümkün olmadı. Yenidən cəhd edin."
+    override val leaveForumDialogTitle = "Forum-dan çıxılsın?"
+    override val leaveForumDialogMessage = "Bütün lüğətləriniz gizli olacaq və onları yükləyənlər girişi itirəcək. İstədiyiniz vaxt yenidən qoşula bilərsiniz."
+    override val leaveForumDialogConfirm = "Forum-dan çıx"
+    override val leaveForumDialogCancel = "Qal"
 }

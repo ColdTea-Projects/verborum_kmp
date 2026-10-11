@@ -48,6 +48,7 @@ kotlin {
             implementation(project(":core:network"))
             implementation(project(":core:auth"))
             implementation(project(":core:database"))
+            implementation(project(":core:profile"))
 
             implementation(project(":feature:auth"))
             implementation(project(":feature:bibliotheca"))
@@ -59,6 +60,11 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+        }
+        commonTest.dependencies {
+            // The Koin graph test builds the real wiring, so it needs an engine for the clients the
+            // shell declares — the requests are never made, only the clients constructed.
+            implementation(libs.ktor.client.mock)
         }
     }
 }

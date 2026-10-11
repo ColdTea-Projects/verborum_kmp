@@ -262,4 +262,22 @@ internal object PersianStrings : Strings {
     override val onboardingTestBody = "آزمون چندگزینه‌ای بدهید. هر صورتی که وارد کرده‌اید پرسش خود را دارد و پاسخ درست سطح واژه را بالا می‌برد."
     override val onboardingPracticeSwipeBody = "هنگام تمرین روی کارت بزنید تا ترجمه را ببینید، سپس اگر می‌دانستید به راست و اگر نه به چپ بکشید — در هر حال سطح تغییر می‌کند."
     override val onboardingPracticeFlipBody = "هنگام تمرین روی کارت کلیک کنید تا برگردد. سپس درست یا نادرست را علامت بزنید — در هر حال سطح واژه تغییر می‌کند."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "نمایه"
+    override val profileEmailLabel = "ایمیل"
+    override val profileDisplayNameLabel = "نام نمایشی"
+    override val profileDisplayNameSupporting = "در واژه‌نامه‌هایی که در Forum به اشتراک می‌گذارید به دیگران نشان داده می‌شود"
+    override val profileDisplayNameRequired = "برای پذیرفتن شرایط Forum به نام نمایشی نیاز است"
+    override val profileTermsTitle = "شرایط Forum"
+    override val profileTermsShow = "نمایش شرایط"
+    override val profileTermsHide = "پنهان کردن شرایط"
+    override val profileTermsAgree = "شرایط Forum را می‌پذیرم"
+    override val profileUpdate = "به‌روزرسانی"
+    override val profileUpdated = "نمایه به‌روز شد"
+    override val profileUpdateError = "به‌روزرسانی نمایه ممکن نشد. لطفاً دوباره تلاش کنید."
+    override val leaveForumDialogTitle = "از Forum خارج می‌شوید؟"
+    override val leaveForumDialogMessage = "همهٔ واژه‌نامه‌های شما خصوصی می‌شوند و کسانی که آن‌ها را دانلود کرده‌اند دسترسی خود را از دست می‌دهند. هر زمان بخواهید می‌توانید دوباره بپیوندید."
+    override val leaveForumDialogConfirm = "خروج از Forum"
+    override val leaveForumDialogCancel = "ماندن"
 }

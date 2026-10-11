@@ -30,11 +30,17 @@ val VerborumJson: Json = Json {
 internal expect fun platformHttpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient
 
 /**
- * Builds the one [HttpClient] the app uses. The engine is chosen per target
- * (Darwin on iOS, the browser fetch engine on web).
+ * Builds one [HttpClient] for one backend service. The engine is chosen per target (Darwin on iOS,
+ * the browser fetch engine on web); [baseUrl] decides which service it talks to, because the base
+ * URL is stamped on by `defaultRequest` rather than written at every call site.
+ *
+ * [baseUrl] rather than an [ApiConfig], even though that is where every caller but one gets it: the
+ * Keycloak client has an issuer and no API service at all, and making it invent the other two URLs
+ * to satisfy the type would be inventing exactly the values that must never be guessed.
  */
 fun createHttpClient(
-    config: ApiConfig = defaultApiConfig(),
+    baseUrl: String,
+    enableLogging: Boolean = false,
     tokenProvider: BearerTokenProvider? = null,
 ): HttpClient = platformHttpClient {
     expectSuccess = false
@@ -48,7 +54,7 @@ fun createHttpClient(
         connectTimeoutMillis = 15_000
     }
 
-    if (config.enableLogging) {
+    if (enableLogging) {
         install(Logging) {
             logger = KtorKermitLogger
             // INFO is method, URL and status — no headers and no bodies. The sanitiser is the
@@ -64,7 +70,7 @@ fun createHttpClient(
     }
 
     defaultRequest {
-        url(config.baseUrl.ensureTrailingSlash())
+        url(baseUrl.ensureTrailingSlash())
         header(HttpHeaders.Accept, ContentType.Application.Json)
     }
 }

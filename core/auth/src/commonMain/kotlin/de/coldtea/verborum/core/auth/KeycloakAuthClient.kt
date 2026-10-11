@@ -3,7 +3,6 @@ package de.coldtea.verborum.core.auth
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.VerborumError
 import de.coldtea.verborum.core.common.map
-import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.network.createHttpClient
 import de.coldtea.verborum.core.network.toVerborumError
 import io.ktor.client.HttpClient
@@ -22,7 +21,8 @@ import kotlinx.serialization.Serializable
  * credentials.
  */
 fun createAuthHttpClient(config: AuthConfig): HttpClient = createHttpClient(
-    config = ApiConfig(baseUrl = config.issuer, enableLogging = false),
+    baseUrl = config.issuer,
+    enableLogging = false,
     tokenProvider = null,
 )
 

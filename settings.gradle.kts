@@ -37,6 +37,7 @@ include(":core:localization")
 include(":core:network")
 include(":core:auth")
 include(":core:database")
+include(":core:profile")
 
 include(":feature:auth")
 include(":feature:bibliotheca")

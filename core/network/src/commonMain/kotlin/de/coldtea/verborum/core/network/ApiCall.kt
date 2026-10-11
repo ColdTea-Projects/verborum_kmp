@@ -57,7 +57,12 @@ suspend inline fun <reified T> plainApiCall(
     when {
         status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
         status in 200..299 -> Outcome.Success(response.body<T>())
-        else -> Outcome.Failure(VerborumError.Http(status))
+
+        // The services that answer with the payload directly answer a failure with their own error
+        // body rather than an `Envelope`, and callers branch on the class name in it: the sharing
+        // rule and the profile rules are both "400 plus which rule". Dropping it would leave them
+        // unable to tell one 400 from another.
+        else -> Outcome.Failure(response.toHttpFailure())
     }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation
@@ -80,7 +85,7 @@ suspend inline fun statusApiCall(
     when {
         status == 401 -> Outcome.Failure(VerborumError.Unauthorized)
         status in 200..299 -> Outcome.Success(Unit)
-        else -> Outcome.Failure(VerborumError.Http(status))
+        else -> Outcome.Failure(response.toHttpFailure())
     }.logFailure(response.call.request.url.encodedPath)
 } catch (cancellation: CancellationException) {
     throw cancellation

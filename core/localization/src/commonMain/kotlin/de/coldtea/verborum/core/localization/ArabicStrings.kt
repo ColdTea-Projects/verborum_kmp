@@ -262,4 +262,22 @@ internal object ArabicStrings : Strings {
     override val onboardingTestBody = "اختبر نفسك باختيار من متعدد. كل صيغة أدخلتها تصبح سؤالًا مستقلًا، والإجابات الصحيحة ترفع مستوى الكلمة."
     override val onboardingPracticeSwipeBody = "أثناء التدريب انقر البطاقة لترى الترجمة، ثم اسحب يمينًا إن كنت تعرفها ويسارًا إن لم تكن — في الحالتين يتغير المستوى."
     override val onboardingPracticeFlipBody = "أثناء التدريب انقر البطاقة لقلبها، ثم علّمها صحيحة أو خاطئة — في الحالتين يتغير مستوى الكلمة."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "الملف الشخصي"
+    override val profileEmailLabel = "البريد الإلكتروني"
+    override val profileDisplayNameLabel = "الاسم المعروض"
+    override val profileDisplayNameSupporting = "يظهر للآخرين على القواميس التي تشاركها في Forum"
+    override val profileDisplayNameRequired = "يلزم وجود اسم معروض لقبول شروط Forum"
+    override val profileTermsTitle = "شروط Forum"
+    override val profileTermsShow = "إظهار الشروط"
+    override val profileTermsHide = "إخفاء الشروط"
+    override val profileTermsAgree = "أوافق على شروط Forum"
+    override val profileUpdate = "تحديث"
+    override val profileUpdated = "تم تحديث الملف الشخصي"
+    override val profileUpdateError = "تعذّر تحديث ملفك الشخصي. يُرجى المحاولة مرة أخرى."
+    override val leaveForumDialogTitle = "هل تريد مغادرة Forum؟"
+    override val leaveForumDialogMessage = "ستصبح جميع قواميسك خاصة، وسيفقد من نزّلوها إمكانية الوصول إليها. يمكنك الانضمام مرة أخرى في أي وقت."
+    override val leaveForumDialogConfirm = "مغادرة Forum"
+    override val leaveForumDialogCancel = "البقاء"
 }

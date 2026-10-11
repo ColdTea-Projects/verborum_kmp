@@ -262,4 +262,22 @@ internal object TurkishStrings : Strings {
     override val onboardingTestBody = "Kelimelerinizle çoktan seçmeli testler yapın. Girdiğiniz her biçim kendi sorusunu alır ve doğru cevaplar kelimenin seviyesini yükseltir."
     override val onboardingPracticeSwipeBody = "Çalışırken bir karta dokunup çeviriyi görün, bildiyseniz sağa, bilmediyseniz sola kaydırın — her iki durumda da seviye değişir."
     override val onboardingPracticeFlipBody = "Çalışırken bir karta tıklayıp çevirin. Sonra doğru ya da yanlış olarak işaretleyin — her iki durumda da kelimenin seviyesi değişir."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profil"
+    override val profileEmailLabel = "E-posta"
+    override val profileDisplayNameLabel = "Görünen ad"
+    override val profileDisplayNameSupporting = "Forum’da paylaştığın sözlüklerde diğer kullanıcılara gösterilir"
+    override val profileDisplayNameRequired = "Forum koşullarını kabul etmek için bir görünen ad gerekli"
+    override val profileTermsTitle = "Forum koşulları"
+    override val profileTermsShow = "Koşulları göster"
+    override val profileTermsHide = "Koşulları gizle"
+    override val profileTermsAgree = "Forum koşullarını kabul ediyorum"
+    override val profileUpdate = "Güncelle"
+    override val profileUpdated = "Profil güncellendi"
+    override val profileUpdateError = "Profilin güncellenemedi. Lütfen tekrar dene."
+    override val leaveForumDialogTitle = "Forum’dan ayrılınsın mı?"
+    override val leaveForumDialogMessage = "Tüm sözlüklerin gizli olacak ve onları indirenler erişimini kaybedecek. İstediğin zaman yeniden katılabilirsin."
+    override val leaveForumDialogConfirm = "Forum’dan ayrıl"
+    override val leaveForumDialogCancel = "Kal"
 }

@@ -262,4 +262,22 @@ internal object DutchStrings : Strings {
     override val onboardingTestBody = "Doe meerkeuzetests. Elke ingevoerde vorm krijgt een eigen vraag, en goede antwoorden verhogen het niveau van een woord."
     override val onboardingPracticeSwipeBody = "Tik tijdens het oefenen op een kaart om de vertaling te zien en veeg naar rechts als je het wist, anders naar links — hoe dan ook verandert het niveau."
     override val onboardingPracticeFlipBody = "Klik tijdens het oefenen op een kaart om hem om te draaien. Markeer hem daarna goed of fout — hoe dan ook verandert het niveau van het woord."
+
+    // ---- profile -------------------------------------------------------------------------
+    override val optionsProfile = "Profiel"
+    override val profileEmailLabel = "E-mail"
+    override val profileDisplayNameLabel = "Weergavenaam"
+    override val profileDisplayNameSupporting = "Wordt aan anderen getoond bij de woordenboeken die je in het Forum deelt"
+    override val profileDisplayNameRequired = "Een weergavenaam is vereist om de Forum-voorwaarden te accepteren"
+    override val profileTermsTitle = "Forum-voorwaarden"
+    override val profileTermsShow = "Voorwaarden tonen"
+    override val profileTermsHide = "Voorwaarden verbergen"
+    override val profileTermsAgree = "Ik ga akkoord met de Forum-voorwaarden"
+    override val profileUpdate = "Bijwerken"
+    override val profileUpdated = "Profiel bijgewerkt"
+    override val profileUpdateError = "Je profiel kon niet worden bijgewerkt. Probeer het opnieuw."
+    override val leaveForumDialogTitle = "Het Forum verlaten?"
+    override val leaveForumDialogMessage = "Al je woordenboeken worden privé en wie ze heeft gedownload, verliest de toegang. Je kunt op elk moment weer lid worden."
+    override val leaveForumDialogConfirm = "Forum verlaten"
+    override val leaveForumDialogCancel = "Blijven"
 }

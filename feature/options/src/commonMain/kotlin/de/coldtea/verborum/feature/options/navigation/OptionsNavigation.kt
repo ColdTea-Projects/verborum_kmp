@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import de.coldtea.verborum.feature.options.ui.OptionsScreen
+import de.coldtea.verborum.feature.options.ui.profile.ProfileScreen
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,6 +17,14 @@ data object OptionsGraph
 @Serializable
 @SerialName("settings")
 private data object OptionsHomeRoute
+
+/**
+ * The profile: email, display name and the Forum terms. `#profile` in the address bar, so the web
+ * app can be linked and reloaded straight onto it.
+ */
+@Serializable
+@SerialName("profile")
+private data object ProfileRoute
 
 /**
  * The app-language picker. iOS reaches it from the Options tab's language row; web picks its
@@ -41,7 +50,12 @@ fun NavGraphBuilder.optionsGraph(
             OptionsScreen(
                 onHowToUseApp = onHowToUseApp,
                 onOpenLanguagePicker = { navController.navigate(LanguagePickerRoute) },
+                onOpenProfile = { navController.navigate(ProfileRoute) },
             )
+        }
+
+        composable<ProfileRoute> {
+            ProfileScreen()
         }
 
         registerLanguagePickerRoutes()
