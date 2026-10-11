@@ -35,6 +35,12 @@ internal fun WordListItem(
     onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * A word of a downloaded dictionary. The two action icons are **removed**, not disabled: both
+     * writes are a 403 on someone else's dictionary, so there is nothing to enable later, and a pair
+     * of greyed-out icons on every row would be noise claiming to be an affordance.
+     */
+    isReadOnly: Boolean = false,
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -78,7 +84,7 @@ internal fun WordListItem(
                     }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!isReadOnly) Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = { onEditClick(word.wordId) },
                         modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),

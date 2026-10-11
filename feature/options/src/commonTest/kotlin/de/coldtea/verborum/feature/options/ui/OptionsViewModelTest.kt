@@ -17,6 +17,8 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.database.LocalCache
 import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
 import de.coldtea.verborum.core.database.bibliotheca.DictionaryDao
+import de.coldtea.verborum.core.database.bibliotheca.ImportedDictionaryDao
+import de.coldtea.verborum.core.database.bibliotheca.ImportedWordDao
 import de.coldtea.verborum.core.database.bibliotheca.WordDao
 import de.coldtea.verborum.core.common.VerborumError
 import io.ktor.client.HttpClient
@@ -200,6 +202,8 @@ private class RecordingLibrary : BibliothecaDatabase {
 
     override val dictionaryDao: DictionaryDao get() = error("sign-out reads no rows")
     override val wordDao: WordDao get() = error("sign-out reads no rows")
+    override val importedDictionaryDao: ImportedDictionaryDao get() = error("sign-out reads no rows")
+    override val importedWordDao: ImportedWordDao get() = error("sign-out reads no rows")
 
     override suspend fun <R> withTransaction(block: suspend () -> R): R = block()
 

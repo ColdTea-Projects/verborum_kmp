@@ -280,4 +280,21 @@ internal object DutchStrings : Strings {
     override val leaveForumDialogMessage = "Al je woordenboeken worden privé en wie ze heeft gedownload, verliest de toegang. Je kunt op elk moment weer lid worden."
     override val leaveForumDialogConfirm = "Forum verlaten"
     override val leaveForumDialogCancel = "Blijven"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Gedownload"
+    override val dictionaryOptionsUnsubscribe = "Afmelden"
+    override val unsubscribeDialogMessage = "Het wordt uit je Bibliotheca verwijderd, samen met je oefenvoortgang. Je kunt het opnieuw downloaden via het Forum."
+    override val errorUnsubscribeFailed = "Afmelden is mislukt. Controleer je verbinding en probeer het opnieuw."
+    override val dictionarySharingTitle = "Gedeeld in het Forum"
+    override val dictionarySharingOn = "Forumleden kunnen het zien en downloaden"
+    override val dictionarySharingOff = "Alleen jij kunt het zien"
+    override val dictionarySharingLastShared = "Je laatste gedeelde woordenboek — zolang je in het Forum zit, moet er één gedeeld blijven"
+    override val unshareDialogMessage = "Het verdwijnt uit het Forum en wie het heeft gedownload, verliest de toegang."
+    override val unshareDialogConfirm = "Stoppen met delen"
+    override val errorSharingFailed = "Delen kon niet worden gewijzigd. Controleer je verbinding en probeer het opnieuw."
+    override val errorDeleteLastShared = "Dit is je laatste gedeelde woordenboek. Deel eerst een ander, of verlaat het Forum om ze allemaal privé te maken."
+    override fun unsubscribeDialogTitle(name: String): String = "Afmelden voor ‘${name}’?"
+    override fun unshareDialogTitle(name: String): String = "Stoppen met delen van ‘${name}’?"
+    override fun forumPublishedBy(publisher: String): String = "door ${publisher}"
 }

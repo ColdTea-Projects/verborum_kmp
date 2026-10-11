@@ -280,4 +280,21 @@ internal object TurkishStrings : Strings {
     override val leaveForumDialogMessage = "Tüm sözlüklerin gizli olacak ve onları indirenler erişimini kaybedecek. İstediğin zaman yeniden katılabilirsin."
     override val leaveForumDialogConfirm = "Forum’dan ayrıl"
     override val leaveForumDialogCancel = "Kal"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "İndirildi"
+    override val dictionaryOptionsUnsubscribe = "Abonelikten çık"
+    override val unsubscribeDialogMessage = "Bu sözlük, üzerindeki çalışma ilerlemenle birlikte Bibliotheca’ndan kaldırılacak. Forum’dan yeniden indirebilirsin."
+    override val errorUnsubscribeFailed = "Abonelikten çıkılamadı. Bağlantını kontrol edip tekrar dene."
+    override val dictionarySharingTitle = "Forum’da paylaşılıyor"
+    override val dictionarySharingOn = "Forum üyeleri görebilir ve indirebilir"
+    override val dictionarySharingOff = "Yalnızca sen görebilirsin"
+    override val dictionarySharingLastShared = "Paylaştığın son sözlük — Forum’dayken en az biri paylaşılmalı"
+    override val unshareDialogMessage = "Forum’dan kalkar ve indirenler erişimini kaybeder."
+    override val unshareDialogConfirm = "Paylaşımı durdur"
+    override val errorSharingFailed = "Paylaşım değiştirilemedi. Bağlantını kontrol edip tekrar dene."
+    override val errorDeleteLastShared = "Bu, paylaştığın son sözlük. Önce başka bir sözlük paylaş ya da tümünü gizli yapmak için Forum’dan ayrıl."
+    override fun unsubscribeDialogTitle(name: String): String = "“${name}” aboneliğinden çıkılsın mı?"
+    override fun unshareDialogTitle(name: String): String = "“${name}” paylaşımı durdurulsun mu?"
+    override fun forumPublishedBy(publisher: String): String = "${publisher} tarafından"
 }

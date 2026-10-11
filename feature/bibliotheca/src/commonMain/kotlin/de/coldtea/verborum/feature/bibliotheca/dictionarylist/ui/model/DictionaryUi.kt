@@ -1,6 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model
 
-import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.LibraryDictionary
 
 /**
  * One row of the dictionary list. Only what the row draws — the domain model's sync bookkeeping
@@ -20,15 +20,27 @@ internal data class DictionaryUi(
      * wrong answer instead of a missing one.
      */
     val wordCount: Int? = null,
+    /**
+     * Downloaded from the Forum, and therefore **read-only**: no editing, no adding words, and
+     * Unsubscribe in place of Delete. The row carries it because the whole overflow menu changes.
+     */
+    val isImported: Boolean = false,
+    /** The publisher's name, when known. Only ever set on a download. */
+    val publisherName: String? = null,
+    /** Shared in the Forum. Server-owned — the client never decides this for an existing row. */
+    val isPublic: Boolean = false,
 )
 
-internal fun Dictionary.toUi(wordCount: Int? = null) = DictionaryUi(
-    dictionaryId = dictionaryId,
-    userId = userId,
-    name = name,
-    fromLang = fromLang,
-    toLang = toLang,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
+internal fun LibraryDictionary.toUi(wordCount: Int? = null) = DictionaryUi(
+    dictionaryId = dictionary.dictionaryId,
+    userId = dictionary.userId,
+    name = dictionary.name,
+    fromLang = dictionary.fromLang,
+    toLang = dictionary.toLang,
+    createdAt = dictionary.createdAt,
+    updatedAt = dictionary.updatedAt,
     wordCount = wordCount,
+    isImported = isImported,
+    publisherName = publisherName,
+    isPublic = dictionary.isPublic,
 )

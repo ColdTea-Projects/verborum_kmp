@@ -33,6 +33,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSharingState
+import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
 
 class DictionaryListViewModelTest {
 
@@ -66,23 +71,15 @@ class DictionaryListViewModelTest {
 
         val wordRepository = FakeWordRepository(initial = words)
 
-        return DictionaryListViewModel(
+        val imported = fakeImportedService()
 
+        return DictionaryListViewModel(
             languageSettings = testLanguageSettings(),
-            dictionaryService = DictionaryService(
-                observeDictionariesUseCase = ObserveDictionariesUseCase(repository),
-                observeDictionaryUseCase = ObserveDictionaryUseCase(repository),
-                deleteDictionaryUseCase = DeleteDictionaryUseCase(repository),
-                repository = repository,
-            ),
-            wordService = WordService(repository = wordRepository),
-            syncService = SyncService(
-                activeUser = ActiveUserUseCase { "user-42" },
-                syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
-                dictionaryRepository = repository,
-                wordRepository = wordRepository,
-                uploadPendingChanges = UploadPendingChangesUseCase(repository, wordRepository),
-            ),
+            dictionaryService = fakeDictionaryService(repository, wordRepository, imported),
+            wordService = fakeWordService(wordRepository, imported),
+            syncService = fakeSyncService(repository, wordRepository, imported),
+            importedDictionaryService = imported,
+            observeSharingState = fakeSharingState(repository),
         )
     }
 

@@ -1,8 +1,10 @@
 package de.coldtea.verborum.feature.bibliotheca.common.data
 
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteOutcome
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respondError
@@ -42,11 +44,12 @@ class RemoteDeleteTest {
         store.merge(listOf(dictionary("a")))
         val deleteDictionary = DeleteDictionaryUseCase(
             NetworkDictionaryRepository(api = missingApi(), store = store),
+            FakeWordRepository(),
         )
 
         val outcome = deleteDictionary("a")
 
-        assertIs<Outcome.Success<Unit>>(outcome)
+        assertEquals(DeleteOutcome.DELETED, outcome)
         assertTrue(store.dictionaries.first().isEmpty())
     }
 
@@ -72,11 +75,12 @@ class RemoteDeleteTest {
         store.merge(listOf(dictionary("a")))
         val deleteDictionary = DeleteDictionaryUseCase(
             NetworkDictionaryRepository(api = refusedApi(), store = store),
+            FakeWordRepository(),
         )
 
         val outcome = deleteDictionary("a")
 
-        assertIs<Outcome.Failure>(outcome)
+        assertEquals(DeleteOutcome.REFUSED, outcome)
         assertEquals(listOf("a"), store.dictionaries.first().map { it.dictionaryId })
     }
 
@@ -86,12 +90,13 @@ class RemoteDeleteTest {
         store.merge(listOf(dictionary("a")))
         val deleteDictionary = DeleteDictionaryUseCase(
             NetworkDictionaryRepository(api = unreachableApi(), store = store),
+            FakeWordRepository(),
         )
 
         val outcome = deleteDictionary("a")
 
         // Gone from view, still on the device, and queued — the offline delete path.
-        assertIs<Outcome.Success<Unit>>(outcome)
+        assertEquals(DeleteOutcome.PENDING, outcome)
         assertTrue(store.dictionaries.first().isEmpty())
         assertEquals(listOf("a"), store.tombstoned().map { it.dictionaryId })
     }

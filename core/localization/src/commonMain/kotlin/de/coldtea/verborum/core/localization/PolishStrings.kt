@@ -280,4 +280,21 @@ internal object PolishStrings : Strings {
     override val leaveForumDialogMessage = "Wszystkie Twoje słowniki staną się prywatne, a osoby, które je pobrały, stracą dostęp. Możesz dołączyć ponownie w dowolnej chwili."
     override val leaveForumDialogConfirm = "Opuść Forum"
     override val leaveForumDialogCancel = "Zostań"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Pobrany"
+    override val dictionaryOptionsUnsubscribe = "Anuluj subskrypcję"
+    override val unsubscribeDialogMessage = "Zostanie usunięty z Twojej Bibliotheca wraz z postępami w nauce. Możesz pobrać go ponownie z Forum."
+    override val errorUnsubscribeFailed = "Nie udało się anulować subskrypcji. Sprawdź połączenie i spróbuj ponownie."
+    override val dictionarySharingTitle = "Udostępniony na Forum"
+    override val dictionarySharingOn = "Członkowie Forum mogą go zobaczyć i pobrać"
+    override val dictionarySharingOff = "Tylko Ty go widzisz"
+    override val dictionarySharingLastShared = "Twój ostatni udostępniony słownik — dopóki jesteś na Forum, jeden musi pozostać udostępniony"
+    override val unshareDialogMessage = "Zniknie z Forum, a osoby, które go pobrały, stracą dostęp."
+    override val unshareDialogConfirm = "Przestań udostępniać"
+    override val errorSharingFailed = "Nie udało się zmienić udostępniania. Sprawdź połączenie i spróbuj ponownie."
+    override val errorDeleteLastShared = "To Twój ostatni udostępniony słownik. Najpierw udostępnij inny albo opuść Forum, aby wszystkie stały się prywatne."
+    override fun unsubscribeDialogTitle(name: String): String = "Anulować subskrypcję „${name}”?"
+    override fun unshareDialogTitle(name: String): String = "Przestać udostępniać „${name}”?"
+    override fun forumPublishedBy(publisher: String): String = "autor: ${publisher}"
 }

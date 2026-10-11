@@ -17,5 +17,19 @@ internal class SyncUserDictionariesUseCase(
     private val repository: DictionaryRepository,
 ) {
     suspend operator fun invoke(userId: String): Outcome<Unit> =
-        repository.pullDictionaries(userId).map { }
+        repository.pullDictionaries(userId)
+            .also { outcome ->
+                // `isPublic` always comes from the server, **even on a row with unsynced edits**.
+                // The merge deliberately leaves such a row alone so offline work is not lost, but
+                // that protection must not extend to this one field: the server changes it by event
+                // when the user joins or leaves the Forum, so a row that kept its local copy would
+                // push the stale value on the next upload and silently undo the join — and because
+                // the server then refuses it, retry forever.
+                if (outcome is Outcome.Success) {
+                    outcome.data.forEach { remote ->
+                        repository.applyRemoteSharing(remote.dictionaryId, remote.isPublic)
+                    }
+                }
+            }
+            .map { }
 }

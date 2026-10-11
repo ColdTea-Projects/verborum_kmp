@@ -8,8 +8,9 @@ internal sealed interface DictionaryDetailsState {
     data object Failed : DictionaryDetailsState
 
     /**
-     * The dictionary is gone — deleted here, or removed elsewhere and reconciled by a sync. The
-     * screen leaves on this rather than rendering a header for something that no longer exists.
+     * The dictionary is gone — deleted here, removed elsewhere and reconciled by a sync,
+     * unsubscribed from, or hidden because the user left the Forum. The screen leaves on this rather
+     * than rendering a header for something that is no longer there.
      */
     data object Deleted : DictionaryDetailsState
 
@@ -25,7 +26,34 @@ internal sealed interface DictionaryDetailsState {
          */
         val canSelfPractice: Boolean = false,
         val canTest: Boolean = false,
-    ) : DictionaryDetailsState
+        /**
+         * Downloaded from the Forum, and therefore read-only: no add-word button, no editing or
+         * deleting words, no sharing switch, and Unsubscribe instead of Delete. One flag rather than
+         * several because the whole screen changes together, and a screen that got *some* of it
+         * right would offer the user writes that answer 403.
+         */
+        val isImported: Boolean = false,
+        /** Only known for a dictionary this device downloaded; drives the "by …" subtitle. */
+        val publisherName: String? = null,
+        /** The sharing switch belongs to members, and only for their own dictionaries. */
+        val isSharingVisible: Boolean = false,
+        val isShared: Boolean = false,
+        /**
+         * The member's only shared dictionary. The switch stays on and disabled: the server will not
+         * let them unshare it, and a switch that moved and sprang back would read as a bug.
+         */
+        val isLastShared: Boolean = false,
+        /** A sharing request is in flight; the switch is disabled until it settles. */
+        val isUpdatingSharing: Boolean = false,
+        /** Confirmation before unsharing — people who downloaded it lose access. */
+        val isUnshareConfirmationShown: Boolean = false,
+        /** Confirmation before removing a download. */
+        val isUnsubscribeConfirmationShown: Boolean = false,
+    ) : DictionaryDetailsState {
+
+        /** On and locked, or in flight: either way the user cannot move it right now. */
+        val canToggleSharing: Boolean get() = !isUpdatingSharing && !(isShared && isLastShared)
+    }
 }
 
 /** Below this many distinct words a multiple-choice test cannot offer plausible wrong answers. */

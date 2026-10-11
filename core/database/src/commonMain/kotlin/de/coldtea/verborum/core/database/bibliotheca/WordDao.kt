@@ -47,6 +47,12 @@ interface WordDao {
 
     suspend fun clearTombstone(wordId: String)
 
+    /**
+     * Lifts the tombstone from every word of a dictionary — the counterpart to
+     * [markDictionaryDeleted], for a dictionary delete the server refused.
+     */
+    suspend fun clearDictionaryTombstones(dictionaryId: String)
+
     suspend fun delete(wordId: String)
 
     suspend fun deleteByDictionary(dictionaryId: String)

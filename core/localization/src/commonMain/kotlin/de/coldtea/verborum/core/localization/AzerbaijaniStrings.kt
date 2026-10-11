@@ -280,4 +280,21 @@ internal object AzerbaijaniStrings : Strings {
     override val leaveForumDialogMessage = "Bütün lüğətləriniz gizli olacaq və onları yükləyənlər girişi itirəcək. İstədiyiniz vaxt yenidən qoşula bilərsiniz."
     override val leaveForumDialogConfirm = "Forum-dan çıx"
     override val leaveForumDialogCancel = "Qal"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Yüklənib"
+    override val dictionaryOptionsUnsubscribe = "Abunəlikdən çıx"
+    override val unsubscribeDialogMessage = "O, məşq irəliləyişinizlə birlikdə Bibliotheca-dan silinəcək. Onu Forum-dan yenidən yükləyə bilərsiniz."
+    override val errorUnsubscribeFailed = "Abunəlikdən çıxmaq mümkün olmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+    override val dictionarySharingTitle = "Forum-da paylaşılır"
+    override val dictionarySharingOn = "Forum üzvləri onu görə və yükləyə bilər"
+    override val dictionarySharingOff = "Yalnız siz görə bilərsiniz"
+    override val dictionarySharingLastShared = "Paylaşdığınız son lüğət — Forum-da olduğunuz müddətcə biri paylaşılmalıdır"
+    override val unshareDialogMessage = "O, Forum-dan çıxacaq və onu yükləyənlər girişi itirəcək."
+    override val unshareDialogConfirm = "Paylaşımı dayandır"
+    override val errorSharingFailed = "Paylaşımı dəyişmək mümkün olmadı. Bağlantını yoxlayıb yenidən cəhd edin."
+    override val errorDeleteLastShared = "Bu, paylaşdığınız son lüğətdir. Əvvəlcə başqasını paylaşın və ya hamısını gizli etmək üçün Forum-dan çıxın."
+    override fun unsubscribeDialogTitle(name: String): String = "“${name}” abunəliyindən çıxılsın?"
+    override fun unshareDialogTitle(name: String): String = "“${name}” paylaşımı dayandırılsın?"
+    override fun forumPublishedBy(publisher: String): String = "${publisher} tərəfindən"
 }

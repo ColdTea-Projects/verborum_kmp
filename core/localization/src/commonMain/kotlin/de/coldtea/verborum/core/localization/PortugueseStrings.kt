@@ -280,4 +280,21 @@ internal object PortugueseStrings : Strings {
     override val leaveForumDialogMessage = "Todos os seus dicionários ficarão privados e quem os baixou perderá o acesso. Você pode entrar de novo quando quiser."
     override val leaveForumDialogConfirm = "Sair do Forum"
     override val leaveForumDialogCancel = "Ficar"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Baixado"
+    override val dictionaryOptionsUnsubscribe = "Cancelar inscrição"
+    override val unsubscribeDialogMessage = "Ele será removido da sua Bibliotheca, junto com seu progresso de prática. Você pode baixá-lo novamente no Forum."
+    override val errorUnsubscribeFailed = "Não foi possível cancelar a inscrição. Verifique sua conexão e tente novamente."
+    override val dictionarySharingTitle = "Compartilhado no Forum"
+    override val dictionarySharingOn = "Membros do Forum podem vê-lo e baixá-lo"
+    override val dictionarySharingOff = "Só você pode vê-lo"
+    override val dictionarySharingLastShared = "Seu último dicionário compartilhado — enquanto estiver no Forum, um deve continuar compartilhado"
+    override val unshareDialogMessage = "Ele sai do Forum, e quem o baixou perde o acesso."
+    override val unshareDialogConfirm = "Parar de compartilhar"
+    override val errorSharingFailed = "Não foi possível alterar o compartilhamento. Verifique sua conexão e tente novamente."
+    override val errorDeleteLastShared = "Este é o seu último dicionário compartilhado. Compartilhe outro primeiro ou saia do Forum para tornar todos privados."
+    override fun unsubscribeDialogTitle(name: String): String = "Cancelar a inscrição em “${name}”?"
+    override fun unshareDialogTitle(name: String): String = "Parar de compartilhar “${name}”?"
+    override fun forumPublishedBy(publisher: String): String = "por ${publisher}"
 }

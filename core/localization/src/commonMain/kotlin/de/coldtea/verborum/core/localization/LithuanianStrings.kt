@@ -280,4 +280,21 @@ internal object LithuanianStrings : Strings {
     override val leaveForumDialogMessage = "Visi jūsų žodynai taps privatūs, o juos atsisiuntę praras prieigą. Galite vėl prisijungti bet kada."
     override val leaveForumDialogConfirm = "Palikti Forum"
     override val leaveForumDialogCancel = "Likti"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Atsisiųstas"
+    override val dictionaryOptionsUnsubscribe = "Atsisakyti prenumeratos"
+    override val unsubscribeDialogMessage = "Jis bus pašalintas iš jūsų Bibliotheca kartu su mokymosi pažanga. Galite vėl jį atsisiųsti iš Forum."
+    override val errorUnsubscribeFailed = "Nepavyko atsisakyti prenumeratos. Patikrinkite ryšį ir bandykite dar kartą."
+    override val dictionarySharingTitle = "Bendrinamas Forum"
+    override val dictionarySharingOn = "Forum nariai gali jį matyti ir atsisiųsti"
+    override val dictionarySharingOff = "Matote tik jūs"
+    override val dictionarySharingLastShared = "Paskutinis jūsų bendrinamas žodynas — kol esate Forum, vienas turi likti bendrinamas"
+    override val unshareDialogMessage = "Jis dings iš Forum, o jį atsisiuntę praras prieigą."
+    override val unshareDialogConfirm = "Nebebendrinti"
+    override val errorSharingFailed = "Nepavyko pakeisti bendrinimo. Patikrinkite ryšį ir bandykite dar kartą."
+    override val errorDeleteLastShared = "Tai paskutinis jūsų bendrinamas žodynas. Pirmiausia pasidalykite kitu arba palikite Forum, kad visi taptų privatūs."
+    override fun unsubscribeDialogTitle(name: String): String = "Atsisakyti „${name}“ prenumeratos?"
+    override fun unshareDialogTitle(name: String): String = "Nebebendrinti „${name}“?"
+    override fun forumPublishedBy(publisher: String): String = "autorius: ${publisher}"
 }

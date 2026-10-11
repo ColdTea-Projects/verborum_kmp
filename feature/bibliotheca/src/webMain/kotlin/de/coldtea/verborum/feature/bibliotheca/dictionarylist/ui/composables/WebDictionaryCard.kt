@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import de.coldtea.verborum.core.common.RelativeTime
 import de.coldtea.verborum.core.common.SystemTimeProvider
@@ -54,6 +55,7 @@ internal fun WebDictionaryCard(
     onClick: (String) -> Unit,
     onEditClick: (String) -> Unit,
     onDeleteClick: () -> Unit,
+    onUnsubscribeClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -102,11 +104,19 @@ internal fun WebDictionaryCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = Spacing.small),
                     )
+
+                    // Below the meta line, as on the phone card: the name keeps its full width,
+                    // which matters more here, where it is already clipped at one line.
+                    if (dictionary.isImported) {
+                        DownloadedBadge(modifier = Modifier.padding(top = Spacing.small))
+                    }
                 }
 
                 OverflowMenu(
+                    isImported = dictionary.isImported,
                     onEdit = { onEditClick(dictionary.dictionaryId) },
                     onDelete = onDeleteClick,
+                    onUnsubscribe = onUnsubscribeClick,
                 )
             }
         }
@@ -132,9 +142,40 @@ private fun Monogram(name: String) {
     }
 }
 
-/** Edit and delete, behind the "⋮" — a dropdown rather than a sheet, which is a phone idiom. */
+/**
+ * Marks a card as a download rather than one of the user's own. The accent fill, not its container
+ * tone: the quieter colour all but vanishes against the card's own surface.
+ */
 @Composable
-private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun DownloadedBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = Shapes.pill,
+        color = MaterialTheme.colorScheme.secondary,
+    ) {
+        Text(
+            text = strings.dictionaryBadgeDownloaded,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSecondary,
+            modifier = Modifier.padding(horizontal = Spacing.small, vertical = Spacing.extraSmall),
+        )
+    }
+}
+
+/**
+ * The card's actions, behind the "⋮" — a dropdown rather than a sheet, which is a phone idiom.
+ *
+ * A download gets no Edit item at all rather than a disabled one: every write to someone else's
+ * dictionary is a 403, so there is nothing to enable later.
+ */
+@Composable
+private fun OverflowMenu(
+    isImported: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    onUnsubscribe: () -> Unit,
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Box {
@@ -151,21 +192,31 @@ private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
         }
 
         DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
-            DropdownMenuItem(
-                text = { Text(strings.edit) },
-                onClick = {
-                    isExpanded = false
-                    onEdit()
-                },
-            )
+            if (!isImported) {
+                DropdownMenuItem(
+                    text = { Text(strings.edit) },
+                    onClick = {
+                        isExpanded = false
+                        onEdit()
+                    },
+                )
+            }
+
             DropdownMenuItem(
                 text = {
-                    // Destructive action — flagged in the error colour.
-                    Text(strings.delete, color = MaterialTheme.colorScheme.error)
+                    // Consequential either way — flagged in the error colour.
+                    Text(
+                        text = if (isImported) {
+                            strings.dictionaryOptionsUnsubscribe
+                        } else {
+                            strings.delete
+                        },
+                        color = MaterialTheme.colorScheme.error,
+                    )
                 },
                 onClick = {
                     isExpanded = false
-                    onDelete()
+                    if (isImported) onUnsubscribe() else onDelete()
                 },
             )
         }
@@ -174,7 +225,8 @@ private fun OverflowMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
 
 /**
  * "12 words · 3 days ago", or just the age until the first sync has told us how many words there
- * are — a count of zero is a real answer, "not counted yet" is not.
+ * are — a count of zero is a real answer, "not counted yet" is not. A download reads the publisher
+ * into the same line, since that is who it belongs to.
  */
 @Composable
 private fun metaLabel(dictionary: DictionaryUi): String {
@@ -183,9 +235,13 @@ private fun metaLabel(dictionary: DictionaryUi): String {
         RelativeTime.ago(dictionary.createdAt, SystemTimeProvider.nowEpochMillis())
     }
 
-    return dictionary.wordCount
+    val base = dictionary.wordCount
         ?.let { count -> "${strings.wordCount(count)} · $age" }
         ?: age
+
+    return dictionary.publisherName
+        ?.let { publisher -> "$base · ${strings.forumPublishedBy(publisher)}" }
+        ?: base
 }
 
 /** A card-shaped placeholder, so the grid does not jump when the first sync lands. */

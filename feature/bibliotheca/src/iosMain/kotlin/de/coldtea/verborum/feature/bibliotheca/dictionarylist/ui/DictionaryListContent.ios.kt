@@ -54,6 +54,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.Dic
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DictionaryFilterBar
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DictionarySearchField
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.SelectionBottomSheet
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.SelectionOption
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryFilterState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
@@ -71,6 +72,7 @@ internal actual fun DictionaryListContent(
     onCreateDictionaryClick: () -> Unit,
     onEditDictionaryClick: (String) -> Unit,
     onDeleteDictionary: (String) -> Unit,
+    onUnsubscribe: (String) -> Unit,
     onQueryChanged: (String) -> Unit,
     onFromLanguageChanged: (SupportedLanguage?) -> Unit,
     onToLanguageChanged: (SupportedLanguage?) -> Unit,
@@ -82,14 +84,17 @@ internal actual fun DictionaryListContent(
     // re-created per state branch.
     val listState = rememberLazyListState()
 
-    // The row whose overflow menu is open, and the one awaiting delete confirmation.
+    // The row whose overflow menu is open, and the one awaiting confirmation — of a delete for the
+    // user's own dictionary, or of an unsubscribe for a download.
     var optionsFor by remember { mutableStateOf<DictionaryUi?>(null) }
     var confirmDeleteFor by remember { mutableStateOf<DictionaryUi?>(null) }
+    var confirmUnsubscribeFor by remember { mutableStateOf<DictionaryUi?>(null) }
 
     var openSheet by remember { mutableStateOf<FilterSheet?>(null) }
 
     optionsFor?.let { dictionary ->
         DictionaryOptionsSheet(
+            isImported = dictionary.isImported,
             onDismiss = { optionsFor = null },
             onEdit = {
                 optionsFor = null
@@ -98,6 +103,10 @@ internal actual fun DictionaryListContent(
             onDelete = {
                 optionsFor = null
                 confirmDeleteFor = dictionary
+            },
+            onUnsubscribe = {
+                optionsFor = null
+                confirmUnsubscribeFor = dictionary
             },
         )
     }
@@ -110,6 +119,17 @@ internal actual fun DictionaryListContent(
                 onDeleteDictionary(dictionary.dictionaryId)
             },
             onDismiss = { confirmDeleteFor = null },
+        )
+    }
+
+    confirmUnsubscribeFor?.let { dictionary ->
+        UnsubscribeDialog(
+            dictionaryName = dictionary.name,
+            onConfirm = {
+                confirmUnsubscribeFor = null
+                onUnsubscribe(dictionary.dictionaryId)
+            },
+            onDismiss = { confirmUnsubscribeFor = null },
         )
     }
 
@@ -309,28 +329,41 @@ private fun SortSheet(
     )
 }
 
+/**
+ * The row's actions.
+ *
+ * A download gets **no Edit row at all** rather than a disabled one: every write to someone else's
+ * dictionary is a 403, so there is nothing to enable later and a greyed-out row would only invite
+ * the question. Unsubscribe replaces Delete for the same reason — the user is giving back access,
+ * not destroying anything.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DictionaryOptionsSheet(
+    isImported: Boolean,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onUnsubscribe: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState()) {
         Column(modifier = Modifier.padding(bottom = Spacing.large)) {
-            DictionaryOptionRow(
-                icon = VerborumIcons.Edit,
-                text = strings.edit,
-                // Neutral action — reads like normal content.
-                color = MaterialTheme.colorScheme.onBackground,
-                onClick = onEdit,
-            )
+            if (!isImported) {
+                DictionaryOptionRow(
+                    icon = VerborumIcons.Edit,
+                    text = strings.edit,
+                    // Neutral action — reads like normal content.
+                    color = MaterialTheme.colorScheme.onBackground,
+                    onClick = onEdit,
+                )
+            }
+
             DictionaryOptionRow(
                 icon = VerborumIcons.Delete,
-                text = strings.delete,
-                // Destructive action — flagged in the error colour.
+                text = if (isImported) strings.dictionaryOptionsUnsubscribe else strings.delete,
+                // Consequential either way — flagged in the error colour.
                 color = MaterialTheme.colorScheme.error,
-                onClick = onDelete,
+                onClick = if (isImported) onUnsubscribe else onDelete,
             )
         }
     }

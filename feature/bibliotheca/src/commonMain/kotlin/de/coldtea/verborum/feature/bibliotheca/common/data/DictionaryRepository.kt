@@ -5,6 +5,7 @@ import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.common.TimeProvider
 import de.coldtea.verborum.core.common.map
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SaveDictionaryRemotelyUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -60,11 +61,23 @@ internal interface DictionaryRepository {
     suspend fun removeLocally(dictionaryId: String)
 
     suspend fun restore(dictionaryId: String)
+
+    /**
+     * Writes the sharing flag, server first. The one write that sends an explicit `isPublic` for a
+     * dictionary the server already has.
+     */
+    suspend fun setShared(dictionary: Dictionary, isShared: Boolean): Outcome<Unit>
+
+    /** Takes the server's `isPublic` onto a local row and touches nothing else. */
+    suspend fun applyRemoteSharing(dictionaryId: String, isPublic: Boolean)
 }
 
 internal class NetworkDictionaryRepository(
     private val api: DictionaryApi,
     private val store: DictionaryStore,
+    // Derived from the api this repository already holds, so it defaults rather than being
+    // threaded through every construction; the Koin binding still supplies it explicitly.
+    private val saveRemotely: SaveDictionaryRemotelyUseCase = SaveDictionaryRemotelyUseCase(api),
     private val time: TimeProvider = SystemTimeProvider,
 ) : DictionaryRepository {
 
@@ -133,8 +146,13 @@ internal class NetworkDictionaryRepository(
         // Optimistic: the row appears at once, marked as not yet on the server.
         store.upsert(dictionary.copy(isSynced = false))
 
-        val request = dictionary.toRequest()
-        val outcome = if (isNew) api.create(request) else api.update(request)
+        // `isPublic` is deliberately not in either call's hands — see `SaveDictionaryRemotelyUseCase`.
+        // A create has to carry one, which that use case supplies on the server's own prompting.
+        val outcome = if (isNew) {
+            saveRemotely(dictionary)
+        } else {
+            api.update(dictionary.toRequest())
+        }
 
         return when {
             outcome is Outcome.Success -> {
@@ -168,9 +186,11 @@ internal class NetworkDictionaryRepository(
     override suspend fun tombstoned(): List<Dictionary> = store.tombstoned()
 
     override suspend fun upload(dictionary: Dictionary): Outcome<Unit> =
-        // Always a create: the endpoint upserts on the client-generated id, which is what lets the
-        // Android app push a pending row without knowing whether the server has seen it.
-        api.create(dictionary.toRequest()).also { outcome ->
+        // Always a create: the endpoint upserts on the client-generated id, which is what lets a
+        // pending row be pushed without knowing whether the server has seen it. Which is also why
+        // the sharing flag cannot simply be included — the row may be new to the server or not, and
+        // the use case finds out from the server rather than guessing.
+        saveRemotely(dictionary).also { outcome ->
             if (outcome is Outcome.Success) store.upsert(dictionary.copy(isSynced = true))
         }
 
@@ -182,4 +202,20 @@ internal class NetworkDictionaryRepository(
     override suspend fun removeLocally(dictionaryId: String) = store.remove(dictionaryId)
 
     override suspend fun restore(dictionaryId: String) = store.clearTombstone(dictionaryId)
+
+    override suspend fun setShared(dictionary: Dictionary, isShared: Boolean): Outcome<Unit> =
+        api.update(dictionary.toRequest(isPublic = isShared)).also { outcome ->
+            // Local last: the server decides whether a member may unshare this one at all, so
+            // writing first would mean undoing it on a refusal.
+            if (outcome is Outcome.Success) {
+                store.upsert(dictionary.copy(isPublic = isShared, isSynced = true))
+            }
+        }
+
+    override suspend fun applyRemoteSharing(dictionaryId: String, isPublic: Boolean) {
+        val row = store.find(dictionaryId) ?: return
+        if (row.isPublic == isPublic) return
+
+        store.upsert(row.copy(isPublic = isPublic))
+    }
 }

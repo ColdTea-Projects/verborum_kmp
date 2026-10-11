@@ -1,8 +1,9 @@
 package de.coldtea.verborum.core.database.bibliotheca
 
 /**
- * The library's local database: the same two tables the Android app keeps in Room, behind an
- * interface `commonMain` can name.
+ * The library's local database: the four tables the Android app keeps in Room — the user's own
+ * dictionaries and words, and the ones they downloaded from the Forum — behind an interface
+ * `commonMain` can name.
  *
  * Only iOS has one. `createBibliothecaDatabase` answers null on web, where the app keeps its state in
  * memory for the session — persisting a user's own content in browser storage is a decision about
@@ -13,6 +14,14 @@ interface BibliothecaDatabase {
     val dictionaryDao: DictionaryDao
 
     val wordDao: WordDao
+
+    /**
+     * Dictionaries downloaded from the Forum, in tables of their own. Separate from [dictionaryDao]
+     * so the sync's upload queries physically cannot see them — see [ImportedDictionaryEntity].
+     */
+    val importedDictionaryDao: ImportedDictionaryDao
+
+    val importedWordDao: ImportedWordDao
 
     /**
      * Runs [block] as one unit of work, so a half-applied merge is never visible.

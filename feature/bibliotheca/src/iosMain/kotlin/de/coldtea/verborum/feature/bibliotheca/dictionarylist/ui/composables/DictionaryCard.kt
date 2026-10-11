@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.font.FontWeight
 import de.coldtea.verborum.core.common.RelativeTime
 import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
@@ -96,6 +97,13 @@ internal fun DictionaryCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = Spacing.small),
                     )
+
+                    // Below the meta line rather than beside the name, matching the Android card:
+                    // the title keeps its full width, and the badge reads as a property of the row
+                    // instead of competing with what the dictionary is called.
+                    if (dictionary.isImported) {
+                        DownloadedBadge(modifier = Modifier.padding(top = Spacing.small))
+                    }
                 }
 
                 IconButton(onClick = { onMenuClick(dictionary) }) {
@@ -112,8 +120,33 @@ internal fun DictionaryCard(
 }
 
 /**
+ * Marks a row as a download rather than one of the user's own.
+ *
+ * Filled in the accent rather than its container tone: it sits on the card's own surface, where the
+ * quieter container colour all but disappears — and it is the same gold as the leading book tile, so
+ * the two read as one family.
+ */
+@Composable
+private fun DownloadedBadge(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = Shapes.pill,
+        color = MaterialTheme.colorScheme.secondary,
+    ) {
+        Text(
+            text = strings.dictionaryBadgeDownloaded,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSecondary,
+            modifier = Modifier.padding(horizontal = Spacing.small, vertical = Spacing.extraSmall),
+        )
+    }
+}
+
+/**
  * "12 words • 3 days ago", or just the age until the first sync has told us how many words there
- * are — a count of zero is a real answer, "not counted yet" is not.
+ * are — a count of zero is a real answer, "not counted yet" is not. A download reads the publisher
+ * into the same line, since that is who it belongs to.
  */
 @Composable
 private fun metaLabel(dictionary: DictionaryUi): String {
@@ -122,9 +155,13 @@ private fun metaLabel(dictionary: DictionaryUi): String {
         RelativeTime.ago(dictionary.createdAt, SystemTimeProvider.nowEpochMillis())
     }
 
-    return dictionary.wordCount
+    val base = dictionary.wordCount
         ?.let { count -> "${strings.wordCount(count)} • $age" }
         ?: age
+
+    return dictionary.publisherName
+        ?.let { publisher -> "$base • ${strings.forumPublishedBy(publisher)}" }
+        ?: base
 }
 
 private const val AccentBarAlpha = 0.4f

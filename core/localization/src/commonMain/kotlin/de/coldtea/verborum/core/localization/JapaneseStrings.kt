@@ -279,4 +279,21 @@ internal object JapaneseStrings : Strings {
     override val leaveForumDialogMessage = "すべての辞書が非公開になり、ダウンロードした人はアクセスできなくなります。いつでも再度参加できます。"
     override val leaveForumDialogConfirm = "Forum から退出"
     override val leaveForumDialogCancel = "とどまる"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "ダウンロード済み"
+    override val dictionaryOptionsUnsubscribe = "登録を解除"
+    override val unsubscribeDialogMessage = "練習の進捗とともに Bibliotheca から削除されます。Forum から再度ダウンロードできます。"
+    override val errorUnsubscribeFailed = "登録を解除できませんでした。接続を確認して、もう一度お試しください。"
+    override val dictionarySharingTitle = "Forum で共有中"
+    override val dictionarySharingOn = "Forum のメンバーが閲覧・ダウンロードできます"
+    override val dictionarySharingOff = "自分だけが表示できます"
+    override val dictionarySharingLastShared = "最後の共有辞書です。Forum に参加している間は 1 つ共有したままにする必要があります"
+    override val unshareDialogMessage = "Forum から削除され、ダウンロードした人はアクセスできなくなります。"
+    override val unshareDialogConfirm = "共有を停止"
+    override val errorSharingFailed = "共有を変更できませんでした。接続を確認して、もう一度お試しください。"
+    override val errorDeleteLastShared = "これは最後の共有辞書です。先に別の辞書を共有するか、Forum を退会してすべて非公開にしてください。"
+    override fun unsubscribeDialogTitle(name: String): String = "「${name}」の登録を解除しますか？"
+    override fun unshareDialogTitle(name: String): String = "「${name}」の共有を停止しますか？"
+    override fun forumPublishedBy(publisher: String): String = "作成者: ${publisher}"
 }

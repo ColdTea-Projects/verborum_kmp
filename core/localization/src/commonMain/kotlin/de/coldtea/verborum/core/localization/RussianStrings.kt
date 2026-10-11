@@ -280,4 +280,21 @@ internal object RussianStrings : Strings {
     override val leaveForumDialogMessage = "Все ваши словари станут приватными, а скачавшие их потеряют доступ. Вы можете вернуться в любой момент."
     override val leaveForumDialogConfirm = "Выйти из Forum"
     override val leaveForumDialogCancel = "Остаться"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Скачан"
+    override val dictionaryOptionsUnsubscribe = "Отписаться"
+    override val unsubscribeDialogMessage = "Он будет удалён из вашей Bibliotheca вместе с прогрессом. Вы сможете снова скачать его в Forum."
+    override val errorUnsubscribeFailed = "Не удалось отписаться. Проверьте подключение и попробуйте ещё раз."
+    override val dictionarySharingTitle = "Общий в Forum"
+    override val dictionarySharingOn = "Участники Forum могут видеть и скачивать его"
+    override val dictionarySharingOff = "Видите только вы"
+    override val dictionarySharingLastShared = "Ваш последний общий словарь — пока вы в Forum, один должен оставаться общим"
+    override val unshareDialogMessage = "Он исчезнет из Forum, а скачавшие его потеряют доступ."
+    override val unshareDialogConfirm = "Перестать делиться"
+    override val errorSharingFailed = "Не удалось изменить общий доступ. Проверьте подключение и попробуйте ещё раз."
+    override val errorDeleteLastShared = "Это ваш последний общий словарь. Сначала поделитесь другим или покиньте Forum, чтобы сделать все словари личными."
+    override fun unsubscribeDialogTitle(name: String): String = "Отписаться от «${name}»?"
+    override fun unshareDialogTitle(name: String): String = "Перестать делиться «${name}»?"
+    override fun forumPublishedBy(publisher: String): String = "автор: ${publisher}"
 }

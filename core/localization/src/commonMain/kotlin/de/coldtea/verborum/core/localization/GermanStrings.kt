@@ -297,4 +297,21 @@ internal object GermanStrings : Strings {
     override val leaveForumDialogMessage = "Alle deine Wörterbücher werden privat, und wer sie heruntergeladen hat, verliert den Zugriff. Du kannst jederzeit wieder beitreten."
     override val leaveForumDialogConfirm = "Forum verlassen"
     override val leaveForumDialogCancel = "Bleiben"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Heruntergeladen"
+    override val dictionaryOptionsUnsubscribe = "Abo beenden"
+    override val unsubscribeDialogMessage = "Es wird samt deinem Lernfortschritt aus deiner Bibliotheca entfernt. Du kannst es im Forum erneut herunterladen."
+    override val errorUnsubscribeFailed = "Abo konnte nicht beendet werden. Prüfe deine Verbindung und versuche es erneut."
+    override val dictionarySharingTitle = "Im Forum geteilt"
+    override val dictionarySharingOn = "Forum-Mitglieder können es sehen und herunterladen"
+    override val dictionarySharingOff = "Nur du kannst es sehen"
+    override val dictionarySharingLastShared = "Dein letztes geteiltes Wörterbuch – solange du im Forum bist, muss eines geteilt bleiben"
+    override val unshareDialogMessage = "Es verschwindet aus dem Forum, und wer es heruntergeladen hat, verliert den Zugriff."
+    override val unshareDialogConfirm = "Nicht mehr teilen"
+    override val errorSharingFailed = "Teilen konnte nicht geändert werden. Prüfe deine Verbindung und versuche es erneut."
+    override val errorDeleteLastShared = "Das ist dein letztes geteiltes Wörterbuch. Teile zuerst ein anderes oder verlasse das Forum, um alle privat zu machen."
+    override fun unsubscribeDialogTitle(name: String): String = "Abo von „${name}“ beenden?"
+    override fun unshareDialogTitle(name: String): String = "„${name}“ nicht mehr teilen?"
+    override fun forumPublishedBy(publisher: String): String = "von ${publisher}"
 }

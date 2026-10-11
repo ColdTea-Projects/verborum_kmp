@@ -6,8 +6,11 @@ import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
-import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.ImportedDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.ObserveSharingStateUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SharingState
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteOutcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
@@ -22,7 +25,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal data class DictionaryListUiState(
@@ -41,7 +46,16 @@ internal class DictionaryListViewModel(
     private val dictionaryService: DictionaryService,
     private val wordService: WordService,
     private val syncService: SyncService,
+    private val importedDictionaryService: ImportedDictionaryService,
+    observeSharingState: ObserveSharingStateUseCase,
 ) : BaseViewModel<DictionaryListUiState, DictionaryListEffect>(DictionaryListUiState()) {
+
+    /**
+     * Who may unshare or delete what. Held as state rather than asked for on each tap, because the
+     * answer has to be known *before* a delete is attempted — see [deleteDictionary].
+     */
+    private val sharingState = observeSharingState()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SharingState())
 
     /** Read fresh each time: the language can change while this screen is open. */
     private val strings: Strings get() = stringsFor(languageSettings.language.value)
@@ -89,7 +103,7 @@ internal class DictionaryListViewModel(
                     .map { dictionary ->
                         // Null counts mean "not synced yet"; once known, a dictionary missing from
                         // the map genuinely has no words, and 0 is the right thing to show.
-                        dictionary.toUi(wordCounts?.let { it[dictionary.dictionaryId] ?: 0 })
+                        dictionary.toUi(wordCounts?.let { it[dictionary.dictionary.dictionaryId] ?: 0 })
                     }
                     .filterAndSort(filters)
 
@@ -157,10 +171,37 @@ internal class DictionaryListViewModel(
     /** Resets search, both language filters and the sort — the Clear chip. */
     fun clearFilters() = updateFilters { DictionaryFilterState() }
 
+    /**
+     * Deletes an own dictionary.
+     *
+     * The guard in front of the request is not belt-and-braces: without it, the row is tombstoned —
+     * gone from the list — before the server refuses, and the user watches their last shared
+     * dictionary disappear and come back. Checking first means nothing moves at all.
+     */
     fun deleteDictionary(dictionaryId: String) {
+        if (sharingState.value.isLastShared(dictionaryId)) {
+            viewModelScope.launch { _messages.emit(strings.errorDeleteLastShared) }
+            return
+        }
+
         viewModelScope.launch {
-            if (dictionaryService.deleteDictionary(dictionaryId) is Outcome.Failure) {
-                _messages.emit(strings.dictionaryDeleteFailed)
+            when (dictionaryService.deleteDictionary(dictionaryId)) {
+                // Gone, or gone from view with the sync to finish it. Either way, silence: the row
+                // has already left the list, which is the only answer the user was waiting for.
+                DeleteOutcome.DELETED, DeleteOutcome.PENDING -> Unit
+
+                DeleteOutcome.SHARING_REQUIRED -> _messages.emit(strings.errorDeleteLastShared)
+
+                DeleteOutcome.REFUSED -> _messages.emit(strings.dictionaryDeleteFailed)
+            }
+        }
+    }
+
+    /** Removes a downloaded dictionary: the vault entry goes, then the local copy. Online-only. */
+    fun unsubscribe(dictionaryId: String) {
+        viewModelScope.launch {
+            if (importedDictionaryService.unsubscribe(dictionaryId) is Outcome.Failure) {
+                _messages.emit(strings.errorUnsubscribeFailed)
             }
         }
     }

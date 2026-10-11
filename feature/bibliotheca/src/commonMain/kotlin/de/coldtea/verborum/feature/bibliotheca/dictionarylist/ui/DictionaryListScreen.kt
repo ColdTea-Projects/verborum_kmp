@@ -14,7 +14,10 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.Dictionar
 import org.koin.compose.viewmodel.koinViewModel
 import de.coldtea.verborum.core.localization.strings
 
-/** The library: every dictionary the signed-in user owns. The bibliotheca tab's root screen. */
+/**
+ * The library: every dictionary the signed-in user owns, plus the ones they downloaded from the
+ * Forum. The bibliotheca tab's root screen.
+ */
 @Composable
 internal fun DictionaryListScreen(
     onDictionaryClick: (String) -> Unit,
@@ -48,6 +51,7 @@ internal fun DictionaryListScreen(
         onCreateDictionaryClick = onCreateDictionaryClick,
         onEditDictionaryClick = onEditDictionaryClick,
         onDeleteDictionary = viewModel::deleteDictionary,
+        onUnsubscribe = viewModel::unsubscribe,
         onQueryChanged = viewModel::onQueryChanged,
         onFromLanguageChanged = viewModel::onFromLanguageChanged,
         onToLanguageChanged = viewModel::onToLanguageChanged,
@@ -73,6 +77,11 @@ internal expect fun DictionaryListContent(
     onCreateDictionaryClick: () -> Unit,
     onEditDictionaryClick: (String) -> Unit,
     onDeleteDictionary: (String) -> Unit,
+    /**
+     * Removes a downloaded dictionary. Separate from [onDeleteDictionary] because the two are
+     * different acts: one destroys the user's own data, the other gives back someone else's.
+     */
+    onUnsubscribe: (String) -> Unit,
     onQueryChanged: (String) -> Unit,
     onFromLanguageChanged: (SupportedLanguage?) -> Unit,
     onToLanguageChanged: (SupportedLanguage?) -> Unit,

@@ -23,6 +23,18 @@ internal class DictionaryApi(private val client: HttpClient) {
         client.get("dictionaries/${userId.asPathSegment()}")
     }
 
+    /**
+     * One dictionary by id, which is how a downloaded one is read: it belongs to someone else, so it
+     * cannot come from `dictionaries/{userId}`.
+     *
+     * **404 is a meaningful answer**, not just a failure — the owner made it private, deleted it, or
+     * left the Forum — and the caller drops its local copy on it. Readable at all only because a
+     * public dictionary is readable by anyone signed in; every write to it is a 403.
+     */
+    suspend fun dictionary(dictionaryId: String): Outcome<DictionaryDto> = plainApiCall {
+        client.get("dictionaries/dictionary/${dictionaryId.asPathSegment()}")
+    }
+
     suspend fun create(request: DictionaryRequest): Outcome<Unit> = statusApiCall {
         client.post("dictionaries/") {
             contentType(ContentType.Application.Json)

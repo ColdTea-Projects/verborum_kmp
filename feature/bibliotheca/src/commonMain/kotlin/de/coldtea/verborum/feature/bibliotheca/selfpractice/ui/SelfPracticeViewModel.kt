@@ -82,7 +82,7 @@ internal class SelfPracticeViewModel(
                     SelfPracticeState.Failed
                 } else {
                     SelfPracticeState.Success(
-                        dictionaryName = dictionary.name,
+                        dictionaryName = dictionary.dictionary.name,
                         words = words.inPracticeOrder().map { word -> word.toPracticeUi(reversed, strings) },
                     )
                 }

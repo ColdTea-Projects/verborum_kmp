@@ -280,4 +280,21 @@ internal object ArabicStrings : Strings {
     override val leaveForumDialogMessage = "ستصبح جميع قواميسك خاصة، وسيفقد من نزّلوها إمكانية الوصول إليها. يمكنك الانضمام مرة أخرى في أي وقت."
     override val leaveForumDialogConfirm = "مغادرة Forum"
     override val leaveForumDialogCancel = "البقاء"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "تم التنزيل"
+    override val dictionaryOptionsUnsubscribe = "إلغاء الاشتراك"
+    override val unsubscribeDialogMessage = "ستتم إزالته من Bibliotheca مع تقدّمك في التدريب عليه. يمكنك تنزيله مرة أخرى من Forum."
+    override val errorUnsubscribeFailed = "تعذّر إلغاء الاشتراك. تحقّق من اتصالك وحاول مرة أخرى."
+    override val dictionarySharingTitle = "مُشارَك في Forum"
+    override val dictionarySharingOn = "يمكن لأعضاء Forum رؤيته وتنزيله"
+    override val dictionarySharingOff = "أنت فقط من يمكنه رؤيته"
+    override val dictionarySharingLastShared = "آخر قاموس تشاركه — ما دمت في Forum يجب أن يبقى قاموس واحد مُشارَكًا"
+    override val unshareDialogMessage = "سيُزال من Forum، وسيفقد من نزّلوه إمكانية الوصول إليه."
+    override val unshareDialogConfirm = "إيقاف المشاركة"
+    override val errorSharingFailed = "تعذّر تغيير المشاركة. تحقّق من اتصالك وحاول مرة أخرى."
+    override val errorDeleteLastShared = "هذا آخر قاموس تشاركه. شارك قاموسًا آخر أولًا، أو غادر Forum لجعلها كلها خاصة."
+    override fun unsubscribeDialogTitle(name: String): String = "هل تريد إلغاء الاشتراك في “${name}”؟"
+    override fun unshareDialogTitle(name: String): String = "هل تريد إيقاف مشاركة “${name}”؟"
+    override fun forumPublishedBy(publisher: String): String = "بواسطة ${publisher}"
 }

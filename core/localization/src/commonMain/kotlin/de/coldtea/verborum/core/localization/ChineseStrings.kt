@@ -279,4 +279,21 @@ internal object ChineseStrings : Strings {
     override val leaveForumDialogMessage = "你的所有词典都将变为私有，已下载的人将无法再访问。你可以随时重新加入。"
     override val leaveForumDialogConfirm = "退出 Forum"
     override val leaveForumDialogCancel = "留下"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "已下载"
+    override val dictionaryOptionsUnsubscribe = "取消订阅"
+    override val unsubscribeDialogMessage = "它将连同你的练习进度一起从 Bibliotheca 中移除。你可以在 Forum 中重新下载。"
+    override val errorUnsubscribeFailed = "无法取消订阅。请检查网络连接后重试。"
+    override val dictionarySharingTitle = "在 Forum 中共享"
+    override val dictionarySharingOn = "Forum 成员可以查看和下载"
+    override val dictionarySharingOff = "仅你可见"
+    override val dictionarySharingLastShared = "你最后一本共享词典——在 Forum 期间必须保留一本共享"
+    override val unshareDialogMessage = "它将离开 Forum，已下载的人将无法再访问。"
+    override val unshareDialogConfirm = "停止共享"
+    override val errorSharingFailed = "无法更改共享设置。请检查网络连接后重试。"
+    override val errorDeleteLastShared = "这是你最后一本共享的词典。请先共享另一本，或退出 Forum 将所有词典设为私密。"
+    override fun unsubscribeDialogTitle(name: String): String = "要取消订阅“${name}”吗？"
+    override fun unshareDialogTitle(name: String): String = "要停止共享“${name}”吗？"
+    override fun forumPublishedBy(publisher: String): String = "作者：${publisher}"
 }

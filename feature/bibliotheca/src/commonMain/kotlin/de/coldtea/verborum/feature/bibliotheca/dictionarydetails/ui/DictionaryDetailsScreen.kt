@@ -12,7 +12,12 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.REQUIR
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/** One dictionary: how to practise it, the words it holds, and how to get rid of it. */
+/**
+ * One dictionary: how to practise it, the words it holds, and how to get rid of it.
+ *
+ * Serves both kinds. A download is read-only throughout — no add-word button, no word editing, no
+ * sharing switch — and offers Unsubscribe where an own dictionary offers Delete.
+ */
 @Composable
 internal fun DictionaryDetailsScreen(
     dictionaryId: String,
@@ -46,6 +51,12 @@ internal fun DictionaryDetailsScreen(
         onDeleteWord = viewModel::deleteWord,
         onDeleteDictionary = viewModel::deleteDictionary,
         onUnavailableMode = viewModel::explainUnavailableMode,
+        onSharedChange = viewModel::setShared,
+        onConfirmUnshare = viewModel::confirmUnshare,
+        onDismissUnshare = viewModel::dismissUnshareConfirmation,
+        onUnsubscribeClick = viewModel::askToUnsubscribe,
+        onConfirmUnsubscribe = viewModel::confirmUnsubscribe,
+        onDismissUnsubscribe = viewModel::dismissUnsubscribeConfirmation,
         modifier = modifier,
     )
 }
@@ -68,6 +79,14 @@ internal expect fun DictionaryDetailsContent(
     onDeleteWord: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onUnavailableMode: (isTest: Boolean) -> Unit,
+    /** Moves the sharing switch. Only reachable while `isSharingVisible`. */
+    onSharedChange: (Boolean) -> Unit,
+    onConfirmUnshare: () -> Unit,
+    onDismissUnshare: () -> Unit,
+    /** Opens the unsubscribe confirmation; only a download offers it. */
+    onUnsubscribeClick: () -> Unit,
+    onConfirmUnsubscribe: () -> Unit,
+    onDismissUnsubscribe: () -> Unit,
     modifier: Modifier,
 )
 

@@ -20,6 +20,9 @@ import de.coldtea.verborum.feature.bibliotheca.common.data.WordRepository
 internal class UploadPendingChangesUseCase(
     private val dictionaryRepository: DictionaryRepository,
     private val wordRepository: WordRepository,
+    // Derived from the two repositories above, so it defaults; Koin still supplies it explicitly.
+    private val deleteDictionary: DeleteDictionaryUseCase =
+        DeleteDictionaryUseCase(dictionaryRepository, wordRepository),
 ) {
     suspend operator fun invoke() {
         uploadDeletedDictionaries()
@@ -32,17 +35,18 @@ internal class UploadPendingChangesUseCase(
         wordRepository.pendingUploads().forEach { word -> wordRepository.upload(word) }
     }
 
-    /** A dictionary takes its words with it, so both deletes have to land before the row goes. */
+    /**
+     * Finishes the deletes a screen could not complete, through the **same** use case the screen
+     * used — which is what makes a refused delete stop being retried: that use case lifts the
+     * tombstone on a refusal, so the row leaves this list instead of being replayed on every sync
+     * forever.
+     *
+     * A dictionary takes its words with it on the server, in one transaction, so only the dictionary
+     * delete is ever sent.
+     */
     private suspend fun uploadDeletedDictionaries() {
         dictionaryRepository.tombstoned().forEach { dictionary ->
-            val id = dictionary.dictionaryId
-            val wordsDeleted = wordRepository.deleteDictionaryWordsRemotely(id)
-            val dictionaryDeleted = dictionaryRepository.deleteRemotely(id)
-
-            if (wordsDeleted is Outcome.Success && dictionaryDeleted is Outcome.Success) {
-                wordRepository.removeDictionaryLocally(id)
-                dictionaryRepository.removeLocally(id)
-            }
+            deleteDictionary(dictionary.dictionaryId)
         }
     }
 

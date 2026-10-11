@@ -83,6 +83,11 @@ internal fun WebWordRow(
     onEditClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * A word of a downloaded dictionary. The actions are removed rather than disabled: both writes
+     * are a 403 on someone else's dictionary, so there is nothing to enable later.
+     */
+    isReadOnly: Boolean = false,
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -127,13 +132,15 @@ internal fun WebWordRow(
                     }
                 }
 
-                WebTextAction(label = strings.edit, onClick = { onEditClick(word.wordId) })
-                WebTextAction(
-                    label = strings.delete,
-                    onClick = { onDeleteClick(word.wordId) },
-                    // Destructive action — flagged in the error colour.
-                    color = MaterialTheme.colorScheme.error,
-                )
+                if (!isReadOnly) {
+                    WebTextAction(label = strings.edit, onClick = { onEditClick(word.wordId) })
+                    WebTextAction(
+                        label = strings.delete,
+                        onClick = { onDeleteClick(word.wordId) },
+                        // Destructive action — flagged in the error colour.
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
     }

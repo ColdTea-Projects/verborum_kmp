@@ -33,7 +33,10 @@ import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WebPracticeTile
+import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.SharingRow
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WebWordRow
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnshareDialog
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
@@ -61,6 +64,12 @@ internal actual fun DictionaryDetailsContent(
     onDeleteWord: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onUnavailableMode: (isTest: Boolean) -> Unit,
+    onSharedChange: (Boolean) -> Unit,
+    onConfirmUnshare: () -> Unit,
+    onDismissUnshare: () -> Unit,
+    onUnsubscribeClick: () -> Unit,
+    onConfirmUnsubscribe: () -> Unit,
+    onDismissUnsubscribe: () -> Unit,
     modifier: Modifier,
 ) {
     when (val details = state.details) {
@@ -103,6 +112,22 @@ internal actual fun DictionaryDetailsContent(
                 )
             }
 
+            if (details.isUnshareConfirmationShown) {
+                UnshareDialog(
+                    dictionaryName = details.name,
+                    onConfirm = onConfirmUnshare,
+                    onDismiss = onDismissUnshare,
+                )
+            }
+
+            if (details.isUnsubscribeConfirmationShown) {
+                UnsubscribeDialog(
+                    dictionaryName = details.name,
+                    onConfirm = onConfirmUnsubscribe,
+                    onDismiss = onDismissUnsubscribe,
+                )
+            }
+
             Box(
                 modifier = modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
@@ -113,7 +138,16 @@ internal actual fun DictionaryDetailsContent(
 
                         WebPageTitle(
                             title = details.name,
-                            subtitle = "${details.languagePair} · ${strings.wordCount(details.words.size)}",
+                            // The publisher joins the subtitle only when this device knows the name.
+                            subtitle = buildString {
+                                append(details.languagePair)
+                                append(" · ")
+                                append(strings.wordCount(details.words.size))
+                                details.publisherName?.let { publisher ->
+                                    append(" · ")
+                                    append(strings.forumPublishedBy(publisher))
+                                }
+                            },
                         )
 
                         WebPageSpacer()
@@ -138,23 +172,47 @@ internal actual fun DictionaryDetailsContent(
                             )
                         }
 
+                        if (details.isSharingVisible) {
+                            WebPageSpacer()
+
+                            SharingRow(
+                                isShared = details.isShared,
+                                isLastShared = details.isLastShared,
+                                canToggle = details.canToggleSharing,
+                                onSharedChange = onSharedChange,
+                            )
+                        }
+
                         WebPageSpacer()
 
                         WordListPanel(
                             words = details.words,
                             onEditWordClick = onEditWordClick,
                             onDeleteWord = onDeleteWord,
+                            isReadOnly = details.isImported,
                         )
 
                         WebPageSpacer()
 
-                        WebOutlinedButton(label = strings.addWord, onClick = onCreateWordClick)
+                        // A download has nothing to add to: the words are its owner's.
+                        if (!details.isImported) {
+                            WebOutlinedButton(label = strings.addWord, onClick = onCreateWordClick)
 
-                        WebPageSpacer(Spacing.medium)
+                            WebPageSpacer(Spacing.medium)
+                        }
 
+                        // Unsubscribe for a download, Delete for an own dictionary — never both.
                         WebPrimaryButton(
-                            label = strings.deleteDictionary,
-                            onClick = { showDeleteDialog = true },
+                            label = if (details.isImported) {
+                                strings.dictionaryOptionsUnsubscribe
+                            } else {
+                                strings.deleteDictionary
+                            },
+                            onClick = if (details.isImported) {
+                                onUnsubscribeClick
+                            } else {
+                                { showDeleteDialog = true }
+                            },
                         )
 
                         WebPageSpacer(Spacing.extraLarge)
@@ -204,6 +262,7 @@ private fun WordListPanel(
     words: List<WordUi>,
     onEditWordClick: (String) -> Unit,
     onDeleteWord: (String) -> Unit,
+    isReadOnly: Boolean,
 ) {
     WebPanel {
         WebEyebrow(strings.wordList)
@@ -226,6 +285,7 @@ private fun WordListPanel(
                     word = word,
                     onEditClick = onEditWordClick,
                     onDeleteClick = onDeleteWord,
+                    isReadOnly = isReadOnly,
                 )
             }
         }

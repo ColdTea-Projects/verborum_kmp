@@ -9,6 +9,8 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.SystemTimeProvider
 import de.coldtea.verborum.core.common.TimeProvider
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.ObserveSharingStateUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.SharingState
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
@@ -16,6 +18,8 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -45,8 +49,13 @@ internal class CreateDictionaryViewModel(
     private val dictionaryService: DictionaryService,
     private val syncService: SyncService,
     private val activeUser: ActiveUserUseCase,
+    observeSharingState: ObserveSharingStateUseCase,
     private val time: TimeProvider = SystemTimeProvider,
 ) : BaseViewModel<CreateDictionaryUiState, Nothing>(CreateDictionaryUiState()) {
+
+    /** Only read for one thing: whether this new dictionary has to be the member's shared one. */
+    private val sharingState = observeSharingState()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SharingState())
 
     /** Read fresh each time: the language can change while this screen is open. */
     private val strings: Strings get() = stringsFor(languageSettings.language.value)
@@ -153,7 +162,11 @@ internal class CreateDictionaryViewModel(
                 dictionaryId = existing?.dictionaryId ?: Uuid.random().toString(),
                 userId = existing?.userId ?: activeUser().orEmpty(),
                 name = state.name.trim(),
-                isPublic = existing?.isPublic ?: false,
+                // New dictionaries are private — except a member's *first* one, which the server
+                // insists must be shared: a member who has dictionaries has to keep one in the
+                // Forum, so creating a private first one is refused. An existing dictionary keeps
+                // whatever the server last said, and the save omits the field anyway.
+                isPublic = existing?.isPublic ?: sharingState.value.needsFirstShare,
                 fromLang = fromLanguage.code,
                 toLang = toLanguage.code,
                 createdAt = existing?.createdAt ?: now,

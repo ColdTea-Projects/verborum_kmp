@@ -18,6 +18,9 @@ internal val dictionaryDetailsModule: Module = module {
             dictionaryService = get(),
             wordService = get(),
             syncService = get(),
+            importedDictionaryService = get(),
+            setDictionaryShared = get(),
+            observeSharingState = get(),
         )
     }
 }

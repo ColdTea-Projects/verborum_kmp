@@ -38,6 +38,7 @@ include(":core:network")
 include(":core:auth")
 include(":core:database")
 include(":core:profile")
+include(":core:marketplace")
 
 include(":feature:auth")
 include(":feature:bibliotheca")

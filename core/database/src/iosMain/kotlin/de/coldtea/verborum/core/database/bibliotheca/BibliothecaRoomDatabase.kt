@@ -8,15 +8,20 @@ import androidx.room.RoomDatabaseConstructor
 /**
  * The iOS database.
  *
- * The schema is the Android app's at *its* version 3 — tombstones and dictionary tags included — but
- * the version here starts at 1 on purpose: no iOS device has ever held a v1 or v2 file, so replaying
- * Android's migration history would be ceremony over a database that is created at the final shape.
- * A future schema change adds a migration from this 1, independently of Android's numbering.
+ * The schema mirrors the Android app's, but the version numbering is this target's own and does not
+ * track Android's: v1 was created at the shape Android had reached by *its* v3, because no iOS
+ * device had ever held anything earlier. v2 adds the two tables for dictionaries downloaded from the
+ * Forum — the same change Android made at its v4.
  */
 @Database(
-    entities = [RoomDictionary::class, RoomWord::class],
-    version = 1,
-    exportSchema = false,
+    entities = [
+        RoomDictionary::class,
+        RoomWord::class,
+        RoomImportedDictionary::class,
+        RoomImportedWord::class,
+    ],
+    version = 2,
+    exportSchema = true,
 )
 @ConstructedBy(BibliothecaRoomDatabaseConstructor::class)
 internal abstract class BibliothecaRoomDatabase : RoomDatabase() {
@@ -24,6 +29,10 @@ internal abstract class BibliothecaRoomDatabase : RoomDatabase() {
     abstract fun dictionaryDao(): RoomDictionaryDao
 
     abstract fun wordDao(): RoomWordDao
+
+    abstract fun importedDictionaryDao(): RoomImportedDictionaryDao
+
+    abstract fun importedWordDao(): RoomImportedWordDao
 }
 
 /** Room's KSP processor writes the `actual` for each iOS target. */

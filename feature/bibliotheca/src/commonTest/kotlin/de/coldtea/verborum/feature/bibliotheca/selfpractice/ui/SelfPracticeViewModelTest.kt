@@ -29,6 +29,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
 
 class SelfPracticeViewModelTest {
 
@@ -52,24 +56,14 @@ class SelfPracticeViewModelTest {
             updateResult = if (updateFails) unauthorized else Outcome.Success(Unit),
         )
 
-        val viewModel = SelfPracticeViewModel(
+        val imported = fakeImportedService()
 
+        val viewModel = SelfPracticeViewModel(
             languageSettings = testLanguageSettings(),
             dictionaryId = dictionaryId,
-            dictionaryService = DictionaryService(
-                observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaries),
-                observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaries),
-                deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaries),
-                repository = dictionaries,
-            ),
-            wordService = WordService(repository = wordRepository),
-            syncService = SyncService(
-                activeUser = ActiveUserUseCase { "user-42" },
-                syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
-                dictionaryRepository = dictionaries,
-                wordRepository = wordRepository,
-                uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
-            ),
+            dictionaryService = fakeDictionaryService(dictionaries, wordRepository, imported),
+            wordService = fakeWordService(wordRepository, imported),
+            syncService = fakeSyncService(dictionaries, wordRepository, imported),
         )
 
         return viewModel to wordRepository
@@ -189,23 +183,13 @@ class SelfPracticeViewModelTest {
         runTest(mainDispatcher) {
             val dictionaries = FakeDictionaryRepository(emptyList())
             val wordRepository = FakeWordRepository()
+            val imported = fakeImportedService()
             val viewModel = SelfPracticeViewModel(
                 languageSettings = testLanguageSettings(),
                 dictionaryId = dictionaryId,
-                dictionaryService = DictionaryService(
-                    observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaries),
-                    observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaries),
-                    deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaries),
-                repository = dictionaries,
-                ),
-                wordService = WordService(repository = wordRepository),
-                syncService = SyncService(
-                    activeUser = ActiveUserUseCase { "user-42" },
-                    syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
-                    dictionaryRepository = dictionaries,
-                    wordRepository = wordRepository,
-                    uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
-                ),
+                dictionaryService = fakeDictionaryService(dictionaries, wordRepository, imported),
+                wordService = fakeWordService(wordRepository, imported),
+                syncService = fakeSyncService(dictionaries, wordRepository, imported),
             )
 
             advanceUntilIdle()

@@ -60,6 +60,9 @@ internal class DatabaseWordStore(
 
     override suspend fun clearTombstone(wordId: String) = dao.clearTombstone(wordId)
 
+    override suspend fun clearDictionaryTombstones(dictionaryId: String) =
+        dao.clearDictionaryTombstones(dictionaryId)
+
     override suspend fun find(wordId: String): Word? = dao.getWord(wordId)?.toWord()
 
     override suspend fun pendingUploads(): List<Word> = dao.pendingUploads().map(WordEntity::toWord)

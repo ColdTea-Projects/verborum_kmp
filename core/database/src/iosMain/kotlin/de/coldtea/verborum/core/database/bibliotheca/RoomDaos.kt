@@ -123,6 +123,9 @@ internal interface RoomWordDao {
     @Query("UPDATE word SET is_deleted = 0 WHERE word_id = :wordId")
     suspend fun clearTombstone(wordId: String)
 
+    @Query("UPDATE word SET is_deleted = 0 WHERE fk_dictionary_id = :dictionaryId")
+    suspend fun clearDictionaryTombstones(dictionaryId: String)
+
     @Query("DELETE FROM word WHERE word_id = :wordId")
     suspend fun delete(wordId: String)
 

@@ -39,7 +39,10 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.PracticeModeButton
+import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.SharingRow
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.composables.WordListItem
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnshareDialog
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
@@ -58,6 +61,12 @@ internal actual fun DictionaryDetailsContent(
     onDeleteWord: (String) -> Unit,
     onDeleteDictionary: () -> Unit,
     onUnavailableMode: (isTest: Boolean) -> Unit,
+    onSharedChange: (Boolean) -> Unit,
+    onConfirmUnshare: () -> Unit,
+    onDismissUnshare: () -> Unit,
+    onUnsubscribeClick: () -> Unit,
+    onConfirmUnsubscribe: () -> Unit,
+    onDismissUnsubscribe: () -> Unit,
     modifier: Modifier,
 ) {
     when (val details = state.details) {
@@ -81,7 +90,17 @@ internal actual fun DictionaryDetailsContent(
         is DictionaryDetailsState.Success -> {
             RegisterTopBar(
                 title = details.name,
-                subtitle = "${details.languagePair} · ${strings.wordCount(details.words.size)}",
+                // The publisher joins the subtitle only when this device knows the name — a
+                // dictionary downloaded elsewhere has none, and "by Unknown" says less than nothing.
+                subtitle = buildString {
+                    append(details.languagePair)
+                    append(" · ")
+                    append(strings.wordCount(details.words.size))
+                    details.publisherName?.let { publisher ->
+                        append(" · ")
+                        append(strings.forumPublishedBy(publisher))
+                    }
+                },
                 showBackButton = true,
             )
 
@@ -95,6 +114,22 @@ internal actual fun DictionaryDetailsContent(
                         onDeleteDictionary()
                     },
                     onDismiss = { showDeleteDialog = false },
+                )
+            }
+
+            if (details.isUnshareConfirmationShown) {
+                UnshareDialog(
+                    dictionaryName = details.name,
+                    onConfirm = onConfirmUnshare,
+                    onDismiss = onDismissUnshare,
+                )
+            }
+
+            if (details.isUnsubscribeConfirmationShown) {
+                UnsubscribeDialog(
+                    dictionaryName = details.name,
+                    onConfirm = onConfirmUnsubscribe,
+                    onDismiss = onDismissUnsubscribe,
                 )
             }
 
@@ -123,6 +158,18 @@ internal actual fun DictionaryDetailsContent(
                             item { TagsRow(tags = details.tags) }
                         }
 
+                        if (details.isSharingVisible) {
+                            item {
+                                SharingRow(
+                                    isShared = details.isShared,
+                                    isLastShared = details.isLastShared,
+                                    canToggle = details.canToggleSharing,
+                                    onSharedChange = onSharedChange,
+                                    modifier = Modifier.padding(top = Spacing.small),
+                                )
+                            }
+                        }
+
                         item {
                             Spacer(modifier = Modifier.height(Spacing.medium))
                             Text(
@@ -147,12 +194,14 @@ internal actual fun DictionaryDetailsContent(
                                     word = word,
                                     onEditClick = onEditWordClick,
                                     onDeleteClick = onDeleteWord,
+                                    isReadOnly = details.isImported,
                                 )
                             }
                         }
                     }
 
-                    OutlinedButton(
+                    // A download has nothing to add to: the words are its owner's.
+                    if (!details.isImported) OutlinedButton(
                         onClick = onCreateWordClick,
                         shape = Shapes.large,
                         border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.primary),
@@ -171,8 +220,10 @@ internal actual fun DictionaryDetailsContent(
                         Text(text = strings.addWordTitle, style = MaterialTheme.typography.titleSmall)
                     }
 
+                    // Unsubscribe for a download, Delete for an own dictionary — never both, and
+                    // never Delete for something that is not the user's to destroy.
                     Button(
-                        onClick = { showDeleteDialog = true },
+                        onClick = if (details.isImported) onUnsubscribeClick else { { showDeleteDialog = true } },
                         shape = Shapes.large,
                         // Destructive, so it reads as such rather than as the screen's main action.
                         colors = ButtonDefaults.buttonColors(
@@ -192,7 +243,11 @@ internal actual fun DictionaryDetailsContent(
                         )
                         Spacer(modifier = Modifier.width(Spacing.small))
                         Text(
-                            text = strings.deleteDictionary,
+                            text = if (details.isImported) {
+                                strings.dictionaryOptionsUnsubscribe
+                            } else {
+                                strings.deleteDictionary
+                            },
                             style = MaterialTheme.typography.titleSmall,
                         )
                     }

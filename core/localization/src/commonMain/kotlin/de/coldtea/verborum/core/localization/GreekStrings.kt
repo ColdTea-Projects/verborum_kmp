@@ -280,4 +280,21 @@ internal object GreekStrings : Strings {
     override val leaveForumDialogMessage = "Όλα τα λεξικά σας θα γίνουν ιδιωτικά και όσοι τα κατέβασαν θα χάσουν την πρόσβαση. Μπορείτε να εγγραφείτε ξανά οποτεδήποτε."
     override val leaveForumDialogConfirm = "Αποχώρηση"
     override val leaveForumDialogCancel = "Παραμονή"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Λήφθηκε"
+    override val dictionaryOptionsUnsubscribe = "Κατάργηση εγγραφής"
+    override val unsubscribeDialogMessage = "Θα αφαιρεθεί από τη Bibliotheca σας μαζί με την πρόοδο εξάσκησης. Μπορείτε να το κατεβάσετε ξανά από το Forum."
+    override val errorUnsubscribeFailed = "Δεν ήταν δυνατή η κατάργηση εγγραφής. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά."
+    override val dictionarySharingTitle = "Κοινόχρηστο στο Forum"
+    override val dictionarySharingOn = "Τα μέλη του Forum μπορούν να το δουν και να το κατεβάσουν"
+    override val dictionarySharingOff = "Μόνο εσείς μπορείτε να το δείτε"
+    override val dictionarySharingLastShared = "Το τελευταίο κοινόχρηστο λεξικό σας — όσο είστε στο Forum, ένα πρέπει να μένει κοινόχρηστο"
+    override val unshareDialogMessage = "Θα αφαιρεθεί από το Forum και όσοι το κατέβασαν θα χάσουν την πρόσβαση."
+    override val unshareDialogConfirm = "Διακοπή κοινής χρήσης"
+    override val errorSharingFailed = "Δεν ήταν δυνατή η αλλαγή κοινής χρήσης. Ελέγξτε τη σύνδεση και δοκιμάστε ξανά."
+    override val errorDeleteLastShared = "Αυτό είναι το τελευταίο κοινόχρηστο λεξικό σας. Μοιραστείτε πρώτα ένα άλλο ή αποχωρήστε από το Forum για να γίνουν όλα ιδιωτικά."
+    override fun unsubscribeDialogTitle(name: String): String = "Κατάργηση εγγραφής από «${name}»;"
+    override fun unshareDialogTitle(name: String): String = "Διακοπή κοινής χρήσης του «${name}»;"
+    override fun forumPublishedBy(publisher: String): String = "από ${publisher}"
 }

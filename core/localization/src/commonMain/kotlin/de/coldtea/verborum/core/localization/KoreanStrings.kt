@@ -279,4 +279,21 @@ internal object KoreanStrings : Strings {
     override val leaveForumDialogMessage = "모든 사전이 비공개로 전환되고, 다운로드한 사람은 더 이상 볼 수 없습니다. 언제든 다시 참여할 수 있습니다."
     override val leaveForumDialogConfirm = "Forum 나가기"
     override val leaveForumDialogCancel = "머무르기"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "다운로드됨"
+    override val dictionaryOptionsUnsubscribe = "구독 해지"
+    override val unsubscribeDialogMessage = "연습 진행 상황과 함께 Bibliotheca에서 삭제됩니다. Forum에서 다시 다운로드할 수 있습니다."
+    override val errorUnsubscribeFailed = "구독을 해지하지 못했습니다. 연결을 확인하고 다시 시도하세요."
+    override val dictionarySharingTitle = "Forum에 공유됨"
+    override val dictionarySharingOn = "Forum 회원이 보고 다운로드할 수 있습니다"
+    override val dictionarySharingOff = "나만 볼 수 있습니다"
+    override val dictionarySharingLastShared = "마지막 공유 사전입니다 — Forum에 있는 동안 하나는 공유 상태여야 합니다"
+    override val unshareDialogMessage = "Forum에서 사라지며, 다운로드한 사람은 더 이상 볼 수 없습니다."
+    override val unshareDialogConfirm = "공유 중지"
+    override val errorSharingFailed = "공유를 변경하지 못했습니다. 연결을 확인하고 다시 시도하세요."
+    override val errorDeleteLastShared = "마지막으로 공유된 사전입니다. 먼저 다른 사전을 공유하거나, Forum을 나가 모두 비공개로 전환하세요."
+    override fun unsubscribeDialogTitle(name: String): String = "‘${name}’ 구독을 해지할까요?"
+    override fun unshareDialogTitle(name: String): String = "‘${name}’ 공유를 중지할까요?"
+    override fun forumPublishedBy(publisher: String): String = "작성자: ${publisher}"
 }

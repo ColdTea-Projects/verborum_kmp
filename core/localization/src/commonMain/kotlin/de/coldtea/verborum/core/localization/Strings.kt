@@ -336,6 +336,39 @@ interface Strings {
         else -> null
     }
 
+    // ---- downloaded dictionaries -----------------------------------------------------------------
+    val dictionaryBadgeDownloaded: String get() = "Downloaded"
+    val dictionaryOptionsUnsubscribe: String get() = "Unsubscribe"
+    fun unsubscribeDialogTitle(name: String): String = "Unsubscribe from \u201C$name\u201D?"
+    val unsubscribeDialogMessage: String
+        get() = "It will be removed from your Bibliotheca, along with your practice progress on " +
+            "it. You can download it again from the Forum."
+
+    val errorUnsubscribeFailed: String
+        get() = "Couldn\u2019t unsubscribe. Check your connection and try again."
+
+    /** "by Anna Bauer" — the publisher line, shown only when this device knows the name. */
+    fun forumPublishedBy(publisher: String): String = "by $publisher"
+
+    // ---- sharing a dictionary in the Forum -------------------------------------------------------
+    val dictionarySharingTitle: String get() = "Shared in the Forum"
+    val dictionarySharingOn: String get() = "Forum members can see and download it"
+    val dictionarySharingOff: String get() = "Only you can see it"
+    val dictionarySharingLastShared: String
+        get() = "Your last shared dictionary \u2014 while you\u2019re in the Forum, one must stay shared"
+
+    fun unshareDialogTitle(name: String): String = "Stop sharing \u201C$name\u201D?"
+    val unshareDialogMessage: String
+        get() = "It leaves the Forum, and people who downloaded it lose access."
+
+    val unshareDialogConfirm: String get() = "Stop sharing"
+    val errorSharingFailed: String
+        get() = "Couldn\u2019t change sharing. Check your connection and try again."
+
+    val errorDeleteLastShared: String
+        get() = "This is your last shared dictionary. Share another one first, or leave the Forum " +
+            "to make all of them private."
+
     // ---- profile -------------------------------------------------------------------------------
     val optionsProfile: String get() = "Profile"
     val profileEmailLabel: String get() = "Email"

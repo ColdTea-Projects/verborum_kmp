@@ -59,20 +59,29 @@ internal data class DictionaryTagDto(
 @Serializable
 internal data class DictionaryTagRequest(@SerialName("tag") val tag: String)
 
-/** The create/update payload. Tags are their own sub-resource, so they are absent here. */
+/**
+ * The create/update payload. Tags are their own sub-resource, so they are absent here.
+ *
+ * [isPublic] is **nullable, and null means "leave it alone"** — the field is then omitted from the
+ * JSON entirely, which is what the server reads as "unchanged". That is the normal case for an
+ * existing dictionary: the server owns sharing (joining the Forum makes everything public, leaving
+ * makes it private, by event), so a client that sent its local copy back would silently undo a
+ * change it had not heard about yet. The two places an explicit value is sent are a *create*, where
+ * the server requires one, and the sharing switch, which is the user saying so.
+ */
 @Serializable
 internal data class DictionaryRequest(
     @SerialName("dictionaryId") val dictionaryId: String,
     @SerialName("userId") val userId: String,
     @SerialName("name") val name: String,
-    @SerialName("isPublic") val isPublic: Boolean,
+    @SerialName("isPublic") val isPublic: Boolean? = null,
     @SerialName("fromLang") val fromLang: String,
     @SerialName("toLang") val toLang: String,
     @SerialName("createdAt") val createdAt: String? = null,
     @SerialName("updatedAt") val updatedAt: String? = null,
 )
 
-internal fun Dictionary.toRequest() = DictionaryRequest(
+internal fun Dictionary.toRequest(isPublic: Boolean? = null) = DictionaryRequest(
     dictionaryId = dictionaryId,
     userId = userId,
     name = name,

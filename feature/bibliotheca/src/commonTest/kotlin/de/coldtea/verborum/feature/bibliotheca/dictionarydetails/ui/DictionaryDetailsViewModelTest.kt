@@ -30,6 +30,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSharingState
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SetDictionarySharedUseCase
 
 class DictionaryDetailsViewModelTest {
 
@@ -58,24 +64,17 @@ class DictionaryDetailsViewModelTest {
         )
         val wordRepository = FakeWordRepository(initial = words, deleteResult = deleteResult)
 
-        val viewModel = DictionaryDetailsViewModel(
+        val imported = fakeImportedService()
 
+        val viewModel = DictionaryDetailsViewModel(
             languageSettings = testLanguageSettings(),
             dictionaryId = dictionaryId,
-            dictionaryService = DictionaryService(
-                observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaryRepository),
-                observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaryRepository),
-                deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaryRepository),
-                repository = dictionaryRepository,
-            ),
-            wordService = WordService(repository = wordRepository),
-            syncService = SyncService(
-                activeUser = ActiveUserUseCase { "user-42" },
-                syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaryRepository),
-                dictionaryRepository = dictionaryRepository,
-                wordRepository = wordRepository,
-                uploadPendingChanges = UploadPendingChangesUseCase(dictionaryRepository, wordRepository),
-            ),
+            dictionaryService = fakeDictionaryService(dictionaryRepository, wordRepository, imported),
+            wordService = fakeWordService(wordRepository, imported),
+            syncService = fakeSyncService(dictionaryRepository, wordRepository, imported),
+            importedDictionaryService = imported,
+            setDictionaryShared = SetDictionarySharedUseCase(dictionaryRepository),
+            observeSharingState = fakeSharingState(dictionaryRepository),
         )
 
         return viewModel to wordRepository

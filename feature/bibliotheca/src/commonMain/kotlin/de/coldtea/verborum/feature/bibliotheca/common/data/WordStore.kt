@@ -51,6 +51,9 @@ internal interface WordStore {
     /** Restores a word whose delete the server refused, so it reappears instead of vanishing. */
     suspend fun clearTombstone(wordId: String)
 
+    /** Brings back every word of a dictionary whose delete the server refused. */
+    suspend fun clearDictionaryTombstones(dictionaryId: String)
+
     suspend fun find(wordId: String): Word?
 
     /** Words the server has not seen yet — what the upload pushes. */
@@ -118,6 +121,12 @@ internal class InMemoryWordStore : WordStore {
 
     override suspend fun removeDictionary(dictionaryId: String) = mutex.withLock {
         _rows.value = rows().filterNot { it.dictionaryId == dictionaryId }
+    }
+
+    override suspend fun clearDictionaryTombstones(dictionaryId: String) = mutex.withLock {
+        _rows.value = rows().map { row ->
+            if (row.dictionaryId == dictionaryId) row.copy(isDeleted = false) else row
+        }
     }
 
     override suspend fun clearTombstone(wordId: String) = mutex.withLock {

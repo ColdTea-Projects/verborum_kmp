@@ -280,4 +280,21 @@ internal object UkrainianStrings : Strings {
     override val leaveForumDialogMessage = "Усі ваші словники стануть приватними, а ті, хто їх завантажив, втратять доступ. Ви можете повернутися будь-коли."
     override val leaveForumDialogConfirm = "Вийти з Forum"
     override val leaveForumDialogCancel = "Залишитися"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Завантажено"
+    override val dictionaryOptionsUnsubscribe = "Відписатися"
+    override val unsubscribeDialogMessage = "Його буде видалено з вашої Bibliotheca разом із прогресом. Ви зможете знову завантажити його у Forum."
+    override val errorUnsubscribeFailed = "Не вдалося відписатися. Перевірте з’єднання та спробуйте ще раз."
+    override val dictionarySharingTitle = "Спільний у Forum"
+    override val dictionarySharingOn = "Учасники Forum можуть бачити й завантажувати його"
+    override val dictionarySharingOff = "Бачите лише ви"
+    override val dictionarySharingLastShared = "Ваш останній спільний словник — поки ви у Forum, один має лишатися спільним"
+    override val unshareDialogMessage = "Він зникне з Forum, а ті, хто його завантажив, втратять доступ."
+    override val unshareDialogConfirm = "Припинити ділитися"
+    override val errorSharingFailed = "Не вдалося змінити спільний доступ. Перевірте з’єднання та спробуйте ще раз."
+    override val errorDeleteLastShared = "Це ваш останній спільний словник. Спершу поділіться іншим або залиште Forum, щоб зробити всі словники приватними."
+    override fun unsubscribeDialogTitle(name: String): String = "Відписатися від «${name}»?"
+    override fun unshareDialogTitle(name: String): String = "Припинити ділитися «${name}»?"
+    override fun forumPublishedBy(publisher: String): String = "автор: ${publisher}"
 }

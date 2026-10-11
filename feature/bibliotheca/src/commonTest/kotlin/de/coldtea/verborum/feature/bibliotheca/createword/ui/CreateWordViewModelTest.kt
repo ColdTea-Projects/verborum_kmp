@@ -34,6 +34,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
 
 class CreateWordViewModelTest {
 
@@ -302,23 +306,16 @@ class CreateWordViewModelTest {
         ),
         words: FakeWordRepository = FakeWordRepository(),
         wordId: String? = null,
-    ) = CreateWordViewModel(
-        languageSettings = testLanguageSettings(),
-        dictionaryId = "dict-1",
-        wordId = wordId,
-        dictionaryService = DictionaryService(
-            observeDictionariesUseCase = ObserveDictionariesUseCase(dictionaries),
-            observeDictionaryUseCase = ObserveDictionaryUseCase(dictionaries),
-            deleteDictionaryUseCase = DeleteDictionaryUseCase(dictionaries),
-            repository = dictionaries,
-        ),
-        wordService = WordService(repository = words),
-        syncService = SyncService(
-            activeUser = ActiveUserUseCase { "user-42" },
-            syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
-            dictionaryRepository = dictionaries,
-            wordRepository = words,
-            uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, words),
-        ),
-    )
+    ): CreateWordViewModel {
+        val imported = fakeImportedService()
+
+        return CreateWordViewModel(
+            languageSettings = testLanguageSettings(),
+            dictionaryId = "dict-1",
+            wordId = wordId,
+            dictionaryService = fakeDictionaryService(dictionaries, words, imported),
+            wordService = fakeWordService(words, imported),
+            syncService = fakeSyncService(dictionaries, words, imported),
+        )
+    }
 }

@@ -280,4 +280,21 @@ internal object FrenchStrings : Strings {
     override val leaveForumDialogMessage = "Tous vos dictionnaires deviendront privés et les personnes qui les ont téléchargés n’y auront plus accès. Vous pouvez rejoindre le Forum à tout moment."
     override val leaveForumDialogConfirm = "Quitter le Forum"
     override val leaveForumDialogCancel = "Rester"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "Téléchargé"
+    override val dictionaryOptionsUnsubscribe = "Se désabonner"
+    override val unsubscribeDialogMessage = "Il sera retiré de votre Bibliotheca, avec votre progression. Vous pourrez le télécharger à nouveau depuis le Forum."
+    override val errorUnsubscribeFailed = "Impossible de se désabonner. Vérifiez votre connexion et réessayez."
+    override val dictionarySharingTitle = "Partagé dans le Forum"
+    override val dictionarySharingOn = "Les membres du Forum peuvent le voir et le télécharger"
+    override val dictionarySharingOff = "Vous seul pouvez le voir"
+    override val dictionarySharingLastShared = "Votre dernier dictionnaire partagé — tant que vous êtes dans le Forum, un doit rester partagé"
+    override val unshareDialogMessage = "Il quitte le Forum, et les personnes qui l’ont téléchargé n’y ont plus accès."
+    override val unshareDialogConfirm = "Arrêter le partage"
+    override val errorSharingFailed = "Impossible de modifier le partage. Vérifiez votre connexion et réessayez."
+    override val errorDeleteLastShared = "C’est votre dernier dictionnaire partagé. Partagez-en d’abord un autre, ou quittez le Forum pour tous les rendre privés."
+    override fun unsubscribeDialogTitle(name: String): String = "Se désabonner de « ${name} » ?"
+    override fun unshareDialogTitle(name: String): String = "Arrêter de partager « ${name} » ?"
+    override fun forumPublishedBy(publisher: String): String = "par ${publisher}"
 }

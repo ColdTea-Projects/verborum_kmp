@@ -27,6 +27,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
 
 class MultipleChoiceViewModelTest {
 
@@ -50,19 +53,15 @@ class MultipleChoiceViewModelTest {
             updateResult = if (updateFails) unauthorized else Outcome.Success(Unit),
         )
 
-        val viewModel = MultipleChoiceViewModel(
+        val imported = fakeImportedService()
 
+        val viewModel = MultipleChoiceViewModel(
             languageSettings = testLanguageSettings(),
             dictionaryId = dictionaryId,
-            wordService = WordService(repository = wordRepository),
-            observeLanguagePairWords = ObserveLanguagePairWordsUseCase(dictionaries, wordRepository),
-            syncService = SyncService(
-                activeUser = ActiveUserUseCase { "user-42" },
-                syncDictionariesUseCase = SyncUserDictionariesUseCase(dictionaries),
-                dictionaryRepository = dictionaries,
-                wordRepository = wordRepository,
-                uploadPendingChanges = UploadPendingChangesUseCase(dictionaries, wordRepository),
-            ),
+            wordService = fakeWordService(wordRepository, imported),
+            observeLanguagePairWords =
+                ObserveLanguagePairWordsUseCase(dictionaries, wordRepository, imported),
+            syncService = fakeSyncService(dictionaries, wordRepository, imported),
         )
 
         return viewModel to wordRepository

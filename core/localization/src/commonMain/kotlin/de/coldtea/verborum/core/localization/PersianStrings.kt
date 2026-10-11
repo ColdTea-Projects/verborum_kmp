@@ -280,4 +280,21 @@ internal object PersianStrings : Strings {
     override val leaveForumDialogMessage = "همهٔ واژه‌نامه‌های شما خصوصی می‌شوند و کسانی که آن‌ها را دانلود کرده‌اند دسترسی خود را از دست می‌دهند. هر زمان بخواهید می‌توانید دوباره بپیوندید."
     override val leaveForumDialogConfirm = "خروج از Forum"
     override val leaveForumDialogCancel = "ماندن"
+
+    // ---- downloaded dictionaries and sharing ---------------------------------------------
+    override val dictionaryBadgeDownloaded = "دانلودشده"
+    override val dictionaryOptionsUnsubscribe = "لغو اشتراک"
+    override val unsubscribeDialogMessage = "این واژه‌نامه همراه با پیشرفت تمرین شما از Bibliotheca حذف می‌شود. می‌توانید دوباره آن را از Forum دانلود کنید."
+    override val errorUnsubscribeFailed = "لغو اشتراک ممکن نشد. اتصال خود را بررسی کنید و دوباره تلاش کنید."
+    override val dictionarySharingTitle = "اشتراک‌گذاری‌شده در Forum"
+    override val dictionarySharingOn = "اعضای Forum می‌توانند آن را ببینند و دانلود کنند"
+    override val dictionarySharingOff = "فقط شما می‌توانید آن را ببینید"
+    override val dictionarySharingLastShared = "آخرین واژه‌نامهٔ اشتراکی شما — تا وقتی در Forum هستید، یکی باید اشتراکی بماند"
+    override val unshareDialogMessage = "از Forum خارج می‌شود و کسانی که آن را دانلود کرده‌اند دسترسی خود را از دست می‌دهند."
+    override val unshareDialogConfirm = "توقف اشتراک‌گذاری"
+    override val errorSharingFailed = "تغییر اشتراک‌گذاری ممکن نشد. اتصال خود را بررسی کنید و دوباره تلاش کنید."
+    override val errorDeleteLastShared = "این آخرین واژه‌نامهٔ اشتراکی شماست. ابتدا یکی دیگر را به اشتراک بگذارید، یا از Forum خارج شوید تا همه خصوصی شوند."
+    override fun unsubscribeDialogTitle(name: String): String = "اشتراک «${name}» لغو شود؟"
+    override fun unshareDialogTitle(name: String): String = "اشتراک‌گذاری «${name}» متوقف شود؟"
+    override fun forumPublishedBy(publisher: String): String = "از ${publisher}"
 }

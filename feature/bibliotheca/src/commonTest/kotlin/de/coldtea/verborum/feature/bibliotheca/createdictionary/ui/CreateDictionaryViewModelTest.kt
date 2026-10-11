@@ -30,6 +30,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeImportedService
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSharingState
+import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
 
 class CreateDictionaryViewModelTest {
 
@@ -191,22 +195,18 @@ class CreateDictionaryViewModelTest {
         repository: FakeDictionaryRepository,
         dictionaryId: String?,
         words: FakeWordRepository = FakeWordRepository(),
-    ) = CreateDictionaryViewModel(
-        languageSettings = testLanguageSettings(),
-        dictionaryId = dictionaryId,
-        dictionaryService = DictionaryService(
-            observeDictionariesUseCase = ObserveDictionariesUseCase(repository),
-            observeDictionaryUseCase = ObserveDictionaryUseCase(repository),
-            deleteDictionaryUseCase = DeleteDictionaryUseCase(repository),
-            repository = repository,
-        ),
-        syncService = SyncService(
+    ): CreateDictionaryViewModel {
+        // One instance shared by both services, as the Koin graph does: two would mean two copies
+        // of the downloaded library.
+        val imported = fakeImportedService()
+
+        return CreateDictionaryViewModel(
+            languageSettings = testLanguageSettings(),
+            dictionaryId = dictionaryId,
+            dictionaryService = fakeDictionaryService(repository, words, imported),
+            syncService = fakeSyncService(repository, words, imported),
             activeUser = ActiveUserUseCase { "user-42" },
-            syncDictionariesUseCase = SyncUserDictionariesUseCase(repository),
-            dictionaryRepository = repository,
-            wordRepository = words,
-            uploadPendingChanges = UploadPendingChangesUseCase(repository, words),
-        ),
-        activeUser = ActiveUserUseCase { "user-42" },
-    )
+            observeSharingState = fakeSharingState(repository),
+        )
+    }
 }

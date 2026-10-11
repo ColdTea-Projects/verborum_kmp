@@ -26,6 +26,7 @@ actual fun createBibliothecaDatabase(): BibliothecaDatabase? =
     RoomBibliothecaDatabase(
         Room.databaseBuilder<BibliothecaRoomDatabase>(name = databaseFilePath())
             .setDriver(BundledSQLiteDriver())
+            .addMigrations(MIGRATION_1_2)
             .build(),
     )
 
@@ -37,6 +38,7 @@ fun createInMemoryBibliothecaDatabase(): BibliothecaDatabase =
     RoomBibliothecaDatabase(
         Room.inMemoryDatabaseBuilder<BibliothecaRoomDatabase>()
             .setDriver(BundledSQLiteDriver())
+            .addMigrations(MIGRATION_1_2)
             .build(),
     )
 
@@ -51,12 +53,24 @@ private class RoomBibliothecaDatabase(
 
     override val wordDao: WordDao = RoomBackedWordDao(room.wordDao())
 
+    override val importedDictionaryDao: ImportedDictionaryDao =
+        RoomBackedImportedDictionaryDao(room.importedDictionaryDao(), room.importedWordDao())
+
+    override val importedWordDao: ImportedWordDao =
+        RoomBackedImportedWordDao(room.importedWordDao())
+
     override suspend fun <R> withTransaction(block: suspend () -> R): R =
         room.useWriterConnection { transactor -> transactor.immediateTransaction { block() } }
 
+    /**
+     * Every table, downloaded dictionaries included: sign-out hands the device to whoever signs in
+     * next, and someone else's dictionary left behind is as much a leak as the user's own.
+     */
     override suspend fun clear() = withTransaction {
         room.wordDao().clear()
         room.dictionaryDao().clear()
+        room.importedWordDao().clear()
+        room.importedDictionaryDao().clear()
     }
 }
 
@@ -143,6 +157,9 @@ private class RoomBackedWordDao(private val dao: RoomWordDao) : WordDao {
 
     override suspend fun clearTombstone(wordId: String) = dao.clearTombstone(wordId)
 
+    override suspend fun clearDictionaryTombstones(dictionaryId: String) =
+        dao.clearDictionaryTombstones(dictionaryId)
+
     override suspend fun delete(wordId: String) = dao.delete(wordId)
 
     override suspend fun deleteByDictionary(dictionaryId: String) =
@@ -152,6 +169,78 @@ private class RoomBackedWordDao(private val dao: RoomWordDao) : WordDao {
 
     override suspend fun deleteInDictionaryNotIn(dictionaryId: String, keepIds: List<String>) =
         dao.deleteInDictionaryNotIn(dictionaryId, keepIds)
+
+    override suspend fun clear() = dao.clear()
+}
+
+/**
+ * Deleting a downloaded dictionary takes its words with it.
+ *
+ * By hand rather than with a foreign key: the Android schema declares none, and adding one here
+ * would make the two clients' tables differ in a way that matters the next time either is migrated.
+ * The word delete goes first so a failure between the two leaves orphaned words — invisible, because
+ * every read joins through the dictionary — rather than a dictionary whose words are gone.
+ */
+private class RoomBackedImportedDictionaryDao(
+    private val dao: RoomImportedDictionaryDao,
+    private val words: RoomImportedWordDao,
+) : ImportedDictionaryDao {
+
+    override fun observeDictionaries(): Flow<List<ImportedDictionaryEntity>> =
+        dao.observeDictionaries().map { rows -> rows.map(RoomImportedDictionary::toEntity) }
+
+    override fun observeDictionary(dictionaryId: String): Flow<ImportedDictionaryEntity?> =
+        dao.observeDictionary(dictionaryId).map { row -> row?.toEntity() }
+
+    override fun observeDictionaryIds(): Flow<List<String>> = dao.observeDictionaryIds()
+
+    override suspend fun getDictionary(dictionaryId: String): ImportedDictionaryEntity? =
+        dao.getDictionary(dictionaryId)?.toEntity()
+
+    override suspend fun dictionaries(): List<ImportedDictionaryEntity> =
+        dao.dictionaries().map(RoomImportedDictionary::toEntity)
+
+    override suspend fun upsert(dictionary: ImportedDictionaryEntity) =
+        dao.upsert(dictionary.toRoom())
+
+    override suspend fun delete(dictionaryId: String) {
+        words.deleteByDictionary(dictionaryId)
+        dao.delete(dictionaryId)
+    }
+
+    override suspend fun clear() = dao.clear()
+}
+
+private class RoomBackedImportedWordDao(
+    private val dao: RoomImportedWordDao,
+) : ImportedWordDao {
+
+    override fun observeWords(dictionaryId: String): Flow<List<ImportedWordEntity>> =
+        dao.observeWords(dictionaryId).map { rows -> rows.map(RoomImportedWord::toEntity) }
+
+    override fun observeWordsInLanguagePair(
+        fromLang: String,
+        toLang: String,
+    ): Flow<List<ImportedWordEntity>> =
+        dao.observeWordsInLanguagePair(fromLang, toLang)
+            .map { rows -> rows.map(RoomImportedWord::toEntity) }
+
+    override fun observeWordCounts(): Flow<List<DictionaryWordCount>> =
+        dao.observeWordCounts().map { rows -> rows.map(RoomDictionaryWordCount::toEntity) }
+
+    override suspend fun getWord(wordId: String): ImportedWordEntity? =
+        dao.getWord(wordId)?.toEntity()
+
+    override suspend fun words(dictionaryId: String): List<ImportedWordEntity> =
+        dao.words(dictionaryId).map(RoomImportedWord::toEntity)
+
+    override suspend fun upsertAll(words: List<ImportedWordEntity>) =
+        dao.upsertAll(words.map(ImportedWordEntity::toRoom))
+
+    override suspend fun updateLevel(wordId: String, level: Int) = dao.updateLevel(wordId, level)
+
+    override suspend fun deleteByDictionary(dictionaryId: String) =
+        dao.deleteByDictionary(dictionaryId)
 
     override suspend fun clear() = dao.clear()
 }

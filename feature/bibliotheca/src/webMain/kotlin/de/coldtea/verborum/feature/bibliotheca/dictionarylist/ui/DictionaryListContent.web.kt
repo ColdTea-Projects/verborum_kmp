@@ -41,7 +41,9 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardContro
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.WebDictionaryCard
+import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.WebDictionaryCardSkeleton
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.WebFilterRow
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState
@@ -68,6 +70,7 @@ internal actual fun DictionaryListContent(
     onCreateDictionaryClick: () -> Unit,
     onEditDictionaryClick: (String) -> Unit,
     onDeleteDictionary: (String) -> Unit,
+    onUnsubscribe: (String) -> Unit,
     onQueryChanged: (String) -> Unit,
     onFromLanguageChanged: (SupportedLanguage?) -> Unit,
     onToLanguageChanged: (SupportedLanguage?) -> Unit,
@@ -80,6 +83,7 @@ internal actual fun DictionaryListContent(
     val listScrollState = rememberLazyListState()
 
     var confirmDeleteFor by remember { mutableStateOf<DictionaryUi?>(null) }
+    var confirmUnsubscribeFor by remember { mutableStateOf<DictionaryUi?>(null) }
     val keyboardController = remember { KeyboardController() }
 
     confirmDeleteFor?.let { dictionary ->
@@ -90,6 +94,17 @@ internal actual fun DictionaryListContent(
                 onDeleteDictionary(dictionary.dictionaryId)
             },
             onDismiss = { confirmDeleteFor = null },
+        )
+    }
+
+    confirmUnsubscribeFor?.let { dictionary ->
+        UnsubscribeDialog(
+            dictionaryName = dictionary.name,
+            onConfirm = {
+                confirmUnsubscribeFor = null
+                onUnsubscribe(dictionary.dictionaryId)
+            },
+            onDismiss = { confirmUnsubscribeFor = null },
         )
     }
 
@@ -128,6 +143,7 @@ internal actual fun DictionaryListContent(
                 onDictionaryClick = onDictionaryClick,
                 onEditDictionaryClick = onEditDictionaryClick,
                 onDeleteClick = { confirmDeleteFor = it },
+                onUnsubscribeClick = { confirmUnsubscribeFor = it },
                 modifier = Modifier.weight(1f),
             )
 
@@ -150,6 +166,7 @@ private fun DictionaryGrid(
     onDictionaryClick: (String) -> Unit,
     onEditDictionaryClick: (String) -> Unit,
     onDeleteClick: (DictionaryUi) -> Unit,
+    onUnsubscribeClick: (DictionaryUi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (listState) {
@@ -195,6 +212,7 @@ private fun DictionaryGrid(
                     onClick = onDictionaryClick,
                     onEditClick = onEditDictionaryClick,
                     onDeleteClick = { onDeleteClick(dictionary) },
+                    onUnsubscribeClick = { onUnsubscribeClick(dictionary) },
                     modifier = cellModifier,
                 )
             }

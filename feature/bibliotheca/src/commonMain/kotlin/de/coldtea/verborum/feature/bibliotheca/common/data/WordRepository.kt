@@ -49,6 +49,9 @@ internal interface WordRepository {
     /** Hides a dictionary's words at once, for a dictionary delete. */
     suspend fun markDictionaryDeleted(dictionaryId: String)
 
+    /** Brings them back when the server refuses the dictionary delete. */
+    suspend fun restoreDictionaryWords(dictionaryId: String)
+
     suspend fun deleteDictionaryWordsRemotely(dictionaryId: String): Outcome<Unit>
 
     suspend fun removeDictionaryLocally(dictionaryId: String)
@@ -173,6 +176,9 @@ internal class NetworkWordRepository(
 
     override suspend fun markDictionaryDeleted(dictionaryId: String) =
         store.markDictionaryDeleted(dictionaryId)
+
+    override suspend fun restoreDictionaryWords(dictionaryId: String) =
+        store.clearDictionaryTombstones(dictionaryId)
 
     override suspend fun deleteDictionaryWordsRemotely(dictionaryId: String): Outcome<Unit> =
         api.deleteByDictionary(dictionaryId).orAlreadyGone()

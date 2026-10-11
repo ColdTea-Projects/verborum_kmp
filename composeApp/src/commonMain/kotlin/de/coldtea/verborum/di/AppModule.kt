@@ -8,6 +8,7 @@ import de.coldtea.verborum.core.auth.AuthorizationLauncher
 import de.coldtea.verborum.core.auth.KeycloakAuthClient
 import de.coldtea.verborum.core.auth.PendingAuthorizationStore
 import de.coldtea.verborum.core.auth.TokenRefresher
+import de.coldtea.verborum.core.auth.PostLogoutHook
 import de.coldtea.verborum.core.auth.PostLogoutHooks
 import de.coldtea.verborum.core.auth.TokenStorage
 import de.coldtea.verborum.core.auth.createAuthHttpClient
@@ -27,6 +28,8 @@ import de.coldtea.verborum.core.network.BearerTokenProvider
 import de.coldtea.verborum.core.network.createHttpClient
 import de.coldtea.verborum.core.network.defaultApiConfig
 import de.coldtea.verborum.core.profile.di.profileModule
+import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHook
+import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHooks
 import de.coldtea.verborum.core.profile.domain.ProfileService
 import de.coldtea.verborum.core.profile.domain.asPostLogoutHook
 import de.coldtea.verborum.feature.auth.di.authFeatureModule

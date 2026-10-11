@@ -14,6 +14,7 @@ internal val createDictionaryModule: Module = module {
             dictionaryService = get(),
             syncService = get(),
             activeUser = get(),
+            observeSharingState = get(),
         )
     }
 }
