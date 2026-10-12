@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -66,17 +64,12 @@ internal fun WebDictionaryCard(
         border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.surfaceVariant),
         shadowElevation = Dimens.elevationCardSubtle,
     ) {
-        // fillMaxSize so a stretched grid cell paints the card (and accent bar) to the row height.
+        // fillMaxSize so a stretched grid cell paints the card to the full row height.
+        //
+        // No gold edge stripe: at the alpha it was drawn with it read as a yellow glow bleeding off
+        // the card rather than as an edge, and the Forum's cards next door have none. Two lists of
+        // dictionaries in one app should not be told apart by a decoration.
         Box(modifier = Modifier.fillMaxSize()) {
-            // The gold edge stripe that marks a library row.
-            Box(
-                modifier = Modifier
-                    .width(Dimens.accentBar)
-                    .fillMaxHeight()
-                    .align(Alignment.CenterEnd)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = AccentBarAlpha)),
-            )
-
             Row(
                 modifier = Modifier.fillMaxWidth().padding(Spacing.large),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
@@ -288,6 +281,5 @@ private fun SkeletonBlock(modifier: Modifier = Modifier) {
     )
 }
 
-private const val AccentBarAlpha = 0.4f
 private const val SkeletonTitleFraction = 0.7f
 private const val SkeletonLineFraction = 0.5f

@@ -3,6 +3,9 @@ package de.coldtea.verborum.feature.bibliotheca.common.domain
 import de.coldtea.verborum.core.auth.PostLogoutHook
 import de.coldtea.verborum.core.common.logging.logger
 import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHook
+import de.coldtea.verborum.feature.bibliotheca.common.data.DictionaryStore
+import de.coldtea.verborum.feature.bibliotheca.common.data.ImportedDictionaryStore
+import de.coldtea.verborum.feature.bibliotheca.common.data.WordStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -52,12 +55,29 @@ internal class BibliothecaMembershipHook(
 }
 
 /**
- * Forgets every downloaded dictionary when a session ends.
+ * Forgets the whole library when a session ends — the user's own dictionaries and words, and the
+ * ones they downloaded.
  *
- * The rows are **someone else's content**, held under the previous account's membership — so the
- * next person to sign in on this device must not find them, and re-joining is not what should bring
- * them back. Registered as a post-logout hook rather than left to the sign-out screen, so it holds
- * on web too, where there is no database for the screen's own wipe to clear.
+ * A hook rather than something the sign-out screen does, and that distinction is the bug it fixes:
+ * the screen cleared `BibliothecaDatabase`, which **only iOS has**. On web the stores are in
+ * memory, so there was nothing for it to clear and the next person to sign in on that browser
+ * inherited the previous account's library. Clearing the *stores* works wherever they are kept.
+ *
+ * Downloads go the same way: they are someone else's content, held under the previous account's
+ * membership, and re-joining is not what should bring them back.
+ *
+ * Words before dictionaries, so a failure between the two leaves orphaned rows rather than
+ * dictionaries that have lost their contents.
  */
-internal fun ImportedDictionaryService.asPostLogoutHook(): PostLogoutHook =
-    PostLogoutHook { clear() }
+internal class BibliothecaPostLogoutHook(
+    private val dictionaries: DictionaryStore,
+    private val words: WordStore,
+    private val imported: ImportedDictionaryStore,
+) : PostLogoutHook {
+
+    override suspend fun onSignedOut() {
+        words.clear()
+        dictionaries.clear()
+        imported.clear()
+    }
+}

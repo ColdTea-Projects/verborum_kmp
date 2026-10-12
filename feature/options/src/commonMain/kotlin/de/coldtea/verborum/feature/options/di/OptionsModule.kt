@@ -12,13 +12,10 @@ import org.koin.dsl.module
  * `coreModule` — `AuthService`, and `ProfileService` for the Profile screen.
  */
 val optionsModule: Module = module {
-    // Built by hand rather than with `viewModelOf`, because the local library is optional — only
-    // iOS binds one, and `getOrNull` is what lets web go without.
     viewModel {
         OptionsViewModel(
             authService = get(),
             languageSettings = get(),
-            localLibrary = getOrNull(),
             localCache = get(),
         )
     }

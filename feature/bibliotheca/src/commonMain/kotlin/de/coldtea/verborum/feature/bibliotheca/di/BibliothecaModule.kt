@@ -22,7 +22,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.data.WordStore
 import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHook
 import de.coldtea.verborum.feature.bibliotheca.common.domain.BibliothecaMembershipHook
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
-import de.coldtea.verborum.feature.bibliotheca.common.domain.asPostLogoutHook
+import de.coldtea.verborum.feature.bibliotheca.common.domain.BibliothecaPostLogoutHook
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ImportedDictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ObserveSharingStateUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.OwnedLanguagesSource
@@ -165,7 +165,9 @@ val bibliothecaModule: Module = module {
     single<MarketplaceMembershipHook> {
         BibliothecaMembershipHook(scope = get(named(BIBLIOTHECA_SCOPE)), syncService = get())
     }
-    single<PostLogoutHook> { get<ImportedDictionaryService>().asPostLogoutHook() }
+    single<PostLogoutHook> {
+        BibliothecaPostLogoutHook(dictionaries = get(), words = get(), imported = get())
+    }
 
     includes(
         dictionaryListModule,

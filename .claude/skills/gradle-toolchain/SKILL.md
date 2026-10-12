@@ -72,3 +72,6 @@ flags — in particular, do not leave `--no-configuration-cache` in place to mak
   toolchain assumes iOS + web.
 - Commit `gradle/wrapper/gradle-wrapper.properties` changes (with the `distributionSha256Sum`) and
   `kotlin-js-store/` lockfiles.
+- **`core:database` exports its Room schema** to `core/database/schemas/` (`room.schemaLocation`,
+  `exportSchema = true`) and the JSON is committed. Bumping the database version means adding the
+  new version's JSON along with the `Migration` written from it — see the `kmp-development` skill.

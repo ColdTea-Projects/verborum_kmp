@@ -4,7 +4,6 @@ import androidx.lifecycle.viewModelScope
 import de.coldtea.verborum.core.auth.AuthService
 import de.coldtea.verborum.core.common.BaseViewModel
 import de.coldtea.verborum.core.database.LocalCache
-import de.coldtea.verborum.core.database.bibliotheca.BibliothecaDatabase
 import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.localization.UiLanguage
 import kotlinx.coroutines.flow.StateFlow
@@ -15,12 +14,6 @@ internal data class OptionsState(val isSigningOut: Boolean = false)
 internal class OptionsViewModel(
     private val authService: AuthService,
     private val languageSettings: LanguageSettings,
-    /**
-     * The on-device copy of the library, where the platform keeps one. Signing out has to empty it:
-     * the rows are one user's content, and the next person to sign in on this device must not find
-     * them waiting. Null on web, which stores nothing across a session.
-     */
-    private val localLibrary: BibliothecaDatabase? = null,
     /**
      * The device's small on-disk settings. Emptied along with the library, because nothing in here
      * is promised to be about the device rather than the person: today it holds only whether the
@@ -57,10 +50,13 @@ internal class OptionsViewModel(
         viewModelScope.launch {
             authService.signOut()
 
-            // After the session is actually gone, so a failed sign-out does not leave the user
-            // signed in and looking at an empty library. The UI language is not touched: it lives
-            // under its own key, and which language someone reads is a property of the device.
-            localLibrary?.clear()
+            // The library is not emptied here: `AuthService` runs the post-logout hooks, and the
+            // library's own hook clears its stores wherever they are kept. Doing it from this
+            // screen meant clearing the *database*, which only iOS has — so on web the next person
+            // to sign in inherited the previous account's dictionaries.
+            //
+            // The UI language is deliberately untouched: it lives under its own key, and which
+            // language someone reads is a property of the device rather than of the account.
             localCache.clear()
 
             // The shell usually replaces this screen before the flag matters; it is reset anyway so

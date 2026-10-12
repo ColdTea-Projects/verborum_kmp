@@ -57,6 +57,23 @@ JS/Wasm constraints (no `Dispatchers.IO`, no `runBlocking`), and the end-to-end 
 new piece of work are in
 [references/dependencies_and_coroutines.md](references/dependencies_and_coroutines.md).
 
+## Changing the database schema
+
+Only iOS has one (`core:database`, Room). Adding or altering a table is three steps, in order:
+
+1. Change the entity, bump `@Database(version = …)` by one.
+2. Build `:core:database` and read the new `core/database/schemas/…/<version>.json`.
+3. Write the `Migration` using the `createSql` from that file **verbatim**, with `${'$'}{TABLE_NAME}`
+   resolved, and register it with `.addMigrations(...)` on both the real and the in-memory builder.
+
+Step 3 is not pedantry. Room validates the database it opens against the shape it computed at
+compile time, so a migration that differs in column order, nullability or index name fails the
+check and takes the database down on launch — and the failure is on the user's device, not in CI.
+The exported JSON is the only source that cannot be wrong. Commit it alongside the migration.
+
+Cover the new tables with a test against `createInMemoryBibliothecaDatabase()`: it opens at the
+current version, which is what proves the entity, the DAO and the migration agree.
+
 ## Checklist
 
 - [ ] Code sits in the widest source set that compiles

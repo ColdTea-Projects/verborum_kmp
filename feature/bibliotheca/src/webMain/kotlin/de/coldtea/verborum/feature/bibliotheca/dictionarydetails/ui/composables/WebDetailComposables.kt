@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextOverflow
 import de.coldtea.verborum.core.designsystem.component.WebProgressBar
 import de.coldtea.verborum.core.designsystem.component.WebTextAction
@@ -63,14 +64,14 @@ internal fun WebPracticeTile(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(Dimens.iconLarge),
+                modifier = Modifier.size(TileIconSize),
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onPrimary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = Spacing.medium),
+                modifier = Modifier.padding(top = Spacing.small),
             )
         }
     }
@@ -146,5 +147,14 @@ internal fun WebWordRow(
     }
 }
 
-/** Wider than tall, so two tiles side by side read as banners rather than buttons. */
-private const val TileAspectRatio = 1.9f
+/**
+ * Wider than tall, so two tiles side by side read as banners rather than buttons.
+ *
+ * A desktop window gives each tile half the pane, which at the old ratio made them tall enough to
+ * push the word list below the fold on a laptop screen. Shallower, with the glyph and the label
+ * carrying the weight instead of the empty space around them.
+ */
+private const val TileAspectRatio = 2.85f
+
+/** The glyph does the work now that the tile is shallow; the label alone would float in it. */
+private val TileIconSize = 48.dp
