@@ -20,6 +20,7 @@ internal object AzerbaijaniStrings : Strings {
     override val signOut = "Çıxış"
     override val signingOut = "Çıxış edilir…"
     override val howToUseTheApp = "Tətbiqdən necə istifadə etməli"
+    override val optionsLanguage = "Dil"
     override val appLanguage = "Tətbiq dili"
     override val appLanguageSubtitle = "Verborumun özünün danışdığı dil."
     override val systemLanguage = "Sistem dili"

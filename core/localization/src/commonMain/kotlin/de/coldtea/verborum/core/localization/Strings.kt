@@ -46,9 +46,11 @@ interface Strings {
 
     // ---- options -------------------------------------------------------------------------------
     val yourAccount: String get() = "Your account"
-    val signOut: String get() = "Sign out"
-    val signingOut: String get() = "Signing out…"
+    val signOut: String get() = "Log out"
+    val signingOut: String get() = "Logging out…"
     val howToUseTheApp: String get() = "How to use the app"
+    /** The Options row. The picker it opens is titled [appLanguage], which says more. */
+    val optionsLanguage: String get() = "Language"
     val appLanguage: String get() = "App language"
     val appLanguageSubtitle: String get() = "The language Verborum itself speaks."
     val systemLanguage: String get() = "System language"

@@ -32,7 +32,7 @@ import de.coldtea.verborum.feature.options.ui.composables.fontFamilyForUiLanguag
 @Composable
 internal actual fun OptionsContent(
     state: OptionsState,
-    language: UiLanguage,
+    @Suppress("UNUSED_PARAMETER") language: UiLanguage,
     chosenLanguage: UiLanguage?,
     onLanguageChosen: (UiLanguage) -> Unit,
     onFollowSystemLanguage: () -> Unit,
@@ -45,18 +45,16 @@ internal actual fun OptionsContent(
     val strings = LocalStrings.current
 
     ContentColumn(modifier = modifier) {
-        LanguageRow(
-            effective = language,
-            chosen = chosenLanguage,
-            onChoose = onLanguageChosen,
-            onFollowSystem = onFollowSystemLanguage,
-        )
-
         OptionRow(
             icon = VerborumIcons.Person,
             label = strings.optionsProfile,
             onClick = onOpenProfile,
-            modifier = Modifier.padding(top = Spacing.medium),
+        )
+
+        LanguageRow(
+            chosen = chosenLanguage,
+            onChoose = onLanguageChosen,
+            onFollowSystem = onFollowSystemLanguage,
         )
 
         onHowToUseApp?.let { openTour ->
@@ -89,7 +87,6 @@ internal actual fun OptionsContent(
  */
 @Composable
 private fun LanguageRow(
-    effective: UiLanguage,
     chosen: UiLanguage?,
     onChoose: (UiLanguage) -> Unit,
     onFollowSystem: () -> Unit,
@@ -100,7 +97,7 @@ private fun LanguageRow(
     Box(modifier = Modifier.padding(top = Spacing.medium)) {
         OptionRow(
             icon = VerborumIcons.Language,
-            label = languageLabel(strings, effective, chosen),
+            label = strings.optionsLanguage,
             onClick = { isExpanded = true },
         )
 

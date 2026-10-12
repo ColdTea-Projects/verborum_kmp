@@ -20,6 +20,7 @@ internal object ItalianStrings : Strings {
     override val signOut = "Esci"
     override val signingOut = "Disconnessione…"
     override val howToUseTheApp = "Come usare l'app"
+    override val optionsLanguage = "Lingua"
     override val appLanguage = "Lingua dell'app"
     override val appLanguageSubtitle = "La lingua in cui parla Verborum."
     override val systemLanguage = "Lingua di sistema"

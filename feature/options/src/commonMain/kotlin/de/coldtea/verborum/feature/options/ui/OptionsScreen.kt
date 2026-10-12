@@ -25,7 +25,6 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.localization.LocalStrings
-import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.core.localization.UiLanguage
 import de.coldtea.verborum.core.localization.strings
 import org.koin.compose.viewmodel.koinViewModel
@@ -131,15 +130,4 @@ internal fun OptionRow(
             Text(text = label, style = MaterialTheme.typography.titleSmall, color = tint)
         }
     }
-}
-
-/**
- * The app-language row's label: what was chosen, or the device's language when following it.
- *
- * Shared across platforms so the row cannot drift apart from what the picker says. "System language
- * (Deutsch)" states both the choice and what it resolves to today.
- */
-internal fun languageLabel(strings: Strings, effective: UiLanguage, chosen: UiLanguage?): String = when (chosen) {
-    null -> "${strings.appLanguage}: ${strings.systemLanguage} (${effective.endonym})"
-    else -> "${strings.appLanguage}: ${chosen.endonym}"
 }

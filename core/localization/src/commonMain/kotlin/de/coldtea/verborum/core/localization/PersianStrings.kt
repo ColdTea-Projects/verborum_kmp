@@ -20,6 +20,7 @@ internal object PersianStrings : Strings {
     override val signOut = "خروج"
     override val signingOut = "در حال خروج…"
     override val howToUseTheApp = "راهنمای استفاده از برنامه"
+    override val optionsLanguage = "زبان"
     override val appLanguage = "زبان برنامه"
     override val appLanguageSubtitle = "زبانی که خود وربوروم با آن سخن می‌گوید."
     override val systemLanguage = "زبان سیستم"

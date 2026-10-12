@@ -20,6 +20,7 @@ internal object GreekStrings : Strings {
     override val signOut = "Αποσύνδεση"
     override val signingOut = "Αποσύνδεση…"
     override val howToUseTheApp = "Πώς λειτουργεί η εφαρμογή"
+    override val optionsLanguage = "Γλώσσα"
     override val appLanguage = "Γλώσσα εφαρμογής"
     override val appLanguageSubtitle = "Η γλώσσα που μιλά η ίδια η Verborum."
     override val systemLanguage = "Γλώσσα συστήματος"

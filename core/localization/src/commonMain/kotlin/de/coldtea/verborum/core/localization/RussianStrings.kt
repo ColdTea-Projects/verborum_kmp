@@ -20,6 +20,7 @@ internal object RussianStrings : Strings {
     override val signOut = "Выйти"
     override val signingOut = "Выход…"
     override val howToUseTheApp = "Как пользоваться приложением"
+    override val optionsLanguage = "Язык"
     override val appLanguage = "Язык приложения"
     override val appLanguageSubtitle = "Язык, на котором говорит сам Verborum."
     override val systemLanguage = "Язык системы"

@@ -20,8 +20,8 @@ import de.coldtea.verborum.core.localization.UiLanguage
 @Composable
 internal actual fun OptionsContent(
     state: OptionsState,
-    language: UiLanguage,
-    chosenLanguage: UiLanguage?,
+    @Suppress("UNUSED_PARAMETER") language: UiLanguage,
+    @Suppress("UNUSED_PARAMETER") chosenLanguage: UiLanguage?,
     @Suppress("UNUSED_PARAMETER") onLanguageChosen: (UiLanguage) -> Unit,
     @Suppress("UNUSED_PARAMETER") onFollowSystemLanguage: () -> Unit,
     onSignOut: () -> Unit,
@@ -33,17 +33,18 @@ internal actual fun OptionsContent(
     val strings = LocalStrings.current
 
     ContentColumn(modifier = modifier) {
-        // A dropdown has no home on a touch screen, so the row is a button into a picker screen.
-        OptionRow(
-            icon = VerborumIcons.Language,
-            label = languageLabel(strings, language, chosenLanguage),
-            onClick = onOpenLanguagePicker,
-        )
-
         OptionRow(
             icon = VerborumIcons.Person,
             label = strings.optionsProfile,
             onClick = onOpenProfile,
+        )
+
+        // A dropdown has no home on a touch screen, so the row is a button into a picker screen.
+        // The row names the setting and nothing more; the picker it opens shows what is chosen.
+        OptionRow(
+            icon = VerborumIcons.Language,
+            label = strings.optionsLanguage,
+            onClick = onOpenLanguagePicker,
             modifier = Modifier.padding(top = Spacing.medium),
         )
 

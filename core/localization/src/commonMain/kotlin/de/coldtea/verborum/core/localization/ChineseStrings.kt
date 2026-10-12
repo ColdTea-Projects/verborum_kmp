@@ -20,6 +20,7 @@ internal object ChineseStrings : Strings {
     override val signOut = "退出登录"
     override val signingOut = "正在退出…"
     override val howToUseTheApp = "如何使用本应用"
+    override val optionsLanguage = "语言"
     override val appLanguage = "应用语言"
     override val appLanguageSubtitle = "Verborum 自身使用的语言。"
     override val systemLanguage = "系统语言"

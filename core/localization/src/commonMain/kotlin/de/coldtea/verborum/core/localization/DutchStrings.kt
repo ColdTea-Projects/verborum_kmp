@@ -20,6 +20,7 @@ internal object DutchStrings : Strings {
     override val signOut = "Uitloggen"
     override val signingOut = "Bezig met uitloggen…"
     override val howToUseTheApp = "Hoe de app werkt"
+    override val optionsLanguage = "Taal"
     override val appLanguage = "Taal van de app"
     override val appLanguageSubtitle = "De taal die Verborum zelf spreekt."
     override val systemLanguage = "Systeemtaal"

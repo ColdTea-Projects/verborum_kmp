@@ -20,6 +20,7 @@ internal object LithuanianStrings : Strings {
     override val signOut = "Atsijungti"
     override val signingOut = "Atsijungiama…"
     override val howToUseTheApp = "Kaip naudotis programa"
+    override val optionsLanguage = "Kalba"
     override val appLanguage = "Programos kalba"
     override val appLanguageSubtitle = "Kalba, kuria kalba pats Verborum."
     override val systemLanguage = "Sistemos kalba"

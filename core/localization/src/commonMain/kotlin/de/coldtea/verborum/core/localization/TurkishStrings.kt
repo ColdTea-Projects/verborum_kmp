@@ -20,6 +20,7 @@ internal object TurkishStrings : Strings {
     override val signOut = "Çıkış yap"
     override val signingOut = "Çıkış yapılıyor…"
     override val howToUseTheApp = "Uygulama nasıl kullanılır"
+    override val optionsLanguage = "Dil"
     override val appLanguage = "Uygulama dili"
     override val appLanguageSubtitle = "Verborum'un kendi konuştuğu dil."
     override val systemLanguage = "Sistem dili"

@@ -20,6 +20,7 @@ internal object PolishStrings : Strings {
     override val signOut = "Wyloguj się"
     override val signingOut = "Wylogowywanie…"
     override val howToUseTheApp = "Jak korzystać z aplikacji"
+    override val optionsLanguage = "Język"
     override val appLanguage = "Język aplikacji"
     override val appLanguageSubtitle = "Język, w którym mówi samo Verborum."
     override val systemLanguage = "Język systemu"

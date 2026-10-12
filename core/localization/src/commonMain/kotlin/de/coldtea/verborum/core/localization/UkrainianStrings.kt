@@ -20,6 +20,7 @@ internal object UkrainianStrings : Strings {
     override val signOut = "Вийти"
     override val signingOut = "Вихід…"
     override val howToUseTheApp = "Як користуватися застосунком"
+    override val optionsLanguage = "Мова"
     override val appLanguage = "Мова застосунку"
     override val appLanguageSubtitle = "Мова, якою говорить сам Verborum."
     override val systemLanguage = "Мова системи"

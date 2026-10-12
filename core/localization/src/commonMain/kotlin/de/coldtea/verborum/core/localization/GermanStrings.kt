@@ -24,6 +24,7 @@ internal object GermanStrings : Strings {
     override val signOut = "Abmelden"
     override val signingOut = "Wird abgemeldet…"
     override val howToUseTheApp = "So funktioniert die App"
+    override val optionsLanguage = "Sprache"
     override val appLanguage = "App-Sprache"
     override val appLanguageSubtitle = "Die Sprache, in der Verborum selbst spricht."
     override val systemLanguage = "Systemsprache"

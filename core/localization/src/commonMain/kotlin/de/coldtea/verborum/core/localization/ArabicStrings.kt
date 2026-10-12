@@ -20,6 +20,7 @@ internal object ArabicStrings : Strings {
     override val signOut = "تسجيل الخروج"
     override val signingOut = "جارٍ تسجيل الخروج…"
     override val howToUseTheApp = "كيفية استخدام التطبيق"
+    override val optionsLanguage = "اللغة"
     override val appLanguage = "لغة التطبيق"
     override val appLanguageSubtitle = "اللغة التي يتحدث بها فيربوروم نفسه."
     override val systemLanguage = "لغة النظام"

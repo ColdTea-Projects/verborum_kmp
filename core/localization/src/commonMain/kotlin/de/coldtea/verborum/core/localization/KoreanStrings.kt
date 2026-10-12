@@ -20,6 +20,7 @@ internal object KoreanStrings : Strings {
     override val signOut = "로그아웃"
     override val signingOut = "로그아웃 중…"
     override val howToUseTheApp = "앱 사용법"
+    override val optionsLanguage = "언어"
     override val appLanguage = "앱 언어"
     override val appLanguageSubtitle = "Verborum이 사용하는 언어입니다."
     override val systemLanguage = "시스템 언어"

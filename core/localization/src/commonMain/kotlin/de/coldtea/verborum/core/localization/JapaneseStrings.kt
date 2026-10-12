@@ -20,6 +20,7 @@ internal object JapaneseStrings : Strings {
     override val signOut = "ログアウト"
     override val signingOut = "ログアウトしています…"
     override val howToUseTheApp = "アプリの使い方"
+    override val optionsLanguage = "言語"
     override val appLanguage = "アプリの言語"
     override val appLanguageSubtitle = "Verborum 自身が話す言語です。"
     override val systemLanguage = "システムの言語"
