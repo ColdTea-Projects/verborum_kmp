@@ -2,6 +2,8 @@ package de.coldtea.verborum.feature.bibliotheca.common
 
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.VerborumError
+import de.coldtea.verborum.core.marketplace.MarketplaceRatings
+import de.coldtea.verborum.core.marketplace.RatingOutcome
 import de.coldtea.verborum.core.profile.domain.ProfileService
 import de.coldtea.verborum.core.profile.domain.UserProfile
 import de.coldtea.verborum.core.profile.domain.VaultEntry
@@ -108,6 +110,33 @@ internal class FakeProfileService(
 
     override fun clear() {
         _profile.value = null
+    }
+}
+
+/**
+ * Ratings, scripted.
+ *
+ * Defaults to "could not find out", which is the state that keeps the card hidden — most tests here
+ * are about the dictionary rather than its rating, and a hidden control cannot affect them.
+ */
+internal class FakeMarketplaceRatings(
+    private val rating: Outcome<Int?> = Outcome.Failure(VerborumError.Network()),
+    private val writeOutcome: RatingOutcome = RatingOutcome.DONE,
+) : MarketplaceRatings {
+
+    /** Every rating written, in order; null for a removal. */
+    val writes = mutableListOf<Int?>()
+
+    override suspend fun myRating(dictionaryId: String): Outcome<Int?> = rating
+
+    override suspend fun setRating(dictionaryId: String, stars: Int): RatingOutcome {
+        writes += stars
+        return writeOutcome
+    }
+
+    override suspend fun removeRating(dictionaryId: String): RatingOutcome {
+        writes += null
+        return writeOutcome
     }
 }
 

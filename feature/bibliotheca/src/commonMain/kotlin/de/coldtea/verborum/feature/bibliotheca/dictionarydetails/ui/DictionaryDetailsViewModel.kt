@@ -7,6 +7,8 @@ import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.common.pluralize
+import de.coldtea.verborum.core.marketplace.MarketplaceRatings
+import de.coldtea.verborum.core.marketplace.RatingOutcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ImportedDictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ObserveSharingStateUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SharingState
@@ -23,6 +25,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,11 +47,18 @@ internal class DictionaryDetailsViewModel(
     private val syncService: SyncService,
     private val importedDictionaryService: ImportedDictionaryService,
     private val setDictionaryShared: SetDictionarySharedUseCase,
+    private val ratings: MarketplaceRatings,
     observeSharingState: ObserveSharingStateUseCase,
 ) : BaseViewModel<DictionaryDetailsUiState, Nothing>(DictionaryDetailsUiState()) {
 
     private val sharingState = observeSharingState()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SharingState())
+
+    /**
+     * The rating of this dictionary, if it is a download. Its own state rather than part of the
+     * screen's, because it is read on its own schedule — once, after the row turns out to be one.
+     */
+    private val rating = MutableStateFlow(RatingState())
 
     /** Read fresh each time: the language can change while this screen is open. */
     private val strings: Strings get() = stringsFor(languageSettings.language.value)
@@ -67,6 +77,53 @@ internal class DictionaryDetailsViewModel(
     init {
         observeDetails()
         refresh()
+        loadRatingIfDownloaded()
+    }
+
+    /** Only a downloaded dictionary has a rating to read; the server refuses the rest. */
+    private fun loadRatingIfDownloaded() {
+        viewModelScope.launch {
+            if (importedDictionaryService.find(dictionaryId) == null) return@launch
+
+            when (val outcome = ratings.myRating(dictionaryId)) {
+                is Outcome.Success -> rating.value = RatingState(stars = outcome.data, isVisible = true)
+
+                // Left hidden: "could not find out" is not "not rated".
+                else -> Unit
+            }
+        }
+    }
+
+    fun rate(stars: Int) = writeRating { ratings.setRating(dictionaryId, stars) to stars }
+
+    fun removeRating() = writeRating { ratings.removeRating(dictionaryId) to null }
+
+    private fun writeRating(write: suspend () -> Pair<RatingOutcome, Int?>) {
+        if (rating.value.isUpdating) return
+
+        val previous = rating.value.stars
+        rating.value = rating.value.copy(isUpdating = true)
+
+        viewModelScope.launch {
+            val (outcome, wanted) = write()
+
+            rating.value = when (outcome) {
+                RatingOutcome.DONE -> rating.value.copy(stars = wanted, isUpdating = false)
+
+                // Restored, so the stars show what the server holds rather than what the tap meant.
+                else -> rating.value.copy(stars = previous, isUpdating = false)
+            }
+
+            if (outcome != RatingOutcome.DONE) {
+                _messages.emit(
+                    if (outcome == RatingOutcome.UNAVAILABLE) {
+                        strings.errorRatingUnavailable
+                    } else {
+                        strings.errorRatingFailed
+                    },
+                )
+            }
+        }
     }
 
     private fun observeDetails() {
@@ -76,7 +133,8 @@ internal class DictionaryDetailsViewModel(
                 dictionaryService.observeDictionary(dictionaryId),
                 wordService.observeWords(dictionaryId),
                 sharingState,
-            ) { row, words, sharing ->
+                rating,
+            ) { row, words, sharing, ratingState ->
                 val dictionary = row?.dictionary
                 // A missing dictionary means it was deleted — here or elsewhere. Reported as its own
                 // state so the screen leaves once, instead of re-rendering a header for a row that
@@ -100,6 +158,9 @@ internal class DictionaryDetailsViewModel(
                         isSharingVisible = sharing.isMember && !row.isImported,
                         isShared = dictionary.isPublic,
                         isLastShared = sharing.isLastShared(dictionaryId),
+                        isRatingVisible = ratingState.isVisible,
+                        myRating = ratingState.stars,
+                        isRatingUpdating = ratingState.isUpdating,
                     )
                 }
             }
@@ -268,3 +329,10 @@ internal class DictionaryDetailsViewModel(
 
 /** "12 words" for the header subtitle. */
 internal fun wordCountLabel(count: Int): String = pluralize(count, "word")
+
+/** The rating half of the details screen, kept apart because it loads on its own schedule. */
+private data class RatingState(
+    val stars: Int? = null,
+    val isVisible: Boolean = false,
+    val isUpdating: Boolean = false,
+)

@@ -1,7 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model
 
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordSurfaces
+import de.coldtea.verborum.core.common.WordSurfaces
 
 /**
  * One row of the word list. The surfaces are resolved to their display form here rather than in the

@@ -19,8 +19,8 @@ import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.localization.LocalStrings
 import de.coldtea.verborum.core.localization.strings
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.*
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
+import de.coldtea.verborum.core.localization.SupportedLanguage
+import de.coldtea.verborum.core.localization.TagSection
 
 /**
  * The dictionary form as a desktop page: a name, the language pair side by side, and the tag

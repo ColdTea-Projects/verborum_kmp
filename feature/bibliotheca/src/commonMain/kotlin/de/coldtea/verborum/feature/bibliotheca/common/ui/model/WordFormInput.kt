@@ -3,6 +3,7 @@ package de.coldtea.verborum.feature.bibliotheca.common.ui.model
 import de.coldtea.verborum.core.network.VerborumJson
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import de.coldtea.verborum.core.common.WordSurfaces
 
 /**
  * What the user typed for one language side of one meaning. A word can carry several alternatives

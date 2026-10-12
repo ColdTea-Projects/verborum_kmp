@@ -1,8 +1,5 @@
-package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model
+package de.coldtea.verborum.core.localization
 
-import de.coldtea.verborum.core.localization.EnglishStrings
-import de.coldtea.verborum.core.localization.UiLanguage
-import de.coldtea.verborum.core.localization.stringsFor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

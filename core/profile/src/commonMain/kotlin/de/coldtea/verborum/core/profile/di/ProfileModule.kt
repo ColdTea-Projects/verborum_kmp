@@ -9,6 +9,7 @@ import de.coldtea.verborum.core.profile.domain.ProfileService
 import de.coldtea.verborum.core.profile.domain.SessionProfileService
 import de.coldtea.verborum.core.profile.domain.usecase.EnsureUserProfileUseCase
 import de.coldtea.verborum.core.profile.domain.usecase.UpdateProfileInfoUseCase
+import de.coldtea.verborum.core.profile.domain.usecase.GetSessionIdentityUseCase
 import de.coldtea.verborum.core.profile.domain.usecase.getSessionIdentityUseCase
 import io.ktor.client.HttpClient
 import org.koin.core.module.Module
@@ -40,12 +41,17 @@ val profileModule: Module = module {
         )
     }
 
+    // Published as a binding, not only used internally: the Forum needs the caller's own subject
+    // to recognise their own listings, and reading the auth session directly from a feature would
+    // put the token lifecycle in reach of a screen.
+    factory<GetSessionIdentityUseCase> { getSessionIdentityUseCase(session = get()) }
+
     single { UserApi(client = get(named(USER_HTTP_CLIENT))) }
     single { VaultApi(client = get(named(USER_HTTP_CLIENT))) }
 
     single<ProfileService> {
         SessionProfileService(
-            sessionIdentity = getSessionIdentityUseCase(session = get()),
+            sessionIdentity = get(),
             ensureUserProfile = EnsureUserProfileUseCase(api = get()),
             updateProfileInfo = UpdateProfileInfoUseCase(api = get()),
             vaultApi = get(),

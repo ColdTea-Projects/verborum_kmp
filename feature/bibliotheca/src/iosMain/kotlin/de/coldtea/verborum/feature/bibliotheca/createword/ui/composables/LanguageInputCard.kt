@@ -36,7 +36,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.isRightToLeft
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.keyboardLayoutFor
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.Gender
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordFormInput
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordGrammar
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordType

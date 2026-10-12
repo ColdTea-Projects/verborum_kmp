@@ -1,16 +1,18 @@
-package de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model
+package de.coldtea.verborum.core.localization
 
-import de.coldtea.verborum.core.localization.Strings
 
 /**
  * A selectable dictionary tag.
+ *
+ * Here rather than in a feature because the Forum filters by the same taxonomy the library tags
+ * with — one list, so a tag a user can set is always one they can search for.
  *
  * [code] is the stable identifier to persist and send — it never changes with the UI language. How
  * the label is produced is the whole difference between the two kinds, matching the Android client,
  * so the type carries it rather than a pair of nullable fields: a tag with neither label, or with
  * both, is not something this can be asked to represent.
  */
-internal sealed interface DictionaryTag {
+sealed interface DictionaryTag {
 
     val code: String
 
@@ -44,7 +46,7 @@ private fun fixed(code: String, name: String): DictionaryTag =
 
 // --- Provisional tag taxonomy (UI; codes are the eventual storage keys) ---
 
-internal val LEVEL_TAGS: List<DictionaryTag> = listOf(
+val LEVEL_TAGS: List<DictionaryTag> = listOf(
     // General proficiency — translatable.
     translated("basic") { tagLevelBasic },
     translated("intermediate") { tagLevelIntermediate },
@@ -61,7 +63,7 @@ internal val LEVEL_TAGS: List<DictionaryTag> = listOf(
     fixed("topik4", "TOPIK 4"), fixed("topik5", "TOPIK 5"), fixed("topik6", "TOPIK 6"),
 )
 
-internal val TOPIC_TAGS: List<DictionaryTag> = listOf(
+val TOPIC_TAGS: List<DictionaryTag> = listOf(
     translated("food_drink") { tagTopicFoodDrink },
     translated("home_appliances") { tagTopicHomeAppliances },
     translated("clothing") { tagTopicClothing },
@@ -94,7 +96,7 @@ internal val TOPIC_TAGS: List<DictionaryTag> = listOf(
     translated("food_service") { tagTopicFoodService },
 )
 
-internal val EXAM_TAGS: List<DictionaryTag> = listOf(
+val EXAM_TAGS: List<DictionaryTag> = listOf(
     fixed("goethe_testdaf", "Goethe/TestDaF (de)"),
     fixed("dele", "DELE (es)"),
     fixed("delf_dalf", "DELF/DALF (fr)"),
@@ -112,7 +114,7 @@ internal val EXAM_TAGS: List<DictionaryTag> = listOf(
  * The taxonomy is the Android app's, section for section and code for code — the tags are a
  * cross-client contract, and a dictionary tagged on one client has to read the same on the others.
  */
-internal enum class TagSection {
+enum class TagSection {
     LEVEL,
     TOPIC,
     EXAM,
@@ -137,10 +139,10 @@ internal enum class TagSection {
 }
 
 /** Every known tag, and the lookup that turns a stored code back into something readable. */
-internal val ALL_TAGS: List<DictionaryTag> = TagSection.entries.flatMap { it.tags }
+val ALL_TAGS: List<DictionaryTag> = TagSection.entries.flatMap { it.tags }
 
 private val tagsByCode: Map<String, DictionaryTag> = ALL_TAGS.associateBy(DictionaryTag::code)
 
 /** An unknown code still shows — as itself — rather than disappearing from an edited dictionary. */
-internal fun tagLabelOf(code: String, strings: Strings): String =
+fun tagLabelOf(code: String, strings: Strings): String =
     tagsByCode[code]?.label(strings) ?: code

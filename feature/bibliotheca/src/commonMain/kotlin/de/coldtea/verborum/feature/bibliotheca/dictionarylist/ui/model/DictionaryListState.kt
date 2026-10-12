@@ -1,6 +1,6 @@
 package de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model
 
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 
 /** What the list is showing: skeletons, an error surface, or rows. */
 internal sealed interface DictionaryListState {

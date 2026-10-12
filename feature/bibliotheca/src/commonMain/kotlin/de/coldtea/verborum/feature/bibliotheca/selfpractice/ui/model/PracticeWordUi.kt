@@ -2,7 +2,7 @@ package de.coldtea.verborum.feature.bibliotheca.selfpractice.ui.model
 
 import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.WordSurfaces
+import de.coldtea.verborum.core.common.WordSurfaces
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationColumns
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationLine
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.wordColumns

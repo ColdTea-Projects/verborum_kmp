@@ -33,6 +33,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
+import de.coldtea.verborum.core.designsystem.component.RatingCard
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
@@ -46,7 +47,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.Uns
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.tagLabelOf
+import de.coldtea.verborum.core.localization.tagLabelOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +68,8 @@ internal actual fun DictionaryDetailsContent(
     onUnsubscribeClick: () -> Unit,
     onConfirmUnsubscribe: () -> Unit,
     onDismissUnsubscribe: () -> Unit,
+    onRate: (Int) -> Unit,
+    onRemoveRating: () -> Unit,
     modifier: Modifier,
 ) {
     when (val details = state.details) {
@@ -156,6 +159,19 @@ internal actual fun DictionaryDetailsContent(
 
                         if (details.tags.isNotEmpty()) {
                             item { TagsRow(tags = details.tags) }
+                        }
+
+                        // Only for a download, and only once the rating is actually known.
+                        if (details.isRatingVisible) {
+                            item {
+                                RatingCard(
+                                    stars = details.myRating,
+                                    onRate = onRate,
+                                    onRemoveRating = onRemoveRating,
+                                    isUpdating = details.isRatingUpdating,
+                                    modifier = Modifier.padding(top = Spacing.small),
+                                )
+                            }
                         }
 
                         if (details.isSharingVisible) {

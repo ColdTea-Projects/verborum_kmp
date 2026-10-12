@@ -11,11 +11,16 @@ import de.coldtea.verborum.core.auth.PendingAuthorizationStore
 import de.coldtea.verborum.core.auth.PostLogoutHooks
 import de.coldtea.verborum.core.auth.TokenStorage
 import de.coldtea.verborum.core.database.LocalCache
+import de.coldtea.verborum.core.marketplace.ImportedDictionariesStore
+import de.coldtea.verborum.core.marketplace.MarketplaceRatings
+import de.coldtea.verborum.core.marketplace.OwnedDictionariesSource
 import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.profile.di.USER_HTTP_CLIENT
 import de.coldtea.verborum.core.profile.di.profileModule
 import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHooks
 import de.coldtea.verborum.core.profile.domain.ProfileService
+import de.coldtea.verborum.feature.bibliotheca.di.bibliothecaModule
+import de.coldtea.verborum.feature.forum.di.forumModule
 import io.ktor.client.HttpClient
 import org.koin.core.Koin
 import org.koin.core.qualifier.named
@@ -68,6 +73,19 @@ class AppModuleGraphTest {
     }
 
     @Test
+    fun `the two features that need each other resolve both ways`() {
+        val koin = graph()
+
+        // The Forum writes a download into the library and reads which ones are already there; the
+        // library shows a rating card the Forum owns the endpoints for. Both directions are bound
+        // through `core:marketplace`, which is precisely the shape that becomes a cycle if either
+        // side resolves the other while being built.
+        assertNotNull(koin.get<ImportedDictionariesStore>())
+        assertNotNull(koin.get<OwnedDictionariesSource>())
+        assertNotNull(koin.get<MarketplaceRatings>())
+    }
+
+    @Test
     fun `signing out has something registered to forget`() {
         val koin = graph()
 
@@ -90,11 +108,14 @@ class AppModuleGraphTest {
     }
 
     /**
-     * The real `coreModule` and `profileModule`, with the platform leaves overridden. Declared last
-     * so the substitutes win.
+     * The real app wiring, with the platform leaves overridden. Declared last so the substitutes
+     * win.
+     *
+     * The feature modules are in because the shape that fails is a *cross-module* one: a cycle
+     * between two features that bind against each other cannot show up in either on its own.
      */
     private fun graph(): Koin = koinApplication {
-        modules(coreModule, profileModule, platformLeaves)
+        modules(coreModule, profileModule, bibliothecaModule, forumModule, platformLeaves)
     }.koin
 }
 

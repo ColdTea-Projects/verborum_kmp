@@ -496,6 +496,140 @@ object VerborumIcons {
         }
     }
 
+    /** A filled five-pointed star — one whole rating point. */
+    val Star: ImageVector by lazy {
+        materialIcon {
+            path(fill = SolidColor(Color.Black)) {
+                moveTo(12f, 17.27f)
+                lineTo(18.18f, 21f)
+                lineTo(16.54f, 13.97f)
+                lineTo(22f, 9.24f)
+                lineTo(14.81f, 8.63f)
+                lineTo(12f, 2f)
+                lineTo(9.19f, 8.63f)
+                lineTo(2f, 9.24f)
+                lineTo(7.46f, 13.97f)
+                lineTo(5.82f, 21f)
+                close()
+            }
+        }
+    }
+
+    /**
+     * The same star in outline — an unearned point.
+     *
+     * Drawn as one path with an inner contour rather than a stroke: a stroked star hairlines away
+     * at the 16dp the list cards use, where this stays legible.
+     */
+    val StarOutline: ImageVector by lazy {
+        materialIcon {
+            path(fill = SolidColor(Color.Black)) {
+                moveTo(22f, 9.24f)
+                lineTo(14.81f, 8.62f)
+                lineTo(12f, 2f)
+                lineTo(9.19f, 8.63f)
+                lineTo(2f, 9.24f)
+                lineTo(7.45f, 13.97f)
+                lineTo(5.82f, 21f)
+                lineTo(12f, 17.27f)
+                lineTo(18.18f, 21f)
+                lineTo(16.54f, 13.97f)
+                close()
+                moveTo(12f, 15.4f)
+                lineTo(8.24f, 17.67f)
+                lineTo(9.24f, 13.39f)
+                lineTo(5.92f, 10.51f)
+                lineTo(10.3f, 10.13f)
+                lineTo(12f, 6.1f)
+                lineTo(13.71f, 10.14f)
+                lineTo(18.09f, 10.52f)
+                lineTo(14.77f, 13.4f)
+                lineTo(15.77f, 17.68f)
+                close()
+            }
+        }
+    }
+
+    /** Half filled, for an average that lands between two whole stars. */
+    val StarHalf: ImageVector by lazy {
+        materialIcon {
+            path(fill = SolidColor(Color.Black)) {
+                moveTo(22f, 9.24f)
+                lineTo(14.81f, 8.62f)
+                lineTo(12f, 2f)
+                lineTo(9.19f, 8.63f)
+                lineTo(2f, 9.24f)
+                lineTo(7.45f, 13.97f)
+                lineTo(5.82f, 21f)
+                lineTo(12f, 17.27f)
+                lineTo(18.18f, 21f)
+                lineTo(16.54f, 13.97f)
+                close()
+                moveTo(12f, 15.4f)
+                verticalLineTo(6.1f)
+                lineTo(13.71f, 10.14f)
+                lineTo(18.09f, 10.52f)
+                lineTo(14.77f, 13.4f)
+                lineTo(15.77f, 17.68f)
+                close()
+            }
+        }
+    }
+
+    /** An arrow into a tray: what the Forum's overflow offers. */
+    val Download: ImageVector by lazy {
+        materialIcon {
+            path(fill = SolidColor(Color.Black)) {
+                moveTo(5f, 20f)
+                horizontalLineTo(19f)
+                verticalLineTo(18f)
+                horizontalLineTo(5f)
+                close()
+                moveTo(19f, 9f)
+                horizontalLineTo(15f)
+                verticalLineTo(3f)
+                horizontalLineTo(9f)
+                verticalLineTo(9f)
+                horizontalLineTo(5f)
+                lineTo(12f, 16f)
+                close()
+            }
+        }
+    }
+
+    /**
+     * Two arrows, one each way: a language pair the Forum matches in **either** direction.
+     *
+     * Drawn rather than written as `\u21C4`, which is the character Android uses. The web build
+     * renders into a canvas with its own bundled faces, and none of them carries that codepoint —
+     * so as text it is a tofu box in the browser however the string is spelled.
+     */
+    val SwapHorizontal: ImageVector by lazy {
+        materialIcon {
+            path(fill = SolidColor(Color.Black)) {
+                // Upper arrow, pointing right.
+                moveTo(4f, 9f)
+                horizontalLineTo(16f)
+                verticalLineTo(11.5f)
+                lineTo(20f, 7.75f)
+                lineTo(16f, 4f)
+                verticalLineTo(6.5f)
+                horizontalLineTo(4f)
+                close()
+
+                // Lower arrow, pointing left.
+                moveTo(20f, 15f)
+                horizontalLineTo(8f)
+                verticalLineTo(12.5f)
+                lineTo(4f, 16.25f)
+                lineTo(8f, 20f)
+                verticalLineTo(17.5f)
+                horizontalLineTo(20f)
+                close()
+            }
+        }
+    }
+
     val Storefront: ImageVector by lazy {
         materialIcon {
             // An awning over a shopfront.

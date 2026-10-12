@@ -31,9 +31,9 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.composables.DropdownField
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.TagSection
-import de.coldtea.verborum.feature.bibliotheca.createdictionary.ui.model.DictionaryTag
+import de.coldtea.verborum.core.localization.SupportedLanguage
+import de.coldtea.verborum.core.localization.TagSection
+import de.coldtea.verborum.core.localization.DictionaryTag
 import de.coldtea.verborum.core.localization.strings
 
 /** Picks one of the supported languages. Read-only text field plus a menu, so typing cannot stray. */

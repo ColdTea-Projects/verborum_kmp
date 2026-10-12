@@ -1,19 +1,31 @@
-package de.coldtea.verborum.feature.bibliotheca.common.ui.model
+package de.coldtea.verborum.core.common
 
-import de.coldtea.verborum.core.network.VerborumJson
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * The display side of a stored word. A word's surface is a JSON array of alternative meanings
+ * The display side of a stored word.
+ *
+ * In `core:common` because two features read the same stored shape: the library shows the user's
+ * own words, and the Forum shows someone else's. Rendering the raw column instead gives the user
+ * `["apple"]`, brackets and quotes included — which is what happens when only one of them knows
+ * the format. A word's surface is a JSON array of alternative meanings
  * (`["buy","purchase"]`), and its meta blob carries the language code the create-word screen wrote.
  *
  * Only what the details screen needs is ported here: the grammatical forms in the meta blob belong
  * to the create-word screen and stay unparsed until that screen exists.
  */
 object WordSurfaces {
+
+    /**
+     * Its own parser rather than `core:network`'s: this module is below that one, and lenient
+     * decoding of a single column needs none of the HTTP contract.
+     */
+    private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+
 
     /** `["buy","purchase"]` → `["buy", "purchase"]`; a plain string stays a single surface. */
     fun split(text: String): List<String> {
@@ -22,7 +34,7 @@ object WordSurfaces {
 
         if (trimmed.startsWith("[")) {
             // A value that is not a JSON array is legitimate input here, not a programmer error.
-            runCatching { VerborumJson.decodeFromString<List<String>>(trimmed) }
+            runCatching { json.decodeFromString<List<String>>(trimmed) }
                 .getOrNull()
                 ?.let { surfaces -> return surfaces.map(String::trim).filter(String::isNotBlank) }
         }
@@ -43,7 +55,7 @@ object WordSurfaces {
 
     private fun parse(meta: String): JsonObject? =
         meta.takeIf { it.isNotBlank() }?.let { raw ->
-            runCatching { VerborumJson.parseToJsonElement(raw).jsonObject }.getOrNull()
+            runCatching { json.parseToJsonElement(raw).jsonObject }.getOrNull()
         }
 
     /** Storage is unaffected by this — surfaces are always a JSON array, whatever the script. */

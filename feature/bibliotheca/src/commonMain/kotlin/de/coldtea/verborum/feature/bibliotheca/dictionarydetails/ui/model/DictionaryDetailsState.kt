@@ -49,6 +49,15 @@ internal sealed interface DictionaryDetailsState {
         val isUnshareConfirmationShown: Boolean = false,
         /** Confirmation before removing a download. */
         val isUnsubscribeConfirmationShown: Boolean = false,
+        /**
+         * The user's own rating of this download, and whether to offer the control at all.
+         *
+         * Hidden until the rating is actually known: empty stars shown to someone who is merely
+         * offline would tell them they had not rated something they had.
+         */
+        val isRatingVisible: Boolean = false,
+        val myRating: Int? = null,
+        val isRatingUpdating: Boolean = false,
     ) : DictionaryDetailsState {
 
         /** On and locked, or in flight: either way the user cannot move it right now. */

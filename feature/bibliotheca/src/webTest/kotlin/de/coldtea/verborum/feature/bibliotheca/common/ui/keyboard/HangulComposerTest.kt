@@ -1,7 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard
 
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

@@ -40,7 +40,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardButton
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardTextField
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LanguageKeyboardPopup
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import de.coldtea.verborum.core.localization.strings
 

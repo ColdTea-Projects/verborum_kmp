@@ -9,7 +9,7 @@ import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarAction
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionarySort
 import org.koin.compose.viewmodel.koinViewModel
 import de.coldtea.verborum.core.localization.strings

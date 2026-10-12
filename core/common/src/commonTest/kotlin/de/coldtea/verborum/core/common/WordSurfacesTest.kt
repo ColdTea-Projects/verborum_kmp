@@ -1,4 +1,4 @@
-package de.coldtea.verborum.feature.bibliotheca.common.ui.model
+package de.coldtea.verborum.core.common
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

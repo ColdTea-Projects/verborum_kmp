@@ -57,6 +57,8 @@ internal fun DictionaryDetailsScreen(
         onUnsubscribeClick = viewModel::askToUnsubscribe,
         onConfirmUnsubscribe = viewModel::confirmUnsubscribe,
         onDismissUnsubscribe = viewModel::dismissUnsubscribeConfirmation,
+        onRate = viewModel::rate,
+        onRemoveRating = viewModel::removeRating,
         modifier = modifier,
     )
 }
@@ -87,6 +89,9 @@ internal expect fun DictionaryDetailsContent(
     onUnsubscribeClick: () -> Unit,
     onConfirmUnsubscribe: () -> Unit,
     onDismissUnsubscribe: () -> Unit,
+    /** Rating a download — the same card the Forum's details screen shows. */
+    onRate: (Int) -> Unit,
+    onRemoveRating: () -> Unit,
     modifier: Modifier,
 )
 

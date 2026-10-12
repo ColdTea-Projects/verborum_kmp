@@ -46,7 +46,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.ANY_LANGUAGE
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DictionaryCard

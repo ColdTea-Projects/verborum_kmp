@@ -1,6 +1,7 @@
 package de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui
 
 import de.coldtea.verborum.feature.bibliotheca.common.FakeDictionaryRepository
+import de.coldtea.verborum.feature.bibliotheca.common.FakeMarketplaceRatings
 import de.coldtea.verborum.feature.bibliotheca.common.FakeProfileService
 import de.coldtea.verborum.feature.bibliotheca.common.FakeWordRepository
 import de.coldtea.verborum.feature.bibliotheca.common.offlineImportedService
@@ -157,6 +158,7 @@ class DetailsEntryTest {
             wordService = fakeWordService(words, imported),
             syncService = fakeSyncService(dictionaries, words, imported),
             importedDictionaryService = imported,
+            ratings = FakeMarketplaceRatings(),
             setDictionaryShared = SetDictionarySharedUseCase(dictionaries),
             observeSharingState = fakeSharingState(dictionaries),
         )

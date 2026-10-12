@@ -1,11 +1,12 @@
-package de.coldtea.verborum.feature.bibliotheca.common.ui.model
+package de.coldtea.verborum.core.localization
 
 /**
  * The languages a dictionary can translate between. [code] is the stable identifier stored on the
  * dictionary and sent to the API; [displayName] is what the user sees.
  *
- * The Android app resolves the name from a string resource in 19 locales. This app has no
- * localisation yet, so the English name is inlined — when resources arrive, only this enum changes.
+ * In `core:localization` rather than in a feature, because two of them need it: the library writes
+ * a dictionary's pair, and the Forum filters listings by one. [displayName] is the English name;
+ * `Strings.languageName` is what a screen shows, and follows the app's language.
  */
 enum class SupportedLanguage(val code: String, val displayName: String) {
     ENGLISH("en", "English"),

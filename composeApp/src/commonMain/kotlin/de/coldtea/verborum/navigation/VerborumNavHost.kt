@@ -30,7 +30,7 @@ fun VerborumNavHost(
         modifier = modifier,
     ) {
         bibliothecaGraph(navController)
-        forumGraph()
+        forumGraph(navController)
         // Where the tour is not shown unprompted, Options is how it is reached. The shell decides
         // that, so neither feature has to know about the other.
         optionsGraph(

@@ -12,7 +12,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.SharingState
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteOutcome
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryFilterState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryListState

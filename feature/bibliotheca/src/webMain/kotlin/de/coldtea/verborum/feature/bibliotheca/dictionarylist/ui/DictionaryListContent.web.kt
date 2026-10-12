@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.coldtea.verborum.core.designsystem.component.ContentPane
+import de.coldtea.verborum.core.designsystem.component.EqualHeightCardGrid
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.WebPageSpacer
 import de.coldtea.verborum.core.designsystem.component.WebPageTitle
@@ -39,7 +40,7 @@ import de.coldtea.verborum.core.designsystem.theme.ContentWidth
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.KeyboardController
 import de.coldtea.verborum.feature.bibliotheca.common.ui.keyboard.LocalKeyboardController
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.SupportedLanguage
+import de.coldtea.verborum.core.localization.SupportedLanguage
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.UnsubscribeDialog
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.WebDictionaryCard
@@ -219,66 +220,5 @@ private fun DictionaryGrid(
         }
     }
 }
-
-/**
- * A reflowing card grid where every item in a row stretches to that row's tallest card.
- *
- * `LazyVerticalGrid` cannot do this — its rows do not expose `IntrinsicSize` — so each row is a
- * `LazyColumn` item measured with [IntrinsicSize.Max], matching how `GridCells.Adaptive` would
- * pick the column count.
- */
-@Composable
-private fun EqualHeightCardGrid(
-    itemCount: Int,
-    listScrollState: LazyListState,
-    modifier: Modifier = Modifier,
-    key: ((index: Int) -> Any)? = null,
-    itemContent: @Composable (index: Int, modifier: Modifier) -> Unit,
-) {
-    BoxWithConstraints(modifier = modifier) {
-        val columnCount = columnsIn(maxWidth)
-        val rowCount = (itemCount + columnCount - 1) / columnCount
-
-        LazyColumn(
-            state = listScrollState,
-            contentPadding = PaddingValues(vertical = Spacing.small),
-            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
-        ) {
-            items(
-                count = rowCount,
-                key = { rowIndex ->
-                    val firstIndex = rowIndex * columnCount
-                    key?.invoke(firstIndex) ?: "row-$rowIndex"
-                },
-            ) { rowIndex ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Max),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
-                ) {
-                    for (column in 0 until columnCount) {
-                        val index = rowIndex * columnCount + column
-                        if (index < itemCount) {
-                            itemContent(
-                                index,
-                                Modifier.weight(1f).fillMaxHeight(),
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/** As many whole cards of at least [CardMinWidth] as fit, counting the gap between them. */
-private fun columnsIn(availableWidth: Dp): Int =
-    ((availableWidth + Spacing.medium) / (CardMinWidth + Spacing.medium)).toInt().coerceAtLeast(1)
-
-/** Below this a card cannot hold its name and language line, so the grid drops a column instead. */
-private val CardMinWidth = 300.dp
 
 private const val SkeletonCount = 4

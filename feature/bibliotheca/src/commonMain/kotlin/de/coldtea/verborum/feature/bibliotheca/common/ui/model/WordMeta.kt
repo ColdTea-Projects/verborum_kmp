@@ -5,6 +5,7 @@ import de.coldtea.verborum.core.network.VerborumJson
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import de.coldtea.verborum.core.common.WordSurfaces
 
 /**
  * A grammatical form stored alongside the base word. [metaKey] is the key in the meta blob; the

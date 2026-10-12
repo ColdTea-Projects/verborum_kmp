@@ -336,6 +336,81 @@ interface Strings {
         else -> null
     }
 
+    // ---- the forum -------------------------------------------------------------------------------
+    val forumListScreenTitle: String get() = "Forum"
+    val forumListScreenSubtitle: String get() = "Dictionaries shared by the community"
+    val forumTabPopular: String get() = "Popular"
+    val forumTabFresh: String get() = "Fresh"
+    val forumListEmpty: String get() = "No shared dictionaries yet"
+    val forumListNoMatches: String get() = "No shared dictionaries match these filters"
+    val forumListLoadError: String get() = "Couldn\u2019t load the shared dictionaries"
+    val forumListLoadMoreError: String get() = "Couldn\u2019t load more dictionaries"
+    val forumUnknownPublisher: String get() = "Unknown publisher"
+
+    /**
+     * "English to French" — a listing's direction read as a sentence.
+     *
+     * Spelled out rather than the library's "English \u203A French": a Forum card is about someone
+     * else's dictionary, which the reader has to take in at a glance rather than recognise.
+     */
+    fun forumLanguageDirection(from: String, to: String): String = "$from to $to"
+    val forumMoreOptions: String get() = "More options"
+    val forumDownload: String get() = "Download"
+    val forumBadgeYours: String get() = "Yours"
+    val forumDownloadSucceeded: String get() = "Downloaded to your Bibliotheca"
+    val forumDownloadUnavailable: String get() = "This dictionary is no longer available"
+    val forumDownloadFailed: String get() = "Couldn\u2019t download the dictionary. Please try again."
+
+    /** Shown instead of the list to someone who has not joined — an explanation, not an error. */
+    val forumMembershipTitle: String get() = "Join the Forum"
+    val forumMembershipMessage: String
+        get() = "To browse and import shared dictionaries, go to Options \u2192 Profile, add a " +
+            "display name and accept the Forum terms."
+
+    /** Rounded to one decimal, which is what the backend sends. */
+    fun forumRatingContentDescription(average: String): String = "Rated $average out of 5"
+
+    // ---- the forum's search screen -----------------------------------------------------------
+    val forumSearchScreenTitle: String get() = "Search"
+    val forumSearchScreenSubtitle: String get() = "Find shared dictionaries"
+    val forumSearchLanguagePairs: String get() = "Language pairs"
+    val forumSearchLanguagePairsHint: String
+        get() = "Each pair matches dictionaries in either direction"
+
+    val forumSearchUser: String get() = "User"
+    fun forumSearchUserTooShort(minimum: Int): String = "Enter at least $minimum characters"
+    val forumAddLanguagePair: String get() = "Add language pair"
+    val forumLanguagePairSheetTitle: String get() = "Add a language pair"
+    val forumLanguagePairPickFirst: String get() = "Pick the first language"
+    fun forumLanguagePairPickSecond(first: String): String = "Pick a language to pair with $first"
+    fun forumLanguagePairChip(first: String, second: String): String = "$first \u21C4 $second"
+    fun forumRemoveLanguagePair(pair: String): String = "Remove $pair"
+    fun forumFilterTagsChip(tags: String): String = "Tags: $tags"
+    val forumFilterTagsTitle: String get() = "Tags"
+    fun forumFilterUserChip(user: String): String = "User: $user"
+    val forumFilterUserHint: String get() = "User name"
+
+    // ---- the forum's details screen ----------------------------------------------------------
+    val forumDetailsCreator: String get() = "Creator"
+    val forumDetailsRating: String get() = "Rating"
+    val forumDetailsDownloads: String get() = "Downloads"
+    val forumDetailsNoRating: String get() = "No ratings yet"
+    val forumDetailsWordListHeader: String get() = "Word List"
+
+    // ---- rating a downloaded dictionary ------------------------------------------------------
+    val ratingYourRating: String get() = "Your rating"
+    val ratingTapToRate: String get() = "Tap to rate"
+    val ratingHint: String get() = "Tap a star to rate. Tap it again to remove your rating."
+    fun ratingStarDescription(stars: Int): String = "Rate $stars out of 5"
+    fun ratingCurrent(stars: Int): String = "Your rating: $stars out of 5"
+    val ratingShow: String get() = "Show your rating"
+    val ratingHide: String get() = "Hide your rating"
+    val errorRatingFailed: String
+        get() = "Couldn\u2019t save your rating. Check your connection and try again."
+
+    val errorRatingUnavailable: String
+        get() = "This dictionary is no longer available, so it can\u2019t be rated."
+
     // ---- downloaded dictionaries -----------------------------------------------------------------
     val dictionaryBadgeDownloaded: String get() = "Downloaded"
     val dictionaryOptionsUnsubscribe: String get() = "Unsubscribe"

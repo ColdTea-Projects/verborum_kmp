@@ -36,6 +36,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.fakeSharingState
 import de.coldtea.verborum.feature.bibliotheca.common.fakeSyncService
 import de.coldtea.verborum.feature.bibliotheca.common.fakeWordService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SetDictionarySharedUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.FakeMarketplaceRatings
 
 class DictionaryDetailsViewModelTest {
 
@@ -73,6 +74,7 @@ class DictionaryDetailsViewModelTest {
             wordService = fakeWordService(wordRepository, imported),
             syncService = fakeSyncService(dictionaryRepository, wordRepository, imported),
             importedDictionaryService = imported,
+            ratings = FakeMarketplaceRatings(),
             setDictionaryShared = SetDictionarySharedUseCase(dictionaryRepository),
             observeSharingState = fakeSharingState(dictionaryRepository),
         )

@@ -117,11 +117,12 @@ internal actual fun VerborumAppScaffold(
                         OfflineBanner()
                     }
 
-                    // The redesign covers the library's screens, and those title themselves. The
-                    // screens it does not cover — Forum, Options — do not, so the bar carries their
-                    // title and the shell draws their page heading. Remove the extra heading as each
-                    // of them gets a page of its own.
-                    val drawsOwnTitle = currentDestination.isIn(TopLevelDestination.Bibliotheca)
+                    // The redesign covers the library's screens and the Forum's, and those title
+                    // themselves. What it does not cover yet — Options — does not, so the bar
+                    // carries its title and the shell draws its page heading. Remove the extra
+                    // heading as each remaining screen gets a page of its own.
+                    val drawsOwnTitle = currentDestination.isIn(TopLevelDestination.Bibliotheca) ||
+                        currentDestination.isIn(TopLevelDestination.Forum)
 
                     if (showChrome) {
                         WebTopBar(
