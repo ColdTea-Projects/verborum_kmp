@@ -287,7 +287,7 @@ private fun PracticeModes(
     ) {
         PracticeModeButton(
             text = strings.test,
-            icon = VerborumIcons.Check,
+            icon = VerborumIcons.CheckSquare,
             containerColor = MaterialTheme.colorScheme.primary,
             isEnabled = canTest,
             onClick = onTestClick,
@@ -296,7 +296,7 @@ private fun PracticeModes(
         )
         PracticeModeButton(
             text = strings.selfPractice,
-            icon = VerborumIcons.Book,
+            icon = VerborumIcons.Play,
             containerColor = MaterialTheme.colorScheme.secondary,
             isEnabled = canSelfPractice,
             onClick = onSelfPracticeClick,

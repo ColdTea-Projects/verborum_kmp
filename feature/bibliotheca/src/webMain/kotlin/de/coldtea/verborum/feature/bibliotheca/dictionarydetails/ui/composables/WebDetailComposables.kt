@@ -68,7 +68,7 @@ internal fun WebPracticeTile(
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onPrimary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Spacing.small),

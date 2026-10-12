@@ -22,8 +22,8 @@ enum class TopLevelDestination(
     val routeClass: KClass<*>,
     val icon: ImageVector,
 ) {
-    Bibliotheca(BibliothecaGraph, BibliothecaGraph::class, VerborumIcons.Book),
-    Forum(ForumGraph, ForumGraph::class, VerborumIcons.Storefront),
+    Bibliotheca(BibliothecaGraph, BibliothecaGraph::class, VerborumIcons.BookFilled),
+    Forum(ForumGraph, ForumGraph::class, VerborumIcons.AccountBalance),
     Options(OptionsGraph, OptionsGraph::class, VerborumIcons.Settings),
     ;
 

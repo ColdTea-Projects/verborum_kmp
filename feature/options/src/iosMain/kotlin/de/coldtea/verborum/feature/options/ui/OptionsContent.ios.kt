@@ -35,13 +35,13 @@ internal actual fun OptionsContent(
     ContentColumn(modifier = modifier) {
         // A dropdown has no home on a touch screen, so the row is a button into a picker screen.
         OptionRow(
-            icon = VerborumIcons.Storefront,
+            icon = VerborumIcons.Language,
             label = languageLabel(strings, language, chosenLanguage),
             onClick = onOpenLanguagePicker,
         )
 
         OptionRow(
-            icon = VerborumIcons.Settings,
+            icon = VerborumIcons.Person,
             label = strings.optionsProfile,
             onClick = onOpenProfile,
             modifier = Modifier.padding(top = Spacing.medium),

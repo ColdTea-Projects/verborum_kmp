@@ -175,5 +175,6 @@ private val CollapsedStarSize = 18.dp
 /** Full size inside a 48dp touch target, so the stars are hittable without being enormous. */
 private val ExpandedStarSize = 28.dp
 
-private const val COLLAPSED_ROTATION = -90f
-private const val EXPANDED_ROTATION = 0f
+// The chevron is drawn pointing down: half a turn points it up.
+private const val COLLAPSED_ROTATION = 0f
+private const val EXPANDED_ROTATION = 180f

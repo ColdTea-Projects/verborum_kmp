@@ -101,7 +101,7 @@ private fun LibraryVisual(modifier: Modifier = Modifier) {
                 }
 
                 Icon(
-                    imageVector = VerborumIcons.ChevronDown,
+                    imageVector = VerborumIcons.ChevronRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(Dimens.iconSmall),

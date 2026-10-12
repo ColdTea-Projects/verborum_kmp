@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
@@ -164,7 +167,16 @@ internal actual fun ForumDetailsContent(
                     )
                     .height(Dimens.buttonHeight),
             ) {
-                Text(strings.forumDownload, style = MaterialTheme.typography.titleSmall)
+Icon(
+                    imageVector = VerborumIcons.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(Dimens.iconSmall),
+                )
+                Text(
+                    text = strings.forumDownload,
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(start = Spacing.small),
+                )
             }
         }
     }

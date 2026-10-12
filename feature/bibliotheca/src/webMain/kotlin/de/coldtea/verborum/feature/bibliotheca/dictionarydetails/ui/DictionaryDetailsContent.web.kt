@@ -253,7 +253,7 @@ private fun PracticeTiles(
     ) {
         WebPracticeTile(
             label = strings.test,
-            icon = VerborumIcons.Check,
+            icon = VerborumIcons.CheckSquare,
             containerColor = MaterialTheme.colorScheme.primary,
             isEnabled = canTest,
             onClick = onTestClick,

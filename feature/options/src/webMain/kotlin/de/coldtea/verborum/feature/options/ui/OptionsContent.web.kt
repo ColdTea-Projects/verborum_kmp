@@ -53,7 +53,7 @@ internal actual fun OptionsContent(
         )
 
         OptionRow(
-            icon = VerborumIcons.Settings,
+            icon = VerborumIcons.Person,
             label = strings.optionsProfile,
             onClick = onOpenProfile,
             modifier = Modifier.padding(top = Spacing.medium),
@@ -99,7 +99,7 @@ private fun LanguageRow(
 
     Box(modifier = Modifier.padding(top = Spacing.medium)) {
         OptionRow(
-            icon = VerborumIcons.Storefront,
+            icon = VerborumIcons.Language,
             label = languageLabel(strings, effective, chosen),
             onClick = { isExpanded = true },
         )

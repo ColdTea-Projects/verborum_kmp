@@ -130,5 +130,6 @@ internal fun MarketplaceTermsSection(
 }
 
 // One chevron, turned: pointing right while the terms are folded away, down once they are open.
-private const val COLLAPSED_ROTATION = -90f
-private const val EXPANDED_ROTATION = 0f
+// The chevron is drawn pointing down: half a turn points it up.
+private const val COLLAPSED_ROTATION = 0f
+private const val EXPANDED_ROTATION = 180f
