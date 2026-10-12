@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
+import de.coldtea.verborum.core.designsystem.component.DictionaryTagsText
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.component.RatingCard
@@ -47,7 +48,6 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.Uns
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
-import de.coldtea.verborum.core.localization.tagLabelOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -158,7 +158,12 @@ internal actual fun DictionaryDetailsContent(
                         }
 
                         if (details.tags.isNotEmpty()) {
-                            item { TagsRow(tags = details.tags) }
+                            item {
+                                DictionaryTagsText(
+                                    tagCodes = details.tags,
+                                    modifier = Modifier.padding(top = Spacing.small),
+                                )
+                            }
                         }
 
                         // Only for a download, and only once the rating is actually known.
@@ -304,16 +309,4 @@ private fun PracticeModes(
             modifier = Modifier.weight(1f),
         )
     }
-}
-
-@Composable
-private fun TagsRow(tags: List<String>) {
-    val tagStrings = strings
-
-    Text(
-        text = tags.joinToString(" · ") { tagLabelOf(it, tagStrings) },
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = Spacing.small),
-    )
 }

@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.designsystem.component.ContentPane
+import de.coldtea.verborum.core.designsystem.component.DictionaryTagsText
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.component.RatingCard
@@ -42,7 +43,6 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.Dictio
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.WordUi
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.composables.DeleteDictionaryDialog
 import de.coldtea.verborum.core.localization.strings
-import de.coldtea.verborum.core.localization.tagLabelOf
 
 /**
  * One dictionary as a desktop page: the two practice modes as tiles, then every word in a bordered
@@ -163,17 +163,10 @@ internal actual fun DictionaryDetailsContent(
                             onUnavailableMode = onUnavailableMode,
                         )
 
-                        val tagStrings = strings
-
-                        if (details.tags.isNotEmpty()) {
-                            Text(
-                                // Stored codes, shown as words the reader knows.
-                                text = details.tags.joinToString(" · ") { tagLabelOf(it, tagStrings) },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = Spacing.medium),
-                            )
-                        }
+                        DictionaryTagsText(
+                            tagCodes = details.tags,
+                            modifier = Modifier.padding(top = Spacing.medium),
+                        )
 
                         // Only for a download, and only once the rating is actually known.
                         if (details.isRatingVisible) {

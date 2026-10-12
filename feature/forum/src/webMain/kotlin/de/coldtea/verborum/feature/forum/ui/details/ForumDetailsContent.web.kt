@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
+import de.coldtea.verborum.core.designsystem.component.DictionaryTagsText
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.component.RatingCard
 import de.coldtea.verborum.core.designsystem.component.RatingStars
+import de.coldtea.verborum.core.designsystem.component.WebEyebrow
+import de.coldtea.verborum.core.designsystem.component.WebPanel
 import de.coldtea.verborum.core.designsystem.component.formatRatingWithCount
 import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
@@ -124,6 +126,10 @@ internal actual fun ForumDetailsContent(
             }
         }
 
+        if (state.tags.isNotEmpty()) {
+            item { DictionaryTagsText(tagCodes = state.tags) }
+        }
+
         if (state.canDownload) {
             item {
                 Button(
@@ -131,7 +137,7 @@ internal actual fun ForumDetailsContent(
                     shape = Shapes.large,
                     modifier = Modifier.fillMaxWidth().height(Dimens.buttonHeight),
                 ) {
-    Icon(
+                    Icon(
                         imageVector = VerborumIcons.Download,
                         contentDescription = null,
                         modifier = Modifier.size(Dimens.iconSmall),
@@ -158,15 +164,19 @@ internal actual fun ForumDetailsContent(
         }
 
         item {
-            Text(
-                text = strings.forumDetailsWordListHeader,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Spacing.small),
-            )
-        }
+            WebPanel(modifier = Modifier.padding(top = Spacing.small)) {
+                WebEyebrow(strings.forumDetailsWordListHeader)
 
-        items(state.words, key = ForumWordUi::wordId) { word -> WordRow(word) }
+                Column(
+                    modifier = Modifier.padding(top = Spacing.medium),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.small),
+                ) {
+                    // A plain column, not a lazy list: the panel sits inside the page's own
+                    // scroll, and a scrollable within a scrollable cannot measure itself.
+                    state.words.forEach { word -> WordRow(word) }
+                }
+            }
+        }
     }
 }
 

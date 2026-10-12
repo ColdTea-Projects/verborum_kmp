@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.ContentColumn
+import de.coldtea.verborum.core.designsystem.component.DictionaryTagsText
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
 import de.coldtea.verborum.core.designsystem.component.RatingCard
@@ -129,6 +130,10 @@ internal actual fun ForumDetailsContent(
             }
         }
 
+        if (state.tags.isNotEmpty()) {
+            item { DictionaryTagsText(tagCodes = state.tags) }
+        }
+
         if (state.isRatingVisible && state.isDownloaded && !state.isOwn) {
             item {
                 RatingCard(
@@ -140,16 +145,30 @@ internal actual fun ForumDetailsContent(
             }
         }
 
+        // One item, not `items`: the frame has to enclose the whole list, and a border cannot
+        // span rows a lazy list composes separately. A listing's preview is bounded by what its
+        // publisher wrote, which is what the Android screen assumes too.
         item {
-            Text(
-                text = strings.forumDetailsWordListHeader,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Spacing.small),
-            )
-        }
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.medium),
+                shape = Shapes.large,
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(Dimens.border, MaterialTheme.colorScheme.outline),
+            ) {
+                Column(
+                    modifier = Modifier.padding(Spacing.medium),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.small),
+                ) {
+                    Text(
+                        text = strings.forumDetailsWordListHeader,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
 
-        items(state.words, key = ForumWordUi::wordId) { word -> WordRow(word) }
+                    state.words.forEach { word -> WordRow(word) }
+                }
+            }
+        }
     }
 
         // Pinned rather than scrolling with the list: a dictionary can run to hundreds of words,
@@ -167,7 +186,7 @@ internal actual fun ForumDetailsContent(
                     )
                     .height(Dimens.buttonHeight),
             ) {
-Icon(
+                Icon(
                     imageVector = VerborumIcons.Download,
                     contentDescription = null,
                     modifier = Modifier.size(Dimens.iconSmall),
