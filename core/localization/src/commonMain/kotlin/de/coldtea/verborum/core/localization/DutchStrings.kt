@@ -193,7 +193,7 @@ internal object DutchStrings : Strings {
     override fun askForm(word: String) = "Wat is “$word”?"
     override fun correctAnswerWas(answer: String) = "Net niet — het antwoord is “$answer”."
     override fun notEnoughWords(required: Int) =
-        "Een test heeft minstens $required verschillende woorden nodig om uit te kiezen."
+        "Een test heeft minstens ${required} woorden in dit taalpaar nodig"
     override fun scoreOf(correct: Int, total: Int) = "$correct van $total"
     override fun showKeyboard(language: String) = "Toetsenbord $language tonen"
     override fun hideKeyboard(language: String) = "Toetsenbord $language verbergen"

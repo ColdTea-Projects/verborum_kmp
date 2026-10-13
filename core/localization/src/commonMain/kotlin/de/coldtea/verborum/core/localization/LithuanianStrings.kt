@@ -193,7 +193,7 @@ internal object LithuanianStrings : Strings {
     override fun askForm(word: String) = "Kas yra „${word}“?"
     override fun correctAnswerWas(answer: String) = "Beveik — teisingas atsakymas „${answer}“."
     override fun notEnoughWords(required: Int) =
-        "Testui reikia bent $required skirtingų žodžių, iš kurių būtų galima rinktis."
+        "Testui reikia bent ${required} žodžių šioje kalbų poroje"
     override fun scoreOf(correct: Int, total: Int) = "$correct iš $total"
     override fun showKeyboard(language: String) = "Rodyti $language klaviatūrą"
     override fun hideKeyboard(language: String) = "Slėpti $language klaviatūrą"

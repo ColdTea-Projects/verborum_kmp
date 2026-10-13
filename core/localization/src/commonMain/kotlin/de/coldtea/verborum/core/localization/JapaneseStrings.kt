@@ -192,7 +192,8 @@ internal object JapaneseStrings : Strings {
     override fun askMeaning(word: String) = "「${word}」の意味は？"
     override fun askForm(word: String) = "「${word}」は？"
     override fun correctAnswerWas(answer: String) = "惜しい — 正解は「${answer}」です。"
-    override fun notEnoughWords(required: Int) = "テストには選択肢となる異なる単語が $required 語以上必要です。"
+    override fun notEnoughWords(required: Int) =
+        "テストにはこの言語ペアで少なくとも${required}語が必要です"
     override fun scoreOf(correct: Int, total: Int) = "$total 問中 $correct 問"
     override fun showKeyboard(language: String) = "$language のキーボードを表示"
     override fun hideKeyboard(language: String) = "$language のキーボードを隠す"

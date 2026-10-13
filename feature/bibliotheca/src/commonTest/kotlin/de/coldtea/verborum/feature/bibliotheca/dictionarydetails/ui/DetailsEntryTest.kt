@@ -8,6 +8,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.offlineImportedService
 import de.coldtea.verborum.feature.bibliotheca.common.data.InMemoryImportedDictionaryStore
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ImportedContent
 import de.coldtea.verborum.feature.bibliotheca.common.dictionary
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SetDictionarySharedUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.fakeDictionaryService
 import de.coldtea.verborum.feature.bibliotheca.common.fakeSharingState
@@ -161,6 +162,8 @@ class DetailsEntryTest {
             ratings = FakeMarketplaceRatings(),
             setDictionaryShared = SetDictionarySharedUseCase(dictionaries),
             observeSharingState = fakeSharingState(dictionaries),
+            observeLanguagePairWords =
+                ObserveLanguagePairWordsUseCase(dictionaries, words, imported),
         )
     }
 }

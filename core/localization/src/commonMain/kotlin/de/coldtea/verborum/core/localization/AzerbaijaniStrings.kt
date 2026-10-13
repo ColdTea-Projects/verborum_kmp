@@ -193,7 +193,7 @@ internal object AzerbaijaniStrings : Strings {
     override fun askForm(word: String) = "“$word” nədir?"
     override fun correctAnswerWas(answer: String) = "Tam deyil — doğru cavab “$answer”."
     override fun notEnoughWords(required: Int) =
-        "Test üçün aralarından seçiləcək ən azı $required fərqli söz lazımdır."
+        "Test üçün bu dil cütündə ən azı ${required} söz lazımdır"
     override fun scoreOf(correct: Int, total: Int) = "$total sualdan $correct"
     override fun showKeyboard(language: String) = "$language klaviaturasını göstər"
     override fun hideKeyboard(language: String) = "$language klaviaturasını gizlət"

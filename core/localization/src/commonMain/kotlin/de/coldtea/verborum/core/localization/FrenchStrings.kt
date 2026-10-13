@@ -193,7 +193,7 @@ internal object FrenchStrings : Strings {
     override fun askForm(word: String) = "Qu'est-ce que « $word » ?"
     override fun correctAnswerWas(answer: String) = "Pas tout à fait — la réponse est « $answer »."
     override fun notEnoughWords(required: Int) =
-        "Un test a besoin d'au moins $required mots différents parmi lesquels choisir."
+        "Un test nécessite au moins ${required} mots dans cette paire de langues"
     override fun scoreOf(correct: Int, total: Int) = "$correct sur $total"
     override fun showKeyboard(language: String) = "Afficher le clavier $language"
     override fun hideKeyboard(language: String) = "Masquer le clavier $language"

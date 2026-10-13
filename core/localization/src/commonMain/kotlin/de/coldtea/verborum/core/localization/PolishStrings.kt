@@ -193,7 +193,7 @@ internal object PolishStrings : Strings {
     override fun askForm(word: String) = "Co to jest „$word”?"
     override fun correctAnswerWas(answer: String) = "Prawie — poprawna odpowiedź to „$answer”."
     override fun notEnoughWords(required: Int) =
-        "Test wymaga co najmniej $required różnych słów do wyboru."
+        "Test wymaga co najmniej ${required} słów w tej parze językowej"
     override fun scoreOf(correct: Int, total: Int) = "$correct z $total"
     override fun showKeyboard(language: String) = "Pokaż klawiaturę: $language"
     override fun hideKeyboard(language: String) = "Ukryj klawiaturę: $language"

@@ -193,7 +193,7 @@ internal object TurkishStrings : Strings {
     override fun askForm(word: String) = "“$word” nedir?"
     override fun correctAnswerWas(answer: String) = "Tam değil — doğru cevap “$answer”."
     override fun notEnoughWords(required: Int) =
-        "Bir test için aralarından seçilecek en az $required farklı kelime gerekir."
+        "Test için bu dil çiftinde en az ${required} kelime gerekir"
     override fun scoreOf(correct: Int, total: Int) = "$total sorudan $correct"
     override fun showKeyboard(language: String) = "$language klavyesini göster"
     override fun hideKeyboard(language: String) = "$language klavyesini gizle"

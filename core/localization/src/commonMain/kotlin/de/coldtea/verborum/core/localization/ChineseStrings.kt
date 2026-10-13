@@ -192,7 +192,8 @@ internal object ChineseStrings : Strings {
     override fun askMeaning(word: String) = "“$word”是什么意思？"
     override fun askForm(word: String) = "“$word”是什么？"
     override fun correctAnswerWas(answer: String) = "差一点 — 答案是“$answer”。"
-    override fun notEnoughWords(required: Int) = "测验至少需要 $required 个不同的单词作为选项。"
+    override fun notEnoughWords(required: Int) =
+        "测验需要该语言对中至少 ${required} 个单词"
     override fun scoreOf(correct: Int, total: Int) = "$total 题中答对 $correct 题"
     override fun showKeyboard(language: String) = "显示${language}键盘"
     override fun hideKeyboard(language: String) = "隐藏${language}键盘"

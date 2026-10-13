@@ -15,6 +15,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionariesUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import de.coldtea.verborum.feature.bibliotheca.common.word
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
@@ -77,6 +78,11 @@ class DictionaryDetailsViewModelTest {
             ratings = FakeMarketplaceRatings(),
             setDictionaryShared = SetDictionarySharedUseCase(dictionaryRepository),
             observeSharingState = fakeSharingState(dictionaryRepository),
+            observeLanguagePairWords = ObserveLanguagePairWordsUseCase(
+                dictionaryRepository,
+                wordRepository,
+                imported,
+            ),
         )
 
         return viewModel to wordRepository
@@ -241,5 +247,119 @@ class DictionaryDetailsViewModelTest {
 
         advanceUntilIdle()
         assertFalse(viewModel.state.value.isRefreshing)
+    }
+
+    @Test
+    fun `one word of its own is testable when the language pair has enough`() =
+        runTest(mainDispatcher) {
+            // What the Test button exists for: the dictionary supplies the question, the rest of the
+            // pair supplies the three wrong answers.
+            val (viewModel, _) = viewModel(
+                dictionaries = listOf(
+                    dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                    dictionary("sibling", fromLang = "de", toLang = "en"),
+                ),
+                words = listOf(word("mine", dictionaryId)) +
+                    (1..3).map { index -> word("their-$index", dictionaryId = "sibling") },
+            )
+
+            advanceUntilIdle()
+
+            assertTrue(viewModel.success().canTest)
+            assertEquals(listOf("mine"), viewModel.success().words.map { it.wordId })
+        }
+
+    @Test
+    fun `words of the opposite direction do not make a dictionary testable`() =
+        runTest(mainDispatcher) {
+            val (viewModel, _) = viewModel(
+                dictionaries = listOf(
+                    dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                    dictionary("reversed", fromLang = "en", toLang = "de"),
+                ),
+                words = listOf(word("mine", dictionaryId)) +
+                    (1..9).map { index -> word("other-$index", dictionaryId = "reversed") },
+            )
+
+            advanceUntilIdle()
+
+            assertFalse(viewModel.success().canTest)
+        }
+
+    @Test
+    fun `an empty dictionary is never testable however large the pair`() = runTest(mainDispatcher) {
+        // The pool only ever supplies wrong answers; a dictionary with no words has no question.
+        val (viewModel, _) = viewModel(
+            dictionaries = listOf(
+                dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                dictionary("sibling", fromLang = "de", toLang = "en"),
+            ),
+            words = (1..9).map { index -> word("their-$index", dictionaryId = "sibling") },
+        )
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.success().canTest)
+        assertFalse(viewModel.success().canSelfPractice)
+    }
+
+    @Test
+    fun `filling a sibling dictionary enables the test without leaving the screen`() =
+        runTest(mainDispatcher) {
+            val (viewModel, words) = viewModel(
+                dictionaries = listOf(
+                    dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                    dictionary("sibling", fromLang = "de", toLang = "en"),
+                ),
+                words = listOf(word("mine", dictionaryId)),
+            )
+            advanceUntilIdle()
+
+            assertFalse(viewModel.success().canTest)
+
+            (1..3).forEach { index ->
+                words.saveWord(word("their-$index", dictionaryId = "sibling"), isNew = true)
+            }
+            advanceUntilIdle()
+
+            assertTrue(viewModel.success().canTest)
+        }
+
+    @Test
+    fun `emptying the pair disables the test again`() = runTest(mainDispatcher) {
+        val (viewModel, words) = viewModel(
+            dictionaries = listOf(
+                dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                dictionary("sibling", fromLang = "de", toLang = "en"),
+            ),
+            words = listOf(word("mine", dictionaryId)) +
+                (1..3).map { index -> word("their-$index", dictionaryId = "sibling") },
+        )
+        advanceUntilIdle()
+        assertTrue(viewModel.success().canTest)
+
+        words.markDeleted("their-1")
+        advanceUntilIdle()
+
+        assertFalse(viewModel.success().canTest)
+    }
+
+    @Test
+    fun `the same entry in two dictionaries counts once`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel(
+            dictionaries = listOf(
+                dictionary(dictionaryId, fromLang = "de", toLang = "en"),
+                dictionary("sibling", fromLang = "de", toLang = "en"),
+            ),
+            // Four rows, one distinguishable entry: nothing to choose between.
+            words = listOf(word("mine", dictionaryId, word = "kaufen", translation = "to buy")) +
+                (1..3).map { index ->
+                    word("copy-$index", dictionaryId = "sibling", word = "kaufen", translation = "to buy")
+                },
+        )
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.success().canTest)
     }
 }

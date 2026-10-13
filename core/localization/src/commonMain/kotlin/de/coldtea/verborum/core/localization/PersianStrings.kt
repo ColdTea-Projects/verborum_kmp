@@ -193,7 +193,7 @@ internal object PersianStrings : Strings {
     override fun askForm(word: String) = "«$word» چیست؟"
     override fun correctAnswerWas(answer: String) = "نزدیک بود — پاسخ «$answer» است."
     override fun notEnoughWords(required: Int) =
-        "آزمون دست‌کم به $required واژهٔ متفاوت برای انتخاب نیاز دارد."
+        "آزمون به دست‌کم ${required} واژه در این جفت زبان نیاز دارد"
     override fun scoreOf(correct: Int, total: Int) = "$correct از $total"
     override fun showKeyboard(language: String) = "نمایش صفحه‌کلید $language"
     override fun hideKeyboard(language: String) = "پنهان کردن صفحه‌کلید $language"

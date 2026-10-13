@@ -184,8 +184,9 @@ interface Strings {
     fun askMeaning(word: String): String = "What does “$word” mean?"
     fun askForm(word: String): String = "What is “$word”?"
     fun correctAnswerWas(answer: String): String = "Not quite — the answer is “$answer”."
+    /** The pair, not the dictionary: the wrong answers may come from any dictionary of it. */
     fun notEnoughWords(required: Int): String =
-        "A test needs at least $required different words to choose between."
+        "A test needs at least ${required} words in this language pair"
     fun scoreOf(correct: Int, total: Int): String = "$correct of $total"
 
     // ---- onboarding ----------------------------------------------------------------------------

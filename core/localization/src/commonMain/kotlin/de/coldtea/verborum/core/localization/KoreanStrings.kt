@@ -192,7 +192,8 @@ internal object KoreanStrings : Strings {
     override fun askMeaning(word: String) = "“$word”은(는) 무슨 뜻인가요?"
     override fun askForm(word: String) = "“$word”은(는) 무엇인가요?"
     override fun correctAnswerWas(answer: String) = "아쉽네요 — 정답은 “$answer”입니다."
-    override fun notEnoughWords(required: Int) = "테스트에는 서로 다른 단어가 최소 ${required}개 필요합니다."
+    override fun notEnoughWords(required: Int) =
+        "테스트에는 이 언어 쌍에 단어가 최소 ${required}개 필요합니다"
     override fun scoreOf(correct: Int, total: Int) = "${total}개 중 ${correct}개"
     override fun showKeyboard(language: String) = "$language 키보드 표시"
     override fun hideKeyboard(language: String) = "$language 키보드 숨기기"

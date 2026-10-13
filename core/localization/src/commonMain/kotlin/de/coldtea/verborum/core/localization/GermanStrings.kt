@@ -154,7 +154,7 @@ internal object GermanStrings : Strings {
     override fun askForm(word: String) = "Was ist „${word}“?"
     override fun correctAnswerWas(answer: String) = "Nicht ganz — die Antwort ist „${answer}“."
     override fun notEnoughWords(required: Int) =
-        "Ein Test braucht mindestens $required verschiedene Wörter zur Auswahl."
+        "Ein Test braucht mindestens ${required} Wörter in diesem Sprachpaar"
     override fun scoreOf(correct: Int, total: Int) = "$correct von $total"
 
     override val onboardingWelcomeTitle = "Willkommen bei Verborum"

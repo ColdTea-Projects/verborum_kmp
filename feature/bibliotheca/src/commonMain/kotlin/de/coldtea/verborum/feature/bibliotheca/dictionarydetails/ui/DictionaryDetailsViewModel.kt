@@ -16,6 +16,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.DeleteOutcome
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SetDictionarySharedUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.SharingChange
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
@@ -49,6 +50,7 @@ internal class DictionaryDetailsViewModel(
     private val setDictionaryShared: SetDictionarySharedUseCase,
     private val ratings: MarketplaceRatings,
     observeSharingState: ObserveSharingStateUseCase,
+    private val observeLanguagePairWords: ObserveLanguagePairWordsUseCase,
 ) : BaseViewModel<DictionaryDetailsUiState, Nothing>(DictionaryDetailsUiState()) {
 
     private val sharingState = observeSharingState()
@@ -132,9 +134,13 @@ internal class DictionaryDetailsViewModel(
             combine(
                 dictionaryService.observeDictionary(dictionaryId),
                 wordService.observeWords(dictionaryId),
+                // A test only needs this dictionary to supply the questions; the three wrong
+                // answers may come from any dictionary of the same language pair. Observed rather
+                // than read once, so filling a sibling dictionary enables the button straight away.
+                observeLanguagePairWords(dictionaryId),
                 sharingState,
                 rating,
-            ) { row, words, sharing, ratingState ->
+            ) { row, words, languagePairWords, sharing, ratingState ->
                 val dictionary = row?.dictionary
                 // A missing dictionary means it was deleted — here or elsewhere. Reported as its own
                 // state so the screen leaves once, instead of re-rendering a header for a row that
@@ -150,7 +156,10 @@ internal class DictionaryDetailsViewModel(
                         words = words.map(Word::toUi),
                         tags = dictionary.tags,
                         canSelfPractice = words.isNotEmpty(),
-                        canTest = words.distinctWordCount() >= REQUIRED_WORDS_FOR_TEST,
+                        // The dictionary still has to hold a word of its own: a pool of distractors
+                        // is not something to be tested on.
+                        canTest = words.isNotEmpty() &&
+                            languagePairWords.distinctWordCount() >= REQUIRED_WORDS_FOR_TEST,
                         isImported = row.isImported,
                         publisherName = row.publisherName,
                         // The switch is for members only, and never for a download: someone else's
@@ -217,7 +226,7 @@ internal class DictionaryDetailsViewModel(
     fun explainUnavailableMode(isTest: Boolean) {
         val wordCount = (currentState.details as? DictionaryDetailsState.Success)?.words?.size ?: 0
 
-        viewModelScope.launch { _messages.emit(unavailableModeMessage(isTest, wordCount)) }
+        viewModelScope.launch { _messages.emit(unavailableModeMessage(isTest, wordCount, strings)) }
     }
 
     fun deleteWord(wordId: String) {

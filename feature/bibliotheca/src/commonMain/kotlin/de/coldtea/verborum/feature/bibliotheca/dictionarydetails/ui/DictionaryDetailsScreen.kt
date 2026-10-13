@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
+import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.REQUIRED_WORDS_FOR_TEST
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -96,8 +97,10 @@ internal expect fun DictionaryDetailsContent(
 )
 
 /** Kept next to the screen it explains, so the threshold and the message cannot drift apart. */
-internal fun unavailableModeMessage(isTest: Boolean, wordCount: Int): String = when {
+internal fun unavailableModeMessage(isTest: Boolean, wordCount: Int, strings: Strings): String = when {
+    // An empty dictionary is the more basic problem, and it wins over the pair being too small:
+    // there is nothing to be asked about, however many distractors are available.
     wordCount == 0 -> "Add a word first — there is nothing to practise yet."
-    isTest -> "A test needs at least $REQUIRED_WORDS_FOR_TEST different words to choose between."
+    isTest -> strings.notEnoughWords(REQUIRED_WORDS_FOR_TEST)
     else -> "Add a word first — there is nothing to practise yet."
 }

@@ -193,7 +193,7 @@ internal object UkrainianStrings : Strings {
     override fun askForm(word: String) = "Що таке «$word»?"
     override fun correctAnswerWas(answer: String) = "Майже — правильна відповідь «$answer»."
     override fun notEnoughWords(required: Int) =
-        "Для тесту потрібно щонайменше $required різних слів на вибір."
+        "Для тесту потрібно щонайменше ${required} слова в цій мовній парі"
     override fun scoreOf(correct: Int, total: Int) = "$correct з $total"
     override fun showKeyboard(language: String) = "Показати клавіатуру: $language"
     override fun hideKeyboard(language: String) = "Сховати клавіатуру: $language"

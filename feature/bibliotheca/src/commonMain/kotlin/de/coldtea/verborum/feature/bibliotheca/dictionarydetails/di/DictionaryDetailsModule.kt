@@ -22,6 +22,7 @@ internal val dictionaryDetailsModule: Module = module {
             setDictionaryShared = get(),
             ratings = get(),
             observeSharingState = get(),
+            observeLanguagePairWords = get(),
         )
     }
 }

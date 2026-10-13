@@ -193,7 +193,7 @@ internal object RussianStrings : Strings {
     override fun askForm(word: String) = "Что такое «$word»?"
     override fun correctAnswerWas(answer: String) = "Почти — правильный ответ «$answer»."
     override fun notEnoughWords(required: Int) =
-        "Для теста нужно не менее $required разных слов на выбор."
+        "Для теста нужно минимум ${required} слова в этой языковой паре"
     override fun scoreOf(correct: Int, total: Int) = "$correct из $total"
     override fun showKeyboard(language: String) = "Показать клавиатуру: $language"
     override fun hideKeyboard(language: String) = "Скрыть клавиатуру: $language"

@@ -193,7 +193,7 @@ internal object GreekStrings : Strings {
     override fun askForm(word: String) = "Τι είναι «$word»;"
     override fun correctAnswerWas(answer: String) = "Παρά λίγο — η απάντηση είναι «$answer»."
     override fun notEnoughWords(required: Int) =
-        "Ένα τεστ χρειάζεται τουλάχιστον $required διαφορετικές λέξεις για επιλογή."
+        "Ένα τεστ χρειάζεται τουλάχιστον ${required} λέξεις σε αυτό το ζεύγος γλωσσών"
     override fun scoreOf(correct: Int, total: Int) = "$correct από $total"
     override fun showKeyboard(language: String) = "Εμφάνιση πληκτρολογίου $language"
     override fun hideKeyboard(language: String) = "Απόκρυψη πληκτρολογίου $language"

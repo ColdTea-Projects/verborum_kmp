@@ -9,6 +9,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.testLanguageSettings
 import de.coldtea.verborum.feature.bibliotheca.common.domain.ActiveUserUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionariesUseCase
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
@@ -46,10 +47,14 @@ class MultipleChoiceViewModelTest {
     private fun viewModel(
         words: List<Word> = fourWords,
         updateFails: Boolean = false,
+        /** Dictionaries other than the one under test, for a pool that is wider than it. */
+        siblings: List<Dictionary> = emptyList(),
+        /** Words of those dictionaries — distractors, never questions. */
+        siblingWords: List<Word> = emptyList(),
     ): Pair<MultipleChoiceViewModel, FakeWordRepository> {
-        val dictionaries = FakeDictionaryRepository(listOf(dictionary(dictionaryId)))
+        val dictionaries = FakeDictionaryRepository(listOf(dictionary(dictionaryId)) + siblings)
         val wordRepository = FakeWordRepository(
-            initial = words,
+            initial = words + siblingWords,
             updateResult = if (updateFails) unauthorized else Outcome.Success(Unit),
         )
 
@@ -240,6 +245,79 @@ class MultipleChoiceViewModelTest {
         viewModel.onNextQuestion()
         advanceUntilIdle()
         assertEquals(2, viewModel.question().index)
+    }
+
+    @Test
+    fun `a dictionary with one word is asked about it and offered the pair's other answers`() =
+        runTest(mainDispatcher) {
+            val (viewModel, _) = viewModel(
+                words = listOf(word("mine", dictionaryId, word = "kaufen", translation = "to buy")),
+                siblings = listOf(dictionary("sibling")),
+                siblingWords = (1..3).map { index ->
+                    word(
+                        "their-$index",
+                        dictionaryId = "sibling",
+                        word = "wort-$index",
+                        translation = "answer-$index",
+                    )
+                },
+            )
+
+            advanceUntilIdle()
+
+            // One question: questions only ever come from the dictionary under test.
+            val choice = viewModel.question().choice
+            assertEquals(1, viewModel.question().total)
+            assertEquals("to buy", choice.question.answer)
+
+            // The other three are the sibling's, which is the whole point.
+            assertEquals(4, choice.choices.size)
+            assertEquals(
+                listOf("answer-1", "answer-2", "answer-3"),
+                choice.choices.filter { it != choice.question.answer }.sorted(),
+            )
+        }
+
+    @Test
+    fun `the correct answer appears once even when the pool repeats it`() =
+        runTest(mainDispatcher) {
+            val (viewModel, _) = viewModel(
+                words = listOf(word("mine", dictionaryId, word = "kaufen", translation = "to buy")),
+                siblings = listOf(dictionary("sibling")),
+                // "to buy" again, from another word: a fine distractor anywhere but here.
+                siblingWords = listOf(
+                    word("dupe", dictionaryId = "sibling", word = "erwerben", translation = "to buy"),
+                ) + (1..3).map { index ->
+                    word(
+                        "their-$index",
+                        dictionaryId = "sibling",
+                        word = "wort-$index",
+                        translation = "answer-$index",
+                    )
+                },
+            )
+
+            advanceUntilIdle()
+
+            val choice = viewModel.question().choice
+            assertEquals(1, choice.choices.count { it == choice.question.answer })
+            assertEquals(choice.choices.size, choice.choices.distinct().size)
+        }
+
+    @Test
+    fun `a pool that grows mid-test does not reshuffle the paper`() = runTest(mainDispatcher) {
+        val (viewModel, words) = viewModel(siblings = listOf(dictionary("sibling")))
+        advanceUntilIdle()
+        val asked = viewModel.question().choice.question.wordId
+
+        words.saveWord(
+            word("late", dictionaryId = "sibling", word = "spät", translation = "late"),
+            isNew = true,
+        )
+        advanceUntilIdle()
+
+        assertEquals(asked, viewModel.question().choice.question.wordId)
+        assertEquals(fourWords.size, viewModel.question().total)
     }
 }
 

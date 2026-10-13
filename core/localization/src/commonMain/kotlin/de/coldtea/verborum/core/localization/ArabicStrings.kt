@@ -193,7 +193,7 @@ internal object ArabicStrings : Strings {
     override fun askForm(word: String) = "ما هو «$word»؟"
     override fun correctAnswerWas(answer: String) = "ليس تمامًا — الإجابة هي «$answer»."
     override fun notEnoughWords(required: Int) =
-        "يحتاج الاختبار إلى $required كلمات مختلفة على الأقل للاختيار بينها."
+        "يحتاج الاختبار إلى ${required} كلمات على الأقل في زوج اللغات هذا"
     override fun scoreOf(correct: Int, total: Int) = "$correct من $total"
     override fun showKeyboard(language: String) = "إظهار لوحة مفاتيح $language"
     override fun hideKeyboard(language: String) = "إخفاء لوحة مفاتيح $language"
