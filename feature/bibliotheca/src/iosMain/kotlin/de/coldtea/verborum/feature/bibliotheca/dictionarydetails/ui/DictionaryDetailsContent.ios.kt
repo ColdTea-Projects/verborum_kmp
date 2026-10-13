@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -246,11 +245,11 @@ internal actual fun DictionaryDetailsContent(
                     Button(
                         onClick = if (details.isImported) onUnsubscribeClick else { { showDeleteDialog = true } },
                         shape = Shapes.large,
-                        // Destructive, so it reads as such rather than as the screen's main action.
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        ),
+                        // The default filled button, which is the Forum's Download button: the
+                        // brand's own primary *is* red, so this already reads as destructive, and
+                        // it reads the same way in both themes. The error-container pair it used
+                        // before does not — it is a pale plate with dark text in light mode and a
+                        // deep plate with pale text in dark, which looks like the two were swapped.
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = Spacing.small, bottom = Spacing.medium)
