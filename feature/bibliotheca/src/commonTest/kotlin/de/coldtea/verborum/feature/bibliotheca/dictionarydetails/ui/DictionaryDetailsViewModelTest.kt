@@ -51,6 +51,8 @@ class DictionaryDetailsViewModelTest {
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
+    private var dictionaryRepository: FakeDictionaryRepository? = null
+
     private fun viewModel(
         words: List<Word> = emptyList(),
         dictionaries: List<de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary> =
@@ -64,6 +66,7 @@ class DictionaryDetailsViewModelTest {
             pullResult = pulled?.let { Outcome.Success(it) },
             deleteResult = deleteResult,
         )
+        this.dictionaryRepository = dictionaryRepository
         val wordRepository = FakeWordRepository(initial = words, deleteResult = deleteResult)
 
         val imported = fakeImportedService()
@@ -236,6 +239,48 @@ class DictionaryDetailsViewModelTest {
 
         assertEquals(DictionaryDetailsState.Deleted, viewModel.state.value.details)
     }
+
+    // region background refresh (P4N-10)
+    @Test
+    fun `a background refresh pulls without showing the spinner`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel(words = listOf(word("w1", dictionaryId)))
+        advanceUntilIdle()
+        val pullsBefore = dictionaryRepository!!.pullCount
+
+        viewModel.refreshInBackground()
+
+        assertFalse(viewModel.state.value.isRefreshing)
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.isRefreshing)
+        assertEquals(pullsBefore + 1, dictionaryRepository!!.pullCount)
+    }
+
+    @Test
+    fun `a background refresh waits for the first pull`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel(words = listOf(word("w1", dictionaryId)))
+        // The init pull is queued, not run: the screen has not yet decided whether this exists
+
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        // The init refresh of an existing dictionary pulls only that dictionary. Had the background
+        // refresh not waited, it would have pulled the whole library first — refresh() owns deciding
+        // whether the dictionary exists at all
+        assertEquals(0, dictionaryRepository!!.pullCount)
+    }
+
+    @Test
+    fun `a dictionary deleted on another device is noticed by the background refresh`() = runTest(mainDispatcher) {
+        // The server no longer has it: the library pull empties the row and the observed flow says so
+        val (viewModel, _) = viewModel(pulled = emptyList())
+        advanceUntilIdle()
+
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        assertEquals(DictionaryDetailsState.Deleted, viewModel.state.value.details)
+    }
+    // endregion
 
     @Test
     fun `the refresh spinner always clears`() = runTest(mainDispatcher) {

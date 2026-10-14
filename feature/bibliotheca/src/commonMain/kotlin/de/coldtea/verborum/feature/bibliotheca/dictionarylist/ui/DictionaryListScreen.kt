@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
@@ -30,6 +31,10 @@ internal fun DictionaryListScreen(
 
     // Delete failures and refresh notices go to the shared snackbar.
     ShowSnackbarMessages(viewModel.messages)
+
+    // Web has no push: an edit made on the phone shows up when the tab is next in front, or within a
+    // minute while it stays visible. Quiet — see refreshInBackground.
+    RefreshWhileVisible(onRefresh = viewModel::refreshInBackground)
 
     // A tab root: no back button. The magnifier reveals the search and filter area.
     RegisterTopBar(

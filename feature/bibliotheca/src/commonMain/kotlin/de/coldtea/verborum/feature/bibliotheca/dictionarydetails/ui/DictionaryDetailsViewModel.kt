@@ -219,6 +219,31 @@ internal class DictionaryDetailsViewModel(
         }
     }
 
+    /** The in-flight [refreshInBackground], so a timer tick cannot stack a second sync on a slow one. */
+    private var backgroundRefresh: Job? = null
+
+    /**
+     * [refresh] without the ceremony, for a screen that keeps itself current (roadmap `P4N-10`): no
+     * spinner and no failure notice, because nobody asked for it.
+     *
+     * Pulls the whole library first, not just this dictionary: that is what notices it was deleted on
+     * another device (the row disappears and the observed flow says so), and it brings the words.
+     * The dictionary's own words and tags follow, because tags only arrive through that path.
+     *
+     * Skipped until the first pull has landed — [refresh] owns deciding whether this dictionary
+     * exists at all — and while any refresh is already running.
+     */
+    fun refreshInBackground() {
+        if (!hasPulled || currentState.isRefreshing || backgroundRefresh?.isActive == true) return
+
+        backgroundRefresh = viewModelScope.launch {
+            if (syncService.syncDictionaries() is Outcome.Failure) return@launch
+            // Gone elsewhere: the observed flow has already moved the screen to Deleted
+            if (dictionaryService.libraryDictionary(dictionaryId) == null) return@launch
+            syncService.syncDictionary(dictionaryId)
+        }
+    }
+
     /**
      * Says why a practice mode cannot start. A disabled tile that explains itself beats one that
      * silently does nothing, and the reason depends on state only this side knows.

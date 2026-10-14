@@ -149,6 +149,24 @@ internal class DictionaryListViewModel(
         }
     }
 
+    /** The in-flight [refreshInBackground], so a timer tick cannot stack a second sync on a slow one. */
+    private var backgroundRefresh: Job? = null
+
+    /**
+     * [refresh] without the ceremony, for a screen that keeps itself current (roadmap `P4N-10`): the
+     * user did not ask for it, so there is no spinner and a failure says nothing — the next tick, or
+     * the next time the tab is in front, tries again. A success clears an earlier failure.
+     *
+     * Skipped while a refresh is already running, whoever started it.
+     */
+    fun refreshInBackground() {
+        if (currentState.isRefreshing || backgroundRefresh?.isActive == true) return
+
+        backgroundRefresh = viewModelScope.launch {
+            if (syncService.syncDictionaries() is Outcome.Success) syncFailed.value = false
+        }
+    }
+
     fun onDictionaryClicked(dictionaryId: String) =
         emitEffect(DictionaryListEffect.OpenDictionary(dictionaryId))
 

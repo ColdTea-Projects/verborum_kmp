@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.DictionaryDetailsState
 import de.coldtea.verborum.core.localization.Strings
@@ -33,6 +34,10 @@ internal fun DictionaryDetailsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ShowSnackbarMessages(viewModel.messages)
+
+    // Web has no push: an edit made elsewhere shows up when the tab is next in front, or within a
+    // minute while it stays visible. Quiet — see refreshInBackground.
+    RefreshWhileVisible(onRefresh = viewModel::refreshInBackground)
 
     // Leaving is driven by the observed state, not by the delete button: the screen goes exactly
     // once, so an async delete cannot race the back navigation, and a torn-down screen can never

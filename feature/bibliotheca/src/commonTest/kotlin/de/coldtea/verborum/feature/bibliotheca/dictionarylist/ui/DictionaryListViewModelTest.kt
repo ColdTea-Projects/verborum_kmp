@@ -55,6 +55,8 @@ class DictionaryListViewModelTest {
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
+    private var dictionaryRepository: FakeDictionaryRepository? = null
+
     private fun viewModel(
         rows: List<Dictionary> = dictionaries,
         syncFails: Boolean = false,
@@ -69,6 +71,7 @@ class DictionaryListViewModelTest {
             deleteResult = deleteResult,
         )
 
+        dictionaryRepository = repository
         val wordRepository = FakeWordRepository(initial = words)
 
         val imported = fakeImportedService()
@@ -195,6 +198,66 @@ class DictionaryListViewModelTest {
         advanceUntilIdle()
         assertFalse(viewModel.state.value.isRefreshing)
     }
+
+    // region background refresh (P4N-10)
+    @Test
+    fun `a background refresh pulls the library without ever showing the spinner`() = runTest(mainDispatcher) {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        val pullsBefore = dictionaryRepository!!.pullCount
+
+        viewModel.refreshInBackground()
+
+        // Nobody asked for it, so nothing on screen moves
+        assertFalse(viewModel.state.value.isRefreshing)
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.isRefreshing)
+        assertEquals(pullsBefore + 1, dictionaryRepository!!.pullCount)
+    }
+
+    @Test
+    fun `a failed background refresh says nothing and keeps the rows`() = runTest(mainDispatcher) {
+        val viewModel = viewModel(syncFails = true)
+        val messages = mutableListOf<String>()
+        val collector = launch { viewModel.messages.collect { messages += it } }
+        advanceUntilIdle()
+        messages.clear() // the first load already reported its own failure; only the quiet one is judged
+
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        assertTrue(messages.isEmpty())
+        assertEquals(listOf("1", "3", "2"), viewModel.rowIds())
+        collector.cancel()
+    }
+
+    @Test
+    fun `a background refresh is skipped while a pull to refresh is running`() = runTest(mainDispatcher) {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        val pullsBefore = dictionaryRepository!!.pullCount
+
+        viewModel.refresh()
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        // One pull, the user's — a timer tick must not stack a second sync on it
+        assertEquals(pullsBefore + 1, dictionaryRepository!!.pullCount)
+    }
+
+    @Test
+    fun `a second background refresh while one is in flight is skipped`() = runTest(mainDispatcher) {
+        val viewModel = viewModel()
+        advanceUntilIdle()
+        val pullsBefore = dictionaryRepository!!.pullCount
+
+        viewModel.refreshInBackground()
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        assertEquals(pullsBefore + 1, dictionaryRepository!!.pullCount)
+    }
+    // endregion
 
     @Test
     fun `deleting drops the row from the list`() = runTest(mainDispatcher) {

@@ -234,6 +234,10 @@ internal class FakeDictionaryRepository(
     var pulledUserId: String? = null
         private set
 
+    /** How many times the library was pulled — how a test tells a background refresh from none. */
+    var pullCount = 0
+        private set
+
     var savedDictionary: Dictionary? = null
         private set
 
@@ -248,6 +252,7 @@ internal class FakeDictionaryRepository(
 
     override suspend fun pullDictionaries(userId: String): Outcome<List<Dictionary>> {
         pulledUserId = userId
+        pullCount++
 
         val outcome = pullResult ?: Outcome.Success(rows.value)
         if (outcome is Outcome.Success) rows.value = outcome.data
