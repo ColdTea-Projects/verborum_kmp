@@ -89,6 +89,50 @@ class SyncServiceTest {
     }
 
     @Test
+    fun `the details screen also refreshes the dictionary's own row`() = runTest {
+        // Unshared on another device: the server says private, this device still says public
+        val repository = FakeDictionaryRepository(
+            initial = listOf(dictionary("dictionary-7").copy(isPublic = true)),
+            pullResult = Outcome.Success(listOf(dictionary("dictionary-7").copy(isPublic = false))),
+        )
+
+        syncService(repository, signedInAs = "user-42").syncDictionary("dictionary-7")
+
+        assertEquals(1, repository.pullCount)
+        assertEquals(false, repository.findDictionary("dictionary-7")?.isPublic)
+        // ...and still only its own words: the library's words are the list screen's business
+        assertEquals("dictionary-7", words.pulledDictionaryId)
+        assertNull(words.pulledUserId)
+    }
+
+    @Test
+    fun `a dictionary deleted elsewhere ends the details sync without asking for its words`() = runTest {
+        val repository = FakeDictionaryRepository(
+            initial = listOf(dictionary("dictionary-7")),
+            pullResult = Outcome.Success(emptyList()),
+        )
+
+        val outcome = syncService(repository, signedInAs = "user-42").syncDictionary("dictionary-7")
+
+        // The row vanishing is how the screen finds out; a words request for it would be an error
+        assertEquals(Outcome.Success(Unit), outcome)
+        assertNull(words.pulledDictionaryId)
+    }
+
+    @Test
+    fun `a failed row pull does not stop the words`() = runTest {
+        val repository = FakeDictionaryRepository(
+            initial = listOf(dictionary("dictionary-7")),
+            pullResult = unauthorized,
+        )
+
+        val outcome = syncService(repository, signedInAs = "user-42").syncDictionary("dictionary-7")
+
+        assertEquals(Outcome.Success(Unit), outcome)
+        assertEquals("dictionary-7", words.pulledDictionaryId)
+    }
+
+    @Test
     fun `signed out there are no words to pull either`() = runTest {
         val service = syncService(FakeDictionaryRepository(), signedInAs = null)
 

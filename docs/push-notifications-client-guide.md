@@ -108,6 +108,6 @@ are cleared. `app/google-services.json` comes from the Firebase console and is g
 
 ## Not built / open
 
-- Preferences per category (`P4N-05`) — deferred; there is nothing user-visible to switch off.
+- Preferences per category (`BL-06`, was `P4N-05`) — deferred; there is nothing user-visible to switch off.
 - Push to everyone who imported a dictionary — cancelled; importers sync on open.
 - iOS (`P4N-12`/`P4N-13`) — waits for the Apple Developer account.

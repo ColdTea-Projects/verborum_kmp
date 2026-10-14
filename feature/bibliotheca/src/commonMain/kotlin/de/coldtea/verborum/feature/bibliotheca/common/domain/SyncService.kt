@@ -52,18 +52,24 @@ internal class SyncService(
     }
 
     /**
-     * Downloads everything one dictionary is made of: its words, and its tags — which the service
-     * keeps as a resource of their own, so nothing else brings them.
+     * Downloads everything one dictionary is made of: its row, its words, and its tags — which the
+     * service keeps as a resource of their own, so nothing else brings them.
+     *
+     * The row comes first, in one request for the user's dictionary list, because a screen drawn from
+     * a dictionary shows what the row says: the sharing switch, the name, the languages. Without it,
+     * opening a dictionary after it was unshared on another device showed it as shared until the next
+     * full library sync. The words of the *other* dictionaries are not pulled — that is what
+     * [syncDictionaries] is for.
      *
      * Only for a dictionary the user owns. A download takes the imported path, which this decides
      * rather than its callers: three screens open a single dictionary, and each one getting the
      * question right separately is three chances to get it wrong.
      *
-     * The words decide the outcome. A dictionary whose tags could not be read still shows its words,
-     * which is the screen's reason for existing.
+     * The words decide the outcome. A dictionary whose row or tags could not be read still shows its
+     * words, which is the screen's reason for existing.
      */
     suspend fun syncDictionary(dictionaryId: String): Outcome<Unit> {
-        activeUser() ?: return Outcome.Success(Unit)
+        val userId = activeUser() ?: return Outcome.Success(Unit)
 
         uploadPendingChanges()
 
@@ -73,6 +79,18 @@ internal class SyncService(
         // path that owns it instead.
         if (importedDictionaryService.find(dictionaryId) != null) {
             return importedDictionaryService.refresh(dictionaryId)
+        }
+
+        val existedBefore = dictionaryRepository.findDictionary(dictionaryId) != null
+
+        // Best effort: a failed row pull leaves the row as it was, and the words below still decide
+        syncDictionariesUseCase(userId)
+
+        // Gone from the server — deleted on another device. The observed row has disappeared, which is
+        // how the screen learns of it; asking for the words of a dictionary that no longer exists
+        // would only turn that into an error
+        if (existedBefore && dictionaryRepository.findDictionary(dictionaryId) == null) {
+            return Outcome.Success(Unit)
         }
 
         return wordRepository.pullWords(dictionaryId).also { dictionaryRepository.pullTags(dictionaryId) }

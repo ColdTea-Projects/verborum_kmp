@@ -263,10 +263,36 @@ class DictionaryDetailsViewModelTest {
         viewModel.refreshInBackground()
         advanceUntilIdle()
 
-        // The init refresh of an existing dictionary pulls only that dictionary. Had the background
-        // refresh not waited, it would have pulled the whole library first — refresh() owns deciding
-        // whether the dictionary exists at all
-        assertEquals(0, dictionaryRepository!!.pullCount)
+        // Only the init refresh ran. Had the background one not waited, the row would have been
+        // pulled twice — refresh() owns deciding whether the dictionary exists at all
+        assertEquals(1, dictionaryRepository!!.pullCount)
+    }
+
+    @Test
+    fun `opening details shows the sharing flag the server holds`() = runTest(mainDispatcher) {
+        // Unshared on another device: the server says private, this device still holds public
+        val (viewModel, _) = viewModel(
+            dictionaries = listOf(dictionary(dictionaryId, name = "Beginner Spanish").copy(isPublic = true)),
+            pulled = listOf(dictionary(dictionaryId, name = "Beginner Spanish").copy(isPublic = false)),
+        )
+
+        advanceUntilIdle()
+
+        assertFalse(viewModel.success().isShared)
+    }
+
+    @Test
+    fun `a background refresh picks up a sharing change made elsewhere`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel(
+            dictionaries = listOf(dictionary(dictionaryId, name = "Beginner Spanish").copy(isPublic = true)),
+            pulled = listOf(dictionary(dictionaryId, name = "Beginner Spanish").copy(isPublic = false)),
+        )
+        advanceUntilIdle()
+
+        viewModel.refreshInBackground()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.success().isShared)
     }
 
     @Test

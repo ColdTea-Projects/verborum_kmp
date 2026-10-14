@@ -3,10 +3,8 @@ package de.coldtea.verborum.core.designsystem.component
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -30,8 +28,11 @@ import kotlinx.coroutines.delay
  * window has focus — a tab on a second monitor must still catch an edit made on the phone), while
  * coming back runs on *resume*.
  *
- * [onRefresh] must be quiet — no spinner, no failure snackbar — because nobody asked for it. The
- * first composition does not refresh: the screen has just loaded.
+ * [onRefresh] must be quiet — no spinner, no failure snackbar — because nobody asked for it, and it
+ * must be a no-op while the screen's own load is still running (every `refreshInBackground` is). There
+ * is deliberately no "skip the first composition": a view model that survived a tab switch has not
+ * refreshed on its own, and re-entering the screen is exactly when it is most likely to be stale. A
+ * freshly created one is mid-load, so the call is a no-op there.
  */
 @Composable
 fun RefreshWhileVisible(onRefresh: () -> Unit) {
@@ -51,15 +52,9 @@ fun RefreshWhileVisible(onRefresh: () -> Unit) {
         }
     }
 
-    // Back in front. The first ON_RESUME is replayed on composition, when the screen has just loaded.
-    var isFirstResume by remember { mutableStateOf(true) }
+    // Back in front — and the replayed ON_RESUME on entering the composition counts: that is a screen
+    // being re-entered. The throttle keeps focus, visibility and this from stacking.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        if (isFirstResume) {
-            isFirstResume = false
-            // Counts as a refresh for the throttle, so a focus event right after load adds nothing
-            throttle.tryAcquire()
-        } else if (throttle.tryAcquire()) {
-            currentOnRefresh()
-        }
+        if (throttle.tryAcquire()) currentOnRefresh()
     }
 }
