@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -81,6 +82,26 @@ internal fun NavHostController.switchTab(destination: TopLevelDestination) {
         launchSingleTop = true
         restoreState = true
     }
+}
+
+/**
+ * Drops back to the first page of the tab already open — the library list, the Forum list, Options
+ * itself — leaving every other tab's saved stack alone.
+ *
+ * Deliberately a plain pop rather than a navigate: re-entering the tab would discard its saved state
+ * and add a second copy of its first page, and popping to the start *screen* rather than to the tab's
+ * graph matters — popping to a graph leaves its graph entry last on the stack, which the next tab
+ * switch then treats as orphaned.
+ *
+ * Returns false when there was nothing above that page, which is the no-op case: the user clicked the
+ * tab they are already at the root of.
+ */
+internal fun NavHostController.returnToTabRoot(destination: TopLevelDestination): Boolean {
+    val tabGraph = currentDestination?.hierarchy
+        ?.firstOrNull { it.hasRoute(destination.routeClass) } as? NavGraph
+        ?: return false
+
+    return popBackStack(tabGraph.findStartDestination().id, inclusive = false)
 }
 
 /**

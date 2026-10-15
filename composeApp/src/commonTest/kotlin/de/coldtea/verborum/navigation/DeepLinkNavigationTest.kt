@@ -86,6 +86,71 @@ class DeepLinkNavigationTest {
         assertEquals(listOf("library", "detail"), navController.leafRoutes())
     }
 
+    @Test
+    fun `clicking the tab you are in returns to its first page`() {
+        val navController = navController()
+
+        navController.navigate(DetailStub)
+        navController.navigate(PracticeStub)
+
+        navController.returnToTabRoot(TopLevelDestination.Bibliotheca)
+
+        assertEquals(listOf("library"), navController.leafRoutes())
+    }
+
+    @Test
+    fun `returning to a tab root leaves the other tabs where they were`() {
+        val navController = navController()
+
+        // Options left on a screen of its own, then the library walked into.
+        navController.navigate(SettingsStub)
+        navController.switchTab(TopLevelDestination.Bibliotheca)
+        navController.navigate(DetailStub)
+
+        navController.returnToTabRoot(TopLevelDestination.Bibliotheca)
+        navController.switchTab(TopLevelDestination.Options)
+
+        assertTrue(navController.currentDestination?.hasRoute(SettingsStub::class) == true)
+    }
+
+    @Test
+    fun `already at the tab root there is nothing to do`() {
+        val navController = navController()
+
+        val popped = navController.returnToTabRoot(TopLevelDestination.Bibliotheca)
+
+        assertFalse(popped)
+        assertEquals(listOf("library"), navController.leafRoutes())
+    }
+
+    @Test
+    fun `a tab the user is not in is left alone`() {
+        val navController = navController()
+
+        navController.navigate(DetailStub)
+
+        // The web sidebar never asks for this — it switches instead — but the guard is what makes
+        // the function safe to call with any tab.
+        val popped = navController.returnToTabRoot(TopLevelDestination.Forum)
+
+        assertFalse(popped)
+        assertEquals(listOf("library", "detail"), navController.leafRoutes())
+    }
+
+    @Test
+    fun `the tab is still returned to its root after being switched away from and back`() {
+        val navController = navController()
+
+        navController.navigate(DetailStub)
+        navController.switchTab(TopLevelDestination.Options)
+        // Restores the library at the dictionary it was left on.
+        navController.switchTab(TopLevelDestination.Bibliotheca)
+
+        navController.returnToTabRoot(TopLevelDestination.Bibliotheca)
+
+        assertEquals(listOf("library"), navController.leafRoutes())
+    }
+
     /** The destinations on the stack, graphs left out — the path a user would walk back down. */
     private fun NavHostController.leafRoutes(): List<String> =
         currentBackStack.value

@@ -205,9 +205,27 @@ private fun VerborumSidebar(
             SidebarItem(
                 destination = destination,
                 isSelected = currentDestination.isIn(destination),
-                onClick = { navController.switchTab(destination) },
+                onClick = { navController.selectTab(destination, currentDestination) },
             )
         }
+    }
+}
+
+/**
+ * What a tab click does: switch tabs, or — on the tab already open — return to its first page.
+ *
+ * Only the web app does the second half. The sidebar is on screen the whole time, so clicking the
+ * tab you are already in is the obvious way back out of a dictionary or a test; on iOS the tabs sit
+ * under a top bar that carries its own back button, and the Android app it mirrors switches only.
+ */
+private fun NavHostController.selectTab(
+    destination: TopLevelDestination,
+    currentDestination: NavDestination?,
+) {
+    if (currentDestination.isIn(destination)) {
+        returnToTabRoot(destination)
+    } else {
+        switchTab(destination)
     }
 }
 
@@ -240,7 +258,7 @@ private fun VerborumBottomBar(
                 BottomBarItem(
                     destination = destination,
                     isSelected = currentDestination.isIn(destination),
-                    onClick = { navController.switchTab(destination) },
+                    onClick = { navController.selectTab(destination, currentDestination) },
                     modifier = Modifier.weight(1f),
                 )
             }
