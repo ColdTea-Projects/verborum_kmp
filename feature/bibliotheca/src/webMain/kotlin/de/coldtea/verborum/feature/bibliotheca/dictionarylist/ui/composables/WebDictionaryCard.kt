@@ -36,7 +36,7 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
+import de.coldtea.verborum.core.localization.languagePairLabel
 import de.coldtea.verborum.feature.bibliotheca.dictionarylist.ui.model.DictionaryUi
 import de.coldtea.verborum.core.localization.strings
 

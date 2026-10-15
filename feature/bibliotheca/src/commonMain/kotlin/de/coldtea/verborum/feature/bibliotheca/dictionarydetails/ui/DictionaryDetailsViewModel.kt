@@ -23,7 +23,7 @@ import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.Dictio
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.REQUIRED_WORDS_FOR_TEST
 import de.coldtea.verborum.feature.bibliotheca.dictionarydetails.ui.model.toUi
 import de.coldtea.verborum.feature.bibliotheca.common.domain.DictionaryService
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.languagePairLabel
+import de.coldtea.verborum.core.localization.languagePairLabel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

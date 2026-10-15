@@ -8,6 +8,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
+import de.coldtea.verborum.core.designsystem.theme.fontFamilyForText
 import de.coldtea.verborum.core.localization.LocalStrings
 import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,6 +31,9 @@ internal fun ForumDetailsScreen(
     RegisterTopBar(
         title = state.name.ifEmpty { strings.forumListScreenTitle },
         backLabel = strings.forumListScreenTitle,
+        // Another user's dictionary name, in whatever script they wrote it; the canvas has no system
+        // font to fall back on, so the face has to be chosen. Null on iOS, which has one.
+        titleFontFamily = fontFamilyForText(state.name),
     )
 
     ShowSnackbarMessages(
