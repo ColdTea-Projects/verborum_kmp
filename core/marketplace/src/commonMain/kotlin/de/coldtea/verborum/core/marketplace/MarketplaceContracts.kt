@@ -79,6 +79,17 @@ interface ImportedDictionariesStore {
      * nowhere else — it is the only source of the "by …" line in the library.
      */
     suspend fun addImportedDictionary(dictionaryId: String, publisherName: String?)
+
+    /**
+     * Brings the downloads in line with the account's vault **cheaply**: one request for the vault, a
+     * dictionary added or removed elsewhere is mirrored here, and nothing already on the device is
+     * re-read. What the Forum's quiet refresh calls, so a download or an unsubscribe made on another
+     * device shows in its badges — the library's own full refresh re-reads every download, which a
+     * screen refreshing every minute should not.
+     *
+     * A failure leaves everything as it was: no answer is not the same as an empty vault.
+     */
+    suspend fun syncWithVault(): Outcome<Unit>
 }
 
 /**

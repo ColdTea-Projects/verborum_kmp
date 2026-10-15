@@ -118,8 +118,48 @@ internal class ImportedDictionaryService(
             Outcome.Loading -> return Outcome.Loading
         }
 
-        val vaultIds = vault.map(VaultEntry::dictionaryId).toSet()
         val now = time.nowEpochMillis()
+
+        dropWhatTheVaultNoLongerLists(vault, now)
+
+        vault.forEach { entry -> refresh(entry, now) }
+
+        return Outcome.Success(Unit)
+    }
+
+    /**
+     * The cheap half of [refreshFromVault]: mirrors which dictionaries are downloaded and nothing
+     * more. Used by the Forum's quiet refresh (see `ImportedDictionariesStore.syncWithVault`).
+     *
+     * - Gone from the vault (after the same grace window) → deleted here, so an unsubscribe made on
+     *   another device takes the badge off.
+     * - In the vault but not on this device → fetched, so a download made elsewhere shows up.
+     * - Already here → **left alone**: no request, which is the whole point. A rename or a new word by
+     *   the owner arrives with the library's own sync.
+     */
+    override suspend fun syncWithVault(): Outcome<Unit> {
+        val vault = when (val outcome = profileService.vault()) {
+            is Outcome.Success -> outcome.data
+            is Outcome.Failure -> return outcome
+            Outcome.Loading -> return Outcome.Loading
+        }
+
+        val now = time.nowEpochMillis()
+
+        dropWhatTheVaultNoLongerLists(vault, now)
+
+        val local = store.all().map { it.dictionaryId }.toSet()
+        vault.filter { entry -> entry.dictionaryId !in local }.forEach { entry -> refresh(entry, now) }
+
+        return Outcome.Success(Unit)
+    }
+
+    /**
+     * A local copy missing from the vault is deleted — **unless it arrived in the last
+     * [IMPORT_GRACE_MILLIS]**, because the backend writes the vault entry a moment after an import.
+     */
+    private suspend fun dropWhatTheVaultNoLongerLists(vault: List<VaultEntry>, now: Long) {
+        val vaultIds = vault.map(VaultEntry::dictionaryId).toSet()
 
         store.all()
             .filter { local -> local.dictionaryId !in vaultIds }
@@ -128,10 +168,6 @@ internal class ImportedDictionaryService(
                 log.i { "dropping a download the vault no longer lists" }
                 store.delete(stale.dictionaryId)
             }
-
-        vault.forEach { entry -> refresh(entry, now) }
-
-        return Outcome.Success(Unit)
     }
 
     /**

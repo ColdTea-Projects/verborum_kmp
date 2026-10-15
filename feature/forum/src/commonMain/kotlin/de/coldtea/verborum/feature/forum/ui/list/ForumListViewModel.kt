@@ -254,4 +254,13 @@ internal class ForumListViewModel(
 
     private fun ForumListUiState.withPaging(tab: ForumTab, paging: ForumPaging) =
         if (tab == ForumTab.POPULAR) copy(popular = paging) else copy(fresh = paging)
+
+    /**
+     * The quiet refresh of the "Downloaded" badges, for a screen that keeps itself current (roadmap
+     * `P4N-14`). Web has no push, so a download or an unsubscribe made on another device reaches this
+     * screen when it is next in front, or within a minute while it stays visible.
+     */
+    fun refreshDownloadsInBackground() {
+        viewModelScope.launch { downloads.refreshQuietly() }
+    }
 }

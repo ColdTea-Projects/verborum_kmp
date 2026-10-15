@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.designsystem.component.VerborumIcons
@@ -38,6 +39,10 @@ internal fun ForumListScreen(
     viewModel: ForumListViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    // Web has no push: a download or an unsubscribe made on another device reaches the badges when
+    // this screen is next in front, or within a minute while it stays visible. Quiet.
+    RefreshWhileVisible(onRefresh = viewModel::refreshDownloadsInBackground)
     val strings = LocalStrings.current
 
     LaunchedEffect(appliedFilter) {

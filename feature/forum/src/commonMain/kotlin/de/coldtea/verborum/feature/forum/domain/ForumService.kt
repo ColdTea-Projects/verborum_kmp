@@ -67,6 +67,12 @@ internal class ForumService(
         return result
     }
 
+    /**
+     * Mirrors the account's vault without re-reading what is already here — what the screens'
+     * quiet refresh calls, so a download or an unsubscribe made on another device reaches the badges.
+     */
+    suspend fun refreshDownloads(): Outcome<Unit> = importedDictionaries.syncWithVault()
+
     /** The ids already on the device, for the "Downloaded" badge. */
     fun downloadedDictionaryIds(): Flow<List<String>> = importedDictionaries.observeDictionaryIds()
 

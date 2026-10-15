@@ -62,7 +62,9 @@ or not yours (nothing is revealed). A deleted account is cleaned up server-side 
 
 ## 3. Tell the server which device is writing — `X-Device-Id`
 
-Send the same `deviceId` as a header on **every write** to ms_dictionary (dictionaries, words, tags):
+Send the same `deviceId` as a header on **every write** that changes the account's data on the server —
+ms_dictionary (dictionaries, words, tags), ms_marketplace (a Forum **download**) and ms_user (removing a
+download from the vault, i.e. an **unsubscribe**):
 
 ```
 X-Device-Id: 3f2c1b8e-6a54-4f0e-9d2a-1b7c5e8a9f10
@@ -78,7 +80,7 @@ FCM **data** messages (no `notification` block), normal priority. In `onMessageR
 
 | `data.type` | When | Do |
 |---|---|---|
-| `SYNC` | the same account changed a dictionary, its words or tags on another device (or joined/left the Forum) | enqueue the existing sync as **unique work** (coalesces a burst). Do not sync inline |
+| `SYNC` | the same account changed a dictionary, its words or tags on another device, **downloaded or unsubscribed** a Forum dictionary there, or joined/left the Forum | enqueue the existing sync as **unique work** (coalesces a burst). Do not sync inline |
 | `REFRESH` | someone imported or rated your published dictionary | invalidate the Forum cache so stats refresh on next view |
 
 - `data.dictionaryId` is present for context; **treat it like any untrusted id** (the API still answers 404

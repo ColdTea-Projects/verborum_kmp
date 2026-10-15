@@ -1,5 +1,6 @@
 package de.coldtea.verborum.feature.forum.ui.model
 
+import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.marketplace.DictionaryLanguages
 import de.coldtea.verborum.core.marketplace.ImportedDictionariesStore
 import de.coldtea.verborum.core.marketplace.OwnedDictionariesSource
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -89,6 +91,80 @@ class ForumDownloadsTest {
     }
 
     @Test
+    fun `unsubscribing in the library takes the badge off`() = runTest {
+        // The library really lists what is added, as in the app — the recording double never does
+        val library = LiveImportedStore()
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), library))
+        downloads.download(listing, ForumUserState(), onNotMember = {})
+        assertTrue("d1" in downloads.userState.first().downloadedIds)
+
+        library.remove("d1")
+
+        // Without the hand-over the session set still said "downloaded", for as long as the app was open
+        assertFalse("d1" in downloads.userState.first().downloadedIds)
+    }
+
+    @Test
+    fun `a download the library never recorded stays marked`() = runTest {
+        // The local copy is best-effort: the import succeeded, so the card must not flip back
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), RecordingImportedStore()))
+        downloads.download(listing, ForumUserState(), onNotMember = {})
+
+        assertTrue("d1" in downloads.userState.first().downloadedIds)
+        assertTrue("d1" in downloads.userState.first().downloadedIds)
+    }
+
+    @Test
+    fun `downloading again after unsubscribing is allowed`() = runTest {
+        val library = LiveImportedStore()
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), library))
+        downloads.download(listing, ForumUserState(), onNotMember = {})
+        library.remove("d1")
+
+        val message = downloads.download(listing, downloads.userState.first(), onNotMember = {})
+
+        assertEquals(ForumMessage.DOWNLOADED, message)
+    }
+
+    @Test
+    fun `a download made on another device reaches the badges through the quiet refresh`() = runTest {
+        // Android downloaded it; this device has not heard until the vault is read
+        val library = LiveImportedStore().apply { vault = listOf("d1") }
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), library))
+        assertFalse("d1" in downloads.userState.first().downloadedIds)
+
+        downloads.refreshQuietly()
+
+        assertTrue("d1" in downloads.userState.first().downloadedIds)
+    }
+
+    @Test
+    fun `an unsubscribe made on another device reaches the badges through the quiet refresh`() = runTest {
+        val library = LiveImportedStore()
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), library))
+        downloads.download(listing, ForumUserState(), onNotMember = {})
+        assertTrue("d1" in downloads.userState.first().downloadedIds)
+
+        // The vault no longer lists it
+        library.vault = emptyList()
+        downloads.refreshQuietly()
+
+        assertFalse("d1" in downloads.userState.first().downloadedIds)
+    }
+
+    @Test
+    fun `the quiet refresh asks the library once per call`() = runTest {
+        val library = LiveImportedStore()
+        val downloads = ForumDownloads(service(Reply(HttpStatusCode.Created), library))
+
+        downloads.refreshQuietly()
+        downloads.refreshQuietly()
+
+        // Sequential calls each run; only an overlapping one is skipped (a guard, not a debounce)
+        assertEquals(2, library.syncCalls)
+    }
+
+    @Test
     fun `a 404 takes the listing out of the list`() = runTest {
         val downloads = ForumDownloads(service(notFound, RecordingImportedStore()))
 
@@ -139,6 +215,35 @@ class ForumDownloadsTest {
     }
 }
 
+/** A library that behaves like the real one: what is added is listed, and a removal is seen. */
+private class LiveImportedStore : ImportedDictionariesStore {
+
+    private val ids = MutableStateFlow<List<String>>(emptyList())
+
+    override fun observeDictionaryIds(): Flow<List<String>> = ids
+
+    override suspend fun addImportedDictionary(dictionaryId: String, publisherName: String?) {
+        ids.value = ids.value + dictionaryId
+    }
+
+    /** What the vault holds, as the account sees it from any device. */
+    var vault: List<String> = emptyList()
+
+    var syncCalls = 0
+        private set
+
+    /** The cheap mirror: what the vault lists, nothing already here re-read. */
+    override suspend fun syncWithVault(): Outcome<Unit> {
+        syncCalls++
+        ids.value = vault
+        return Outcome.Success(Unit)
+    }
+
+    fun remove(dictionaryId: String) {
+        ids.value = ids.value - dictionaryId
+    }
+}
+
 /** Records what the Forum asked the library to keep. */
 private class RecordingImportedStore : ImportedDictionariesStore {
 
@@ -151,6 +256,8 @@ private class RecordingImportedStore : ImportedDictionariesStore {
     override suspend fun addImportedDictionary(dictionaryId: String, publisherName: String?) {
         added += dictionaryId to publisherName
     }
+
+    override suspend fun syncWithVault(): Outcome<Unit> = Outcome.Success(Unit)
 }
 
 private object NoOwnedDictionaries : OwnedDictionariesSource {

@@ -10,6 +10,7 @@ import de.coldtea.verborum.feature.bibliotheca.common.importedWord
 import de.coldtea.verborum.feature.bibliotheca.common.nonMemberProfile
 import de.coldtea.verborum.feature.bibliotheca.common.sharedDictionaryBody
 import de.coldtea.verborum.feature.bibliotheca.common.sharedWordsBody
+import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -105,6 +106,82 @@ class ImportedDictionaryServiceTest {
 
         assertNull(store.find("d1"))
     }
+
+    // region syncWithVault (P4N-14)
+    @Test
+    fun `the cheap sync adds a download made on another device`() = runTest {
+        val store = InMemoryImportedDictionaryStore()
+        val backend = SharedDictionaryBackend(
+            dictionaries = mapOf("d1" to sharedDictionaryBody("d1")),
+            words = mapOf("d1" to sharedWordsBody("w1")),
+        )
+
+        backend.service(store, profileService = FakeProfileService(
+            vaultEntries = listOf(VaultEntry("d1", importedAt = 1_000L)),
+        )).syncWithVault()
+
+        assertEquals("d1", store.find("d1")?.dictionaryId)
+    }
+
+    @Test
+    fun `the cheap sync drops what the vault no longer lists once the grace window is over`() = runTest {
+        val store = InMemoryImportedDictionaryStore()
+        store.save(importedDictionary("d1", importedAt = 0L), listOf(importedWord("w1")))
+
+        // Unsubscribed on another device: the vault is empty, and the copy is older than the grace window
+        SharedDictionaryBackend().service(
+            store,
+            profileService = FakeProfileService(vaultEntries = emptyList()),
+            now = 100_000_000L,
+        ).syncWithVault()
+
+        assertNull(store.find("d1"))
+    }
+
+    @Test
+    fun `the cheap sync keeps a download that arrived moments ago`() = runTest {
+        val store = InMemoryImportedDictionaryStore()
+        store.save(importedDictionary("d1", importedAt = 99_000L), listOf(importedWord("w1")))
+
+        // The backend writes the vault entry a moment after an import, so an empty vault is not a removal yet
+        SharedDictionaryBackend().service(
+            store,
+            profileService = FakeProfileService(vaultEntries = emptyList()),
+            now = 100_000L,
+        ).syncWithVault()
+
+        assertEquals("d1", store.find("d1")?.dictionaryId)
+    }
+
+    @Test
+    fun `the cheap sync does not re-read a download already here`() = runTest {
+        val store = InMemoryImportedDictionaryStore()
+        store.save(importedDictionary("d1", name = "Local name", importedAt = 1_000L), listOf(importedWord("w1")))
+
+        // The owner renamed it; the cheap sync must not fetch that — the library's own sync does
+        SharedDictionaryBackend(dictionaries = mapOf("d1" to sharedDictionaryBody("d1", name = "Renamed"))).service(
+            store,
+            profileService = FakeProfileService(vaultEntries = listOf(VaultEntry("d1", importedAt = 1_000L))),
+        ).syncWithVault()
+
+        assertEquals("Local name", store.find("d1")?.name)
+    }
+
+    @Test
+    fun `a vault that cannot be read leaves the downloads as they were`() = runTest {
+        val store = InMemoryImportedDictionaryStore()
+        store.save(importedDictionary("d1", importedAt = 0L), listOf(importedWord("w1")))
+
+        val outcome = SharedDictionaryBackend().service(
+            store,
+            profileService = FakeProfileService(vaultResult = unauthorized),
+        ).syncWithVault()
+
+        // No answer is not the same as an empty vault
+        assertTrue(outcome is Outcome.Failure)
+        assertEquals("d1", store.find("d1")?.dictionaryId)
+    }
+    // endregion
 
     @Test
     fun `a fetch that never landed keeps the local copy`() = runTest {
