@@ -36,7 +36,7 @@ val forumModule: Module = module {
         val config = get<ApiConfig>()
 
         createHttpClient(
-            baseUrl = config.marketplaceBaseUrl,
+            baseUrl = config.baseUrl,
             enableLogging = config.enableLogging,
             tokenProvider = get(),
         )

@@ -71,11 +71,13 @@ there is no password field in the app.
 | Tokens | Keychain, `…AfterFirstUnlockThisDeviceOnly` | `localStorage` — the session lasts until sign-out |
 | Endpoints | `https://auth.verborum.coldtea.de/realms/verborum` | same-origin `/auth/realms/verborum` |
 
-**Web is same-origin everywhere.** Deployed, a reverse proxy serves `/auth` and `/api` next to the
-app; in development the dev server does the same (`composeApp/webpack.config.d/devServerProxy.js`
-→ Keycloak on `:8180`, `ms_dictionary` on `:8085`). So the token exchange and every API call are
-same-origin: no CORS at any point, no **Web origins** entry to keep in step with the dev port, and
-`connect-src 'self'` stays valid.
+**Web: the login is same-origin, the API is the gateway.** Deployed, a reverse proxy serves `/auth` next to the
+app; in development the dev server does the same for Keycloak (`composeApp/webpack.config.d/devServerProxy.js`
+→ `:8180`), so the token exchange stays same-origin: no CORS, no **Web origins** entry to keep in step with the
+dev port. The **API** is different (roadmap P5-10): in development the app calls the local `ms_gateway` on
+`:8080` directly — a different origin from the dev server — and the gateway answers CORS for it
+(`CORS_ALLOWED_ORIGINS`, default `http://localhost:8280`). A deployed web build keeps `<origin>/api` until the
+release decides how it reaches the gateway (Phase 5R). `core:network` `ApiConfig.web.kt` has the rule.
 
 Local Keycloak (realm `verborum`, client `verborum-app`) still needs its **Valid redirect URIs** to
 include `http://localhost:8280/*` — that is a browser navigation, not an XHR, so no proxy can cover

@@ -1,22 +1,16 @@
 package de.coldtea.verborum.core.network
 
 /**
- * Where the backend lives for the current target. The value is supplied per
- * platform because the web build talks to a same-origin path while the iOS
- * build needs an absolute host.
+ * Where the backend lives for the current target. The value is supplied per platform because the web
+ * build and the iOS build reach the gateway at different addresses.
  *
- * Three base URLs because the backend is three services — `ms_dictionary`, `ms_user` and
- * `ms_marketplace` — each on its own port locally. The API gateway (backend phase 5) collapses them
- * onto one origin **keeping the same paths**, so they are already written gateway-shaped: when that
- * lands, the three values simply become equal and nothing else changes.
+ * One base URL: since the API gateway (backend Phase 5) every call — dictionaries, words, tags, the
+ * profile, the vault, the Forum — goes to the same origin, and the gateway routes by the first path
+ * segment (`/dictionaries`, `/words`, `/users`, `/marketplace`, `/notifications`).
  */
 data class ApiConfig(
-    /** `ms_dictionary` — dictionaries, words, tags. */
+    /** The gateway origin, without a trailing slash. */
     val baseUrl: String,
-    /** `ms_user` — the profile and the vault. */
-    val userBaseUrl: String,
-    /** `ms_marketplace` — Forum listings, imports and ratings. */
-    val marketplaceBaseUrl: String,
     val enableLogging: Boolean = false,
 )
 

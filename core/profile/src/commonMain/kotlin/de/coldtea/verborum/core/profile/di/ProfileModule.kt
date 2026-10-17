@@ -23,8 +23,8 @@ const val USER_HTTP_CLIENT: String = "userHttpClient"
  * Wiring for the profile slice.
  *
  * Its own [HttpClient] because the base URL is stamped on by the client rather than written at each
- * call site, and ms_user answers on a different origin from ms_dictionary until the API gateway
- * lands. The bearer token and the refresh-on-401 behaviour are the same session as every other call.
+ * call site. (Since the API gateway every service shares one origin, so this could be the shared client;
+ * kept separate for now.) The bearer token and the refresh-on-401 behaviour are the same session as every other call.
  *
  * `getOrNull` for the membership hooks: the list is contributed by whichever feature owns
  * dictionaries, and `core:profile` must keep working — in a test, or before that feature is wired —
@@ -35,7 +35,7 @@ val profileModule: Module = module {
         val config = get<ApiConfig>()
 
         createHttpClient(
-            baseUrl = config.userBaseUrl,
+            baseUrl = config.baseUrl,
             enableLogging = config.enableLogging,
             tokenProvider = get(),
         )

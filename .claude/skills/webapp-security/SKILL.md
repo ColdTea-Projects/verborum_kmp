@@ -73,7 +73,7 @@ XSS surface but does not remove it entirely:
 - [ ] No `innerHTML`/`eval`/dynamic script in any `js(...)` bridge; bridges data-only
 - [ ] Redirect/`window.open` targets validated against an allowlist
 - [ ] CSP still valid for what the change adds; `connect-src` unchanged or deliberately widened
-- [ ] API stays same-origin, or CORS + credential scoping explicitly reviewed
+- [ ] Keycloak stays same-origin; the API's cross-origin use (dev gateway) matches the gateway's `CORS_ALLOWED_ORIGINS`, and `connect-src` lists any deployed API origin
 - [ ] PKCE `S256`, fresh verifier, `state` verified, CSRNG-backed RNG
 - [ ] `enableLogging` false; no header/body logging; nothing sensitive logged
 - [ ] No secrets in the bundle; source maps not shipped

@@ -129,9 +129,7 @@ private val platformLeaves = module {
     }
     single<ApiConfig> {
         ApiConfig(
-            baseUrl = "https://dictionary.test",
-            userBaseUrl = "https://user.test",
-            marketplaceBaseUrl = "https://marketplace.test",
+            baseUrl = "https://api.test",
         )
     }
     single<TokenStorage> { InMemoryTokenStorage() }

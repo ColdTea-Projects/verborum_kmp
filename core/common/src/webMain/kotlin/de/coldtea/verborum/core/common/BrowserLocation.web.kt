@@ -40,7 +40,7 @@ expect fun clearBrowserFragment()
 fun isLocalDevelopmentOrigin(origin: String): Boolean = hostOf(origin) in LOCAL_HOSTS
 
 /** The host alone, with any port dropped — `https://localhost:8080` and `http://[::1]` both. */
-private fun hostOf(origin: String): String {
+fun hostOf(origin: String): String {
     val authority = origin.substringAfter("://", missingDelimiterValue = "").substringBefore('/')
 
     // An IPv6 literal is bracketed and made of colons, so its port is whatever follows the closing

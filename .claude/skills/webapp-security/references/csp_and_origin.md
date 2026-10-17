@@ -20,11 +20,15 @@ Content-Security-Policy:
   form-action 'none'
 ```
 
-`connect-src 'self'` works because every web request is same-origin by design: `defaultApiConfig()`
-uses `<origin>/api` and `defaultAuthConfig()` uses `<origin>/auth`, served by a reverse proxy when
-deployed and by the dev server locally (`composeApp/webpack.config.d/devServerProxy.js`). Keep it
-that way — pointing either at another origin in dev is what reintroduces CORS, and it hides the
-failure behind a browser-only error the Node tests cannot catch.
+`connect-src 'self'` covers the login: `defaultAuthConfig()` uses `<origin>/auth`, served by a reverse proxy when
+deployed and by the dev server locally (`composeApp/webpack.config.d/devServerProxy.js`). Keep it that way —
+pointing Keycloak at another origin is what reintroduces CORS on the token exchange.
+
+**The API is cross-origin in development since P5-10.** `defaultApiConfig()` on a local origin returns the gateway
+on `:8080`, and the gateway sends the CORS headers for the dev origin (`CORS_ALLOWED_ORIGINS`; exact origins,
+never `*`; no credentials — the token is a Bearer header). The dev server sends no CSP, so nothing else changes
+locally. A static host that does send the CSP above must add the API origin to `connect-src` before a web build
+is pointed at an `api.` origin; a deployed build still uses `<origin>/api` until the release decides (Phase 5R).
 
 **If the base URL ever becomes cross-origin**, that is a security change, not a config tweak: it
 needs `connect-src` widened, a CORS policy on the API with an explicit origin allowlist (never
