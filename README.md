@@ -128,8 +128,9 @@ drains them, so opening the library or pulling to refresh is what pushes anythin
 write the server actively *refused* is rolled back and reported instead: retrying a payload the
 backend has already judged would fail the same way every time.
 
-Local dev needs `ms_dictionary` running on `http://localhost:8085`; the dev server proxies `/api` to
-it, so no CORS configuration is required on the service.
+Local dev needs the backend services **and the API gateway** running (`http://localhost:8080`). The web app calls the
+gateway directly, and the gateway answers CORS for the dev origin (`CORS_ALLOWED_ORIGINS`, default
+`http://localhost:8280`); only the login is proxied by the dev server. iOS debug talks to the same gateway.
 
 ### The test
 

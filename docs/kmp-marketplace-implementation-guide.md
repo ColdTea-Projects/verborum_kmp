@@ -91,13 +91,14 @@ Memorise these; most bugs come from breaking one.
 
 ### Step 1 — Configuration and networking
 
-Add two more backend base URLs next to the existing dictionary/auth ones (Android debug values shown;
-use the KMP project's per-environment config; see `docs/production-cutover.md`):
+Since the API gateway there is **one** backend base URL for every service (Android debug `http://10.0.2.2:8080/`; iOS
+simulator and local web `http://localhost:8080`; the KMP project's per-environment config; see
+`docs/production-cutover.md`). Nothing to add for the marketplace — the same client reaches it by path:
 
-| Service | Purpose | Android debug base URL |
+| Service | Purpose | Path prefix on the gateway |
 |---|---|---|
-| ms_user | profile + vault | existing "user" URL (`:8086`) |
-| ms_marketplace | browse/import/rating | `http://10.0.2.2:8087/` → on iOS simulator/Web use `localhost:8087` |
+| ms_user | profile + vault | `/users/**` |
+| ms_marketplace | browse/import/rating | `/marketplace/**` |
 
 Rules:
 
@@ -108,8 +109,8 @@ Rules:
   keycloak-bootstrap` in the backend repo.
 - JSON: lenient decoding (ignore unknown keys), **omit null fields when encoding** (a null in a PUT body
   must be *absent*, not `null`, because absent = "unchanged" on several endpoints).
-- **Web only:** the browser needs CORS on `:8086` and `:8087` for the web origin; confirm with the
-  backend owner before debugging anything else.
+- **Web only:** the browser needs CORS for the web origin; the gateway answers it (`CORS_ALLOWED_ORIGINS`, local
+  default `http://localhost:8280`). A new custom request header must be added to the gateway's allowed list first.
 
 Create a `core`-level typed model for API errors: `{ error: String?, errorDetail: String? }`. `error` is
 the exception class name (e.g. `SharingRequiredException`, `InvalidRequestException`), `errorDetail` is
