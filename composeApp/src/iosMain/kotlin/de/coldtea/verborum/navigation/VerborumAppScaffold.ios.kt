@@ -56,7 +56,9 @@ internal actual fun VerborumAppScaffold(
                         )
                     }
                     AnimatedVisibility(visible = showChrome && !isOnline) {
-                        OfflineBanner()
+                        OfflineBanner(
+                            message = if (topBarState.requiresInternet) strings.offlineOnlineOnly else strings.offline,
+                        )
                     }
                 }
             },

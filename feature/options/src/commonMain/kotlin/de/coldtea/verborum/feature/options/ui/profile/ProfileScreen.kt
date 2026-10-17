@@ -1,12 +1,16 @@
 package de.coldtea.verborum.feature.options.ui.profile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.ErrorState
 import de.coldtea.verborum.core.designsystem.component.LoadingState
+import de.coldtea.verborum.core.designsystem.component.LocalIsOnline
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.localization.LocalStrings
@@ -28,7 +32,18 @@ internal fun ProfileScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val strings = LocalStrings.current
 
-    RegisterTopBar(title = strings.optionsProfile, backLabel = strings.options)
+    RegisterTopBar(title = strings.optionsProfile, backLabel = strings.options, requiresInternet = true)
+
+    // Offline the saved profile stays visible but read-only. Coming back reloads it, which also
+    // recovers a first load that failed while offline; a leave-Forum confirmation that was open can
+    // no longer be completed, so it is withdrawn.
+    val isOnline = LocalIsOnline.current
+    var wasOnline by remember { mutableStateOf(isOnline) }
+    LaunchedEffect(isOnline) {
+        if (isOnline && !wasOnline) viewModel.refresh()
+        if (!isOnline) viewModel.dismissLeaveConfirmation()
+        wasOnline = isOnline
+    }
 
     // Both outcomes land here; the form keeps the user's drafts either way, so a rejected update is
     // a message rather than a lost edit.
@@ -48,7 +63,7 @@ internal fun ProfileScreen(
         ProfileState.Loading -> LoadingState(modifier)
 
         is ProfileState.Success -> ProfileContent(
-            form = current.form,
+            form = current.form.copy(isOnline = isOnline),
             onDisplayNameChange = viewModel::changeDisplayName,
             onAgreementChange = viewModel::changeAgreement,
             onUpdate = viewModel::update,

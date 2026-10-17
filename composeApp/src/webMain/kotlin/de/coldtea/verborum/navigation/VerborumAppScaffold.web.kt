@@ -114,7 +114,9 @@ internal actual fun VerborumAppScaffold(
 
                 Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                     AnimatedVisibility(visible = showChrome && !isOnline) {
-                        OfflineBanner()
+                        OfflineBanner(
+                            message = if (topBarState.requiresInternet) strings.offlineOnlineOnly else strings.offline,
+                        )
                     }
 
                     // The redesign covers the library's screens and the Forum's, and those title

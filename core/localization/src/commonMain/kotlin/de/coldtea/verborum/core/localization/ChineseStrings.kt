@@ -8,6 +8,7 @@ internal object ChineseStrings : Strings {
     override val delete = "删除"
     override val edit = "编辑"
     override val remove = "移除"
+    override val offlineOnlineOnly = "您已离线 — 论坛和个人资料需要联网"
     override val offline = "你已离线。更改会保存在本地，重新连接后同步。"
     override val signIn = "登录"
     override val createAccount = "创建账户"

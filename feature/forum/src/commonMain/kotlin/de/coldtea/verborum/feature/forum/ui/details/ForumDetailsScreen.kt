@@ -1,10 +1,12 @@
 package de.coldtea.verborum.feature.forum.ui.details
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.designsystem.component.LocalIsOnline
 import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
@@ -18,6 +20,8 @@ import org.koin.core.parameter.parametersOf
 @Composable
 internal fun ForumDetailsScreen(
     dictionaryId: String,
+    /** Called the moment the connection is gone, or already is on arrival; the graph pops back. */
+    onConnectionLost: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ForumDetailsViewModel = koinViewModel { parametersOf(dictionaryId) },
 ) {
@@ -28,12 +32,17 @@ internal fun ForumDetailsScreen(
     RefreshWhileVisible(onRefresh = viewModel::refreshDownloadsInBackground)
     val strings = LocalStrings.current
 
+    // Online-only content: leave as soon as there is no connection to read or act on it with.
+    val isOnline = LocalIsOnline.current
+    LaunchedEffect(isOnline) { if (!isOnline) onConnectionLost() }
+
     RegisterTopBar(
         title = state.name.ifEmpty { strings.forumListScreenTitle },
         backLabel = strings.forumListScreenTitle,
         // Another user's dictionary name, in whatever script they wrote it; the canvas has no system
         // font to fall back on, so the face has to be chosen. Null on iOS, which has one.
         titleFontFamily = fontFamilyForText(state.name),
+        requiresInternet = true,
     )
 
     ShowSnackbarMessages(

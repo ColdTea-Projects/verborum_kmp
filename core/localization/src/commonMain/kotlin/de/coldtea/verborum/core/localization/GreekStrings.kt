@@ -8,6 +8,7 @@ internal object GreekStrings : Strings {
     override val delete = "Διαγραφή"
     override val edit = "Επεξεργασία"
     override val remove = "Αφαίρεση"
+    override val offlineOnlineOnly = "Είστε εκτός σύνδεσης — το Φόρουμ και το Προφίλ απαιτούν σύνδεση στο διαδίκτυο"
     override val offline = "Είστε εκτός σύνδεσης. Οι αλλαγές αποθηκεύονται τοπικά και συγχρονίζονται μόλις επανασυνδεθείτε."
     override val signIn = "Σύνδεση"
     override val createAccount = "Δημιουργία λογαριασμού"

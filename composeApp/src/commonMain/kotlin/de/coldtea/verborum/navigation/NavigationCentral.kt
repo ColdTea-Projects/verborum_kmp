@@ -13,6 +13,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import de.coldtea.verborum.core.designsystem.component.LocalIsOnline
 import de.coldtea.verborum.core.designsystem.component.LocalNavigateBack
 import de.coldtea.verborum.core.designsystem.component.LocalSnackbarHostState
 import de.coldtea.verborum.core.designsystem.component.LocalVerborumTopBarController
@@ -35,6 +36,7 @@ import de.coldtea.verborum.core.designsystem.component.rememberIsOnline
 fun NavigationCentral(navController: NavHostController = rememberNavController()) {
     val topBarController = remember { VerborumTopBarController() }
     val snackbarHostState = remember { SnackbarHostState() }
+    val isOnline = rememberIsOnline()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -48,12 +50,13 @@ fun NavigationCentral(navController: NavHostController = rememberNavController()
         LocalVerborumTopBarController provides topBarController,
         LocalSnackbarHostState provides snackbarHostState,
         LocalNavigateBack provides { navController.popBackStack() },
+        LocalIsOnline provides isOnline,
     ) {
         VerborumAppScaffold(
             navController = navController,
             currentDestination = currentDestination,
             topBarState = topBarState,
-            isOnline = rememberIsOnline(),
+            isOnline = isOnline,
             snackbarHostState = snackbarHostState,
         )
     }

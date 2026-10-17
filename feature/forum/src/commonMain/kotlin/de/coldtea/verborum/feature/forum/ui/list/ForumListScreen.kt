@@ -1,11 +1,18 @@
 package de.coldtea.verborum.feature.forum.ui.list
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.coldtea.verborum.core.designsystem.component.LocalIsOnline
 import de.coldtea.verborum.core.designsystem.component.RefreshWhileVisible
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
@@ -13,6 +20,7 @@ import de.coldtea.verborum.core.designsystem.component.VerborumIcons
 import de.coldtea.verborum.core.designsystem.component.VerborumTopBarAction
 import de.coldtea.verborum.core.localization.LocalStrings
 import de.coldtea.verborum.feature.forum.domain.MarketplaceListingFilter
+import de.coldtea.verborum.feature.forum.ui.model.ForumAccessState
 import kotlinx.coroutines.flow.map
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -45,6 +53,19 @@ internal fun ForumListScreen(
     RefreshWhileVisible(onRefresh = viewModel::refreshDownloadsInBackground)
     val strings = LocalStrings.current
 
+    // Online-only: while offline the listings are not shown at all (the banner says why), and the way
+    // back online starts a fresh search from page 0 and re-checks membership, which also retries a
+    // check that failed while offline. Going offline reloads nothing — it could only fail.
+    val isOnline = LocalIsOnline.current
+    var wasOnline by remember { mutableStateOf(isOnline) }
+    LaunchedEffect(isOnline) {
+        if (isOnline && !wasOnline) {
+            viewModel.refreshAccess()
+            viewModel.refresh()
+        }
+        wasOnline = isOnline
+    }
+
     LaunchedEffect(appliedFilter) {
         appliedFilter?.let { filter ->
             viewModel.applyFilter(filter)
@@ -56,6 +77,7 @@ internal fun ForumListScreen(
         title = strings.forumListScreenTitle,
         subtitle = strings.forumListScreenSubtitle,
         showBackButton = false,
+        requiresInternet = true,
         action = VerborumTopBarAction(
             icon = VerborumIcons.Search,
             contentDescription = strings.forumSearchScreenTitle,
@@ -72,6 +94,11 @@ internal fun ForumListScreen(
             }
         },
     )
+
+    if (!isOnline && state.access == ForumAccessState.MEMBER) {
+        Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
 
     ForumListContent(
         state = state,

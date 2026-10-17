@@ -8,12 +8,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.common.observeConnectivity
 import de.coldtea.verborum.core.designsystem.theme.Spacing
-import de.coldtea.verborum.core.localization.strings
 
 /**
  * Tracks whether the app currently has usable internet, for the offline banner. Starts out `true`
@@ -26,12 +26,22 @@ fun rememberIsOnline(): Boolean {
 }
 
 /**
+ * The app-wide connectivity state, provided once by the navigation shell from [rememberIsOnline] so
+ * screens can react to it without each starting their own platform monitor. Defaults to online
+ * (previews, tests).
+ */
+val LocalIsOnline = staticCompositionLocalOf { true }
+
+/**
  * Standing "you are offline" notice, shown directly beneath the shared top bar. Pinned there rather
  * than floating over the content: being offline is a standing condition, so it should stay visible
  * instead of timing out the way a snackbar would.
+ *
+ * [message] is `offline` for the local-first screens and `offlineOnlineOnly` for the ones that cannot
+ * work without a connection (see `VerborumTopBarState.requiresInternet`).
  */
 @Composable
-fun OfflineBanner(modifier: Modifier = Modifier) {
+fun OfflineBanner(message: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.errorContainer,
@@ -43,7 +53,7 @@ fun OfflineBanner(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = strings.offline,
+                text = message,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )

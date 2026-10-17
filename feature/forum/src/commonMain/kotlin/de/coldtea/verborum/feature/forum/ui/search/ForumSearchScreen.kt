@@ -37,6 +37,7 @@ internal fun ForumSearchScreen(
         title = strings.forumSearchScreenTitle,
         subtitle = strings.forumSearchScreenSubtitle,
         backLabel = strings.forumListScreenTitle,
+        requiresInternet = true,
     )
 
     ForumSearchContent(

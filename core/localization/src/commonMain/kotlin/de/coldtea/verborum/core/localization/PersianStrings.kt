@@ -8,6 +8,7 @@ internal object PersianStrings : Strings {
     override val delete = "حذف"
     override val edit = "ویرایش"
     override val remove = "برداشتن"
+    override val offlineOnlineOnly = "شما آفلاین هستید — انجمن و پروفایل به اتصال اینترنت نیاز دارند"
     override val offline = "آفلاین هستید. تغییرات به‌صورت محلی ذخیره و هنگام اتصال هم‌گام می‌شوند."
     override val signIn = "ورود"
     override val createAccount = "ایجاد حساب"

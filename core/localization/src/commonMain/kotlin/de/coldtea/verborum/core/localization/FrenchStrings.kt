@@ -8,6 +8,7 @@ internal object FrenchStrings : Strings {
     override val delete = "Supprimer"
     override val edit = "Modifier"
     override val remove = "Retirer"
+    override val offlineOnlineOnly = "Vous êtes hors ligne — le Forum et le Profil nécessitent une connexion internet"
     override val offline = "Vous êtes hors ligne. Les modifications sont enregistrées localement et synchronisées à la reconnexion."
     override val signIn = "Se connecter"
     override val createAccount = "Créer un compte"

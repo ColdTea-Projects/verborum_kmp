@@ -76,7 +76,7 @@ internal actual fun ProfileContent(
                         WebTextField(
                             value = form.displayName,
                             onValueChange = onDisplayNameChange,
-                            isEnabled = !form.isSaving,
+                            isEnabled = form.isEditable,
                         )
                         Text(
                             text = if (form.isDisplayNameMissing) {
@@ -98,7 +98,7 @@ internal actual fun ProfileContent(
                         WebTermsPanel(
                             accepted = form.agreementAccepted,
                             onAcceptedChange = onAgreementChange,
-                            isEnabled = !form.isSaving,
+                            isEnabled = form.isEditable,
                         )
 
                         WebPageSpacer(Spacing.large)

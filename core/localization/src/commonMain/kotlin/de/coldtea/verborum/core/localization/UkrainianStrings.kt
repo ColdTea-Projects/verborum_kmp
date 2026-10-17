@@ -8,6 +8,7 @@ internal object UkrainianStrings : Strings {
     override val delete = "Видалити"
     override val edit = "Редагувати"
     override val remove = "Прибрати"
+    override val offlineOnlineOnly = "Ви офлайн — для Форуму та Профілю потрібне підключення до інтернету"
     override val offline = "Ви офлайн. Зміни зберігаються локально та синхронізуються після відновлення зв'язку."
     override val signIn = "Увійти"
     override val createAccount = "Створити обліковий запис"

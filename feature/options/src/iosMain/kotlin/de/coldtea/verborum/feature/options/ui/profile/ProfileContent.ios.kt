@@ -71,7 +71,7 @@ internal actual fun ProfileContent(
             OutlinedTextField(
                 value = form.displayName,
                 onValueChange = onDisplayNameChange,
-                enabled = !form.isSaving,
+                enabled = form.isEditable,
                 label = { Text(strings.profileDisplayNameLabel) },
                 singleLine = true,
                 isError = form.isDisplayNameMissing,
@@ -92,7 +92,7 @@ internal actual fun ProfileContent(
             MarketplaceTermsSection(
                 accepted = form.agreementAccepted,
                 onAcceptedChange = onAgreementChange,
-                isEnabled = !form.isSaving,
+                isEnabled = form.isEditable,
             )
 
             Spacer(Modifier.height(Spacing.medium))

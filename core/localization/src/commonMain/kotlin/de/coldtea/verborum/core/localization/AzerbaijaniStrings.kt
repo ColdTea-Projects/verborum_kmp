@@ -8,6 +8,7 @@ internal object AzerbaijaniStrings : Strings {
     override val delete = "Sil"
     override val edit = "Redaktə et"
     override val remove = "Çıxar"
+    override val offlineOnlineOnly = "Oflaynsınız — Forum və Profil üçün internet bağlantısı lazımdır"
     override val offline = "Oflaynsınız. Dəyişikliklər lokal saxlanılır və bağlantı bərpa olunanda sinxronlaşdırılır."
     override val signIn = "Daxil ol"
     override val createAccount = "Hesab yarat"

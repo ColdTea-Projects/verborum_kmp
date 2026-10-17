@@ -90,4 +90,18 @@ class ProfileFormTest {
         assertTrue(saving.hasChanges)
         assertFalse(saving.canUpdate)
     }
+
+    @Test
+    fun `offline the form is read-only and cannot be updated until the connection returns`() {
+        val edited = saved.copy(displayName = "Anna B.")
+
+        val offline = edited.copy(isOnline = false)
+        assertFalse(offline.isEditable)
+        assertTrue(offline.hasChanges)
+        assertFalse(offline.canUpdate)
+
+        val back = offline.copy(isOnline = true)
+        assertTrue(back.isEditable)
+        assertTrue(back.canUpdate)
+    }
 }

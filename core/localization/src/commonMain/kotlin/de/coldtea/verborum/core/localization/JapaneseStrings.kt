@@ -8,6 +8,7 @@ internal object JapaneseStrings : Strings {
     override val delete = "削除"
     override val edit = "編集"
     override val remove = "取り除く"
+    override val offlineOnlineOnly = "オフラインです — フォーラムとプロフィールにはインターネット接続が必要です"
     override val offline = "オフラインです。変更はローカルに保存され、再接続時に同期されます。"
     override val signIn = "ログイン"
     override val createAccount = "アカウントを作成"

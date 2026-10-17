@@ -8,6 +8,7 @@ internal object LithuanianStrings : Strings {
     override val delete = "Ištrinti"
     override val edit = "Redaguoti"
     override val remove = "Pašalinti"
+    override val offlineOnlineOnly = "Esate neprisijungę — Forumui ir Profiliui reikia interneto ryšio"
     override val offline = "Esate neprisijungę. Pakeitimai išsaugomi vietoje ir sinchronizuojami vėl prisijungus."
     override val signIn = "Prisijungti"
     override val createAccount = "Sukurti paskyrą"

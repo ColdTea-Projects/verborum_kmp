@@ -16,6 +16,11 @@ internal data class ProfileForm(
     val agreementAccepted: Boolean,
     val isSaving: Boolean = false,
     val isLeaveConfirmationShown: Boolean = false,
+    /**
+     * Whether the device has a connection, set by the screen rather than the view model: the profile
+     * is server-side, so offline the saved values stay readable but nothing can be changed.
+     */
+    val isOnline: Boolean = true,
 ) {
     /** The server trims names, so an edit that only adds whitespace is not a change. */
     val trimmedDisplayName: String get() = displayName.trim()
@@ -33,7 +38,10 @@ internal data class ProfileForm(
      */
     val isLeavingForum: Boolean get() = savedAgreementAccepted && !agreementAccepted
 
-    val canUpdate: Boolean get() = hasChanges && !isDisplayNameMissing && !isSaving
+    /** Whether the fields take input: not while a save is in flight, and not while offline. */
+    val isEditable: Boolean get() = isOnline && !isSaving
+
+    val canUpdate: Boolean get() = hasChanges && !isDisplayNameMissing && isEditable
 
     internal companion object {
         fun from(profile: UserProfile) = ProfileForm(

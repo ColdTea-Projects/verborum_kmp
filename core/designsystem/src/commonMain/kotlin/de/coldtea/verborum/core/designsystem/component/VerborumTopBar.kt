@@ -67,6 +67,11 @@ data class VerborumTopBarState(
      * for example an animated word count that flashes on change.
      */
     val subtitleContent: (@Composable () -> Unit)? = null,
+    /**
+     * The screen cannot work without a connection (the Forum, the profile). The shell words the
+     * offline banner accordingly — "needs an internet connection" rather than "changes will sync".
+     */
+    val requiresInternet: Boolean = false,
 )
 
 /**
@@ -124,6 +129,7 @@ fun RegisterTopBar(
     backLabel: String? = null,
     titleFontFamily: FontFamily? = null,
     subtitleContent: (@Composable () -> Unit)? = null,
+    requiresInternet: Boolean = false,
 ) {
     val controller = LocalVerborumTopBarController.current
 
@@ -140,9 +146,19 @@ fun RegisterTopBar(
         backLabel,
         titleFontFamily,
         subtitleContent,
+        requiresInternet,
     ) {
         val token = controller.register(
-            VerborumTopBarState(title, subtitle, showBackButton, action, backLabel, titleFontFamily, subtitleContent),
+            VerborumTopBarState(
+                title,
+                subtitle,
+                showBackButton,
+                action,
+                backLabel,
+                titleFontFamily,
+                subtitleContent,
+                requiresInternet,
+            ),
         )
 
         onDispose { controller.unregister(token) }

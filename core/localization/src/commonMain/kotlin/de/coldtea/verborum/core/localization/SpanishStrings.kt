@@ -8,6 +8,7 @@ internal object SpanishStrings : Strings {
     override val delete = "Eliminar"
     override val edit = "Editar"
     override val remove = "Quitar"
+    override val offlineOnlineOnly = "Estás sin conexión — el Foro y el Perfil necesitan conexión a internet"
     override val offline = "Estás sin conexión. Los cambios se guardan localmente y se sincronizan al reconectar."
     override val signIn = "Iniciar sesión"
     override val createAccount = "Crear cuenta"

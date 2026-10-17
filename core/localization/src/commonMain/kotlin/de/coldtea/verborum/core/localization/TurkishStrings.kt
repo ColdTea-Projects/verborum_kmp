@@ -8,6 +8,7 @@ internal object TurkishStrings : Strings {
     override val delete = "Sil"
     override val edit = "Düzenle"
     override val remove = "Kaldır"
+    override val offlineOnlineOnly = "Çevrimdışısınız — Forum ve Profil için internet bağlantısı gerekir"
     override val offline = "Çevrimdışısınız. Değişiklikler yerel olarak kaydedilir ve bağlantı kurulunca eşitlenir."
     override val signIn = "Giriş yap"
     override val createAccount = "Hesap oluştur"

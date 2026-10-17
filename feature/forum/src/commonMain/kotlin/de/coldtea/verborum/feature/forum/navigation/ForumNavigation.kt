@@ -82,7 +82,10 @@ fun NavGraphBuilder.forumGraph(navController: NavController) {
         }
 
         composable<ForumDetailsRoute> { entry ->
-            ForumDetailsScreen(dictionaryId = entry.toRoute<ForumDetailsRoute>().dictionaryId)
+            ForumDetailsScreen(
+                dictionaryId = entry.toRoute<ForumDetailsRoute>().dictionaryId,
+                onConnectionLost = { navController.popBackStack() },
+            )
         }
     }
 }

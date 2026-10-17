@@ -8,6 +8,7 @@ internal object GermanStrings : Strings {
     override val delete = "Löschen"
     override val edit = "Bearbeiten"
     override val remove = "Entfernen"
+    override val offlineOnlineOnly = "Du bist offline — Forum und Profil benötigen eine Internetverbindung"
     override val offline =
         "Du bist offline. Änderungen werden lokal gespeichert und synchronisiert, sobald du wieder verbunden bist."
 

@@ -8,6 +8,7 @@ internal object KoreanStrings : Strings {
     override val delete = "삭제"
     override val edit = "편집"
     override val remove = "제거"
+    override val offlineOnlineOnly = "오프라인 상태입니다 — 포럼과 프로필은 인터넷 연결이 필요합니다"
     override val offline = "오프라인 상태입니다. 변경 사항은 기기에 저장되고 연결되면 동기화됩니다."
     override val signIn = "로그인"
     override val createAccount = "계정 만들기"

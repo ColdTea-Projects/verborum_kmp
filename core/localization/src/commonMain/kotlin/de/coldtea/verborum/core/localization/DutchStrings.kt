@@ -8,6 +8,7 @@ internal object DutchStrings : Strings {
     override val delete = "Verwijderen"
     override val edit = "Bewerken"
     override val remove = "Verwijderen"
+    override val offlineOnlineOnly = "Je bent offline — Forum en Profiel hebben een internetverbinding nodig"
     override val offline = "Je bent offline. Wijzigingen worden lokaal opgeslagen en gesynchroniseerd zodra je weer verbinding hebt."
     override val signIn = "Inloggen"
     override val createAccount = "Account aanmaken"

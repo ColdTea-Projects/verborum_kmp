@@ -8,6 +8,7 @@ internal object RussianStrings : Strings {
     override val delete = "Удалить"
     override val edit = "Изменить"
     override val remove = "Убрать"
+    override val offlineOnlineOnly = "Вы офлайн — для Форума и Профиля нужно подключение к интернету"
     override val offline = "Вы офлайн. Изменения сохраняются локально и синхронизируются при подключении."
     override val signIn = "Войти"
     override val createAccount = "Создать аккаунт"

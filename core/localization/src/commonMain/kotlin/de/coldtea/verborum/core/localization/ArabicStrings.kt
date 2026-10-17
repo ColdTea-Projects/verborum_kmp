@@ -8,6 +8,7 @@ internal object ArabicStrings : Strings {
     override val delete = "حذف"
     override val edit = "تعديل"
     override val remove = "إزالة"
+    override val offlineOnlineOnly = "أنت غير متصل — يتطلب المنتدى والملف الشخصي اتصالاً بالإنترنت"
     override val offline = "أنت غير متصل. تُحفظ التغييرات محليًا وتُزامَن عند عودة الاتصال."
     override val signIn = "تسجيل الدخول"
     override val createAccount = "إنشاء حساب"

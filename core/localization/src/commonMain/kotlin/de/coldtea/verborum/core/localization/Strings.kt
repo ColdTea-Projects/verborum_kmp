@@ -22,6 +22,8 @@ interface Strings {
     val edit: String get() = "Edit"
     val remove: String get() = "Remove"
     val offline: String get() = "You are offline. Changes are saved locally and sync when you reconnect."
+    /** Shown instead of [offline] on the Forum and Profile, which never work without a connection. */
+    val offlineOnlineOnly: String get() = "You are offline. Forum and Profile need an internet connection."
 
     // ---- sign in -------------------------------------------------------------------------------
     val signIn: String get() = "Sign in"
