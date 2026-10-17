@@ -74,6 +74,7 @@ XSS surface but does not remove it entirely:
 - [ ] Redirect/`window.open` targets validated against an allowlist
 - [ ] CSP still valid for what the change adds; `connect-src` unchanged or deliberately widened
 - [ ] Keycloak stays same-origin; the API's cross-origin use (dev gateway) matches the gateway's `CORS_ALLOWED_ORIGINS`, and `connect-src` lists any deployed API origin
+- [ ] `history.state` stays null or text: `history-guard.js` loads before the app (Compose Navigation casts it blindly, and one foreign object freezes every tab until the page is closed)
 - [ ] PKCE `S256`, fresh verifier, `state` verified, CSRNG-backed RNG
 - [ ] `enableLogging` false; no header/body logging; nothing sensitive logged
 - [ ] No secrets in the bundle; source maps not shipped
