@@ -7,8 +7,8 @@
         <!-- The only ATS relaxation the app carries. NSAllowsLocalNetworking permits cleartext to
              loopback, .local and link-local addresses *only* — it can never allow http to a public
              host, so a release build stays https-only. It exists so a debug binary can reach the
-             local Keycloak (:8180) and ms_dictionary (:8085); see AuthConfig.ios.kt, which picks
-             those URLs on Platform.isDebugBinary. -->
+             local Keycloak (:8180) and the local API gateway (:8080); see AuthConfig.ios.kt and
+             ApiConfig.ios.kt, which pick those URLs on Platform.isDebugBinary. -->
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSAllowsLocalNetworking</key>

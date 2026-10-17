@@ -5,7 +5,10 @@ Answers one decision: **is this sign-in or network change safe to ship on iOS?**
 ## Transport
 
 - HTTPS only. **Never** add `NSAllowsArbitraryLoads` (or a per-domain ATS exception) to
-  `iosApp/iosApp/Info.plist`; the current plist has no ATS exceptions and should stay that way.
+  `iosApp/iosApp/Info.plist`. The one relaxation it carries is `NSAllowsLocalNetworking`: cleartext to
+  loopback, `.local` and link-local addresses only, so a debug binary reaches the local Keycloak (`:8180`)
+  and the local API gateway (`:8080`). It cannot allow http to a public host, so a release build stays
+  https-only. Do not add anything beyond it.
 - The Darwin engine gets a fresh `defaultApiConfig()` per target — the iOS base URL is absolute, so
   confirm it is `https://` and points at production before release. A localhost/staging URL shipping
   in a release build is both a security and a privacy incident.
