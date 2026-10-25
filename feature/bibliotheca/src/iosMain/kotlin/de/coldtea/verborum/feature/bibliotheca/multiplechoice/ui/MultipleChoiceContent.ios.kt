@@ -29,14 +29,17 @@ import de.coldtea.verborum.core.designsystem.theme.Dimens
 import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.QuestionCard
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.TestDirectionDialog
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.TestResult
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestDirection
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 import de.coldtea.verborum.core.localization.strings
 
 @Composable
 internal actual fun MultipleChoiceContent(
     state: MultipleChoiceUiState,
+    onDirectionChosen: (TestDirection) -> Unit,
     onAnswerSelected: (String) -> Unit,
     onCheckAnswer: () -> Unit,
     onNextQuestion: () -> Unit,
@@ -70,6 +73,21 @@ internal actual fun MultipleChoiceContent(
                     textAlign = TextAlign.Center,
                 )
             }
+        }
+
+        is TestState.ChoosingDirection -> {
+            RegisterTopBar(title = strings.test, showBackButton = true)
+
+            // The dialog is the whole step, so what it sits over is deliberately bare: the first
+            // question only exists once a direction has been picked.
+            Box(modifier = modifier.fillMaxSize())
+
+            TestDirectionDialog(
+                options = test.options,
+                onChoose = onDirectionChosen,
+                // Nothing to go back to on this screen, so dismissing leaves the test.
+                onDismiss = onFinished,
+            )
         }
 
         is TestState.Question -> {

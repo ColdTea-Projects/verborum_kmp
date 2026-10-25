@@ -6,14 +6,19 @@ import de.coldtea.verborum.core.localization.LanguageSettings
 import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.core.localization.stringsFor
 import de.coldtea.verborum.core.common.Outcome
+import de.coldtea.verborum.core.localization.languagePairLabel
+import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncService
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.DISTRACTOR_COUNT
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.DirectionOption
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestChoice
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestDirection
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestQuestion
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.toQuestions
@@ -37,6 +42,7 @@ internal class MultipleChoiceViewModel(
     private val dictionaryId: String,
     private val wordService: WordService,
     private val observeLanguagePairWords: ObserveLanguagePairWordsUseCase,
+    private val observeDictionary: ObserveDictionaryUseCase,
     private val syncService: SyncService,
 ) : BaseViewModel<MultipleChoiceUiState, Nothing>(MultipleChoiceUiState()) {
 
@@ -50,6 +56,12 @@ internal class MultipleChoiceViewModel(
     val messages: SharedFlow<String> = _messages.asSharedFlow()
 
     private var latestWords: List<Word> = emptyList()
+
+    /** The whole language pair, kept because the distractors are rebuilt for the chosen direction. */
+    private var latestPairWords: List<Word> = emptyList()
+
+    /** Null until the learner has said which way round to be asked; settled for the whole run. */
+    private var chosenDirection: TestDirection? = null
 
     /**
      * Each word's level as it stood when this run started. Captured once, because the saves this test
@@ -85,15 +97,24 @@ internal class MultipleChoiceViewModel(
             combine(
                 wordService.observeWords(dictionaryId),
                 observeLanguagePairWords(dictionaryId),
-            ) { dictionaryWords, languagePairWords -> dictionaryWords to languagePairWords }
+                // The direction is offered by name, so the dictionary's own languages are part of
+                // what this screen waits for.
+                observeDictionary(dictionaryId),
+            ) { dictionaryWords, languagePairWords, dictionary ->
+                Triple(dictionaryWords, languagePairWords, dictionary)
+            }
                 .catch { setState { copy(test = TestState.Failed) } }
-                .collect { (dictionaryWords, languagePairWords) ->
-                    onWordsLoaded(dictionaryWords, languagePairWords)
+                .collect { (dictionaryWords, languagePairWords, dictionary) ->
+                    onWordsLoaded(dictionaryWords, languagePairWords, dictionary?.dictionary)
                 }
         }
     }
 
-    private fun onWordsLoaded(dictionaryWords: List<Word>, languagePairWords: List<Word>) {
+    private fun onWordsLoaded(
+        dictionaryWords: List<Word>,
+        languagePairWords: List<Word>,
+        dictionary: Dictionary?,
+    ) {
         // Three plausible wrong answers have to come from somewhere, so the whole language pair —
         // not just this dictionary — needs enough distinct entries.
         val distinctInPair = languagePairWords.distinctBy { it.word + it.translation }.size
@@ -103,16 +124,65 @@ internal class MultipleChoiceViewModel(
             return
         }
 
+        // Nothing can be named yet: the row this screen's own sync is fetching carries the two
+        // languages the direction is offered in.
+        if (dictionary == null) return
+
         latestWords = dictionaryWords
+        latestPairWords = languagePairWords
+
+        val direction = chosenDirection
+
+        // The first step is the question of which way round, and until it is answered there is no
+        // paper to build.
+        if (direction == null) {
+            setState { copy(test = TestState.ChoosingDirection(directionOptions(dictionary))) }
+            return
+        }
 
         // Built once: a sync landing mid-test must not reshuffle the paper being sat.
-        if (questions.isNotEmpty()) return
+        if (questions.isNotEmpty()) {
+            // Except where a retry left the screen on Loading — re-rendering the current question
+            // otherwise reshuffles its choices under the user's finger.
+            if (currentState.test == TestState.Loading) showQuestion()
+            return
+        }
 
-        questions = dictionaryWords.flatMap(Word::toQuestions).shuffled()
-        distractorsByForm = languagePairWords
-            .flatMap(Word::toQuestions)
+        startTest(direction)
+    }
+
+    /** Both ways round, each named in the reader's own language — "English › German". */
+    private fun directionOptions(dictionary: Dictionary): List<DirectionOption> = listOf(
+        DirectionOption(
+            direction = TestDirection.WORD_TO_TRANSLATION,
+            label = languagePairLabel(dictionary.fromLang, dictionary.toLang, strings),
+        ),
+        DirectionOption(
+            direction = TestDirection.TRANSLATION_TO_WORD,
+            label = languagePairLabel(dictionary.toLang, dictionary.fromLang, strings),
+        ),
+    )
+
+    /**
+     * Settles the direction and starts the run. Ignored once a direction is already set: the paper
+     * being sat cannot be rewritten halfway through.
+     */
+    fun onDirectionChosen(direction: TestDirection) {
+        // Nothing to build a paper from would end the run before it began, with a score out of zero.
+        if (chosenDirection != null || latestWords.isEmpty()) return
+
+        chosenDirection = direction
+        startTest(direction)
+    }
+
+    /** The questions come from this dictionary; the wrong answers from the whole language pair. */
+    private fun startTest(direction: TestDirection) {
+        questions = latestWords.flatMap { word -> word.toQuestions(direction) }.shuffled()
+        distractorsByForm = latestPairWords
+            .flatMap { word -> word.toQuestions(direction) }
             .groupBy({ it.formKey }, { it.answer })
 
+        questionIndex = 0
         resetScoring()
         showQuestion()
     }

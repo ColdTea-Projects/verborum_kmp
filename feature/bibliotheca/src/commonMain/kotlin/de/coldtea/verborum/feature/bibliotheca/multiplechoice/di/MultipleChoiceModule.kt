@@ -13,6 +13,7 @@ internal val multipleChoiceModule: Module = module {
             dictionaryId = parameters.get(),
             wordService = get(),
             observeLanguagePairWords = get(),
+            observeDictionary = get(),
             syncService = get(),
         )
     }

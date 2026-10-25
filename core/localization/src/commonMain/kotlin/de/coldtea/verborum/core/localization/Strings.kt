@@ -182,6 +182,11 @@ interface Strings {
     val incorrect: String get() = "Incorrect"
     val backToDictionary: String get() = "Back to Dictionary"
     val tryAgain: String get() = "Try Again"
+    /** The step before the first question: which way round the test asks. */
+    val testDirection: String get() = "Test direction"
+    val chooseTestDirection: String get() = "Choose a direction"
+    val testDirectionSubtitle: String get() =
+        "Pick the language the questions are asked in. The answers come from the other one."
     fun questionProgress(index: Int, total: Int): String = "Question $index of $total"
     fun askMeaning(word: String): String = "What does “$word” mean?"
     fun askForm(word: String): String = "What is “$word”?"

@@ -3,9 +3,8 @@ package de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.core.localization.Strings
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.FieldKey
+import de.coldtea.verborum.feature.bibliotheca.common.ui.model.displayLine
 import de.coldtea.verborum.feature.bibliotheca.common.ui.model.formsOf
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.translationLine
-import de.coldtea.verborum.feature.bibliotheca.common.ui.model.wordLine
 
 /**
  * One quiz item. A word produces a base question (word → translation) plus one per grammatical form
@@ -32,13 +31,26 @@ internal data class TestChoice(
 /**
  * A word's questions: the base pair, then every form both languages recorded. A form only one side
  * has cannot be asked — there would be no answer to mark correct.
+ *
+ * [direction] decides which side asks and which answers; everything below reads from the chosen
+ * sides rather than from the dictionary's own, so the two directions share this one shape.
  */
-internal fun Word.toQuestions(): List<TestQuestion> {
-    val promptForms = formsOf(wordMeta)
-    val answerForms = formsOf(translationMeta)
+internal fun Word.toQuestions(direction: TestDirection): List<TestQuestion> {
+    val isForward = direction == TestDirection.WORD_TO_TRANSLATION
+    val (promptSurfaces, promptMeta) = if (isForward) word to wordMeta else translation to translationMeta
+    val (answerSurfaces, answerMeta) = if (isForward) translation to translationMeta else word to wordMeta
+
+    val promptForms = formsOf(promptMeta)
+    val answerForms = formsOf(answerMeta)
 
     return buildList {
-        add(TestQuestion(wordId = wordId, prompt = wordLine(), answer = translationLine()))
+        add(
+            TestQuestion(
+                wordId = wordId,
+                prompt = displayLine(promptSurfaces, promptMeta),
+                answer = displayLine(answerSurfaces, answerMeta),
+            ),
+        )
 
         FieldKey.entries.forEach { key ->
             val prompt = promptForms[key]

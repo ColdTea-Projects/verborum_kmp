@@ -10,6 +10,13 @@ internal sealed interface TestState {
     /** The language pair has too few distinct entries to offer plausible wrong answers. */
     data object NotEnoughWords : TestState
 
+    /**
+     * Which way round to be asked, before anything is asked. Always both ways round the dictionary
+     * records, each named by its languages, so the learner picks rather than inherits the direction
+     * the dictionary happens to be written in.
+     */
+    data class ChoosingDirection(val options: List<DirectionOption>) : TestState
+
     data class Question(
         val choice: TestChoice,
         /** One-based, for "Question 3 of 11". */

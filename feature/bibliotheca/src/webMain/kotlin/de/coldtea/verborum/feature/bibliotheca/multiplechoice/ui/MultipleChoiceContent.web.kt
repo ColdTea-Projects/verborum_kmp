@@ -26,8 +26,10 @@ import de.coldtea.verborum.core.designsystem.theme.Shapes
 import de.coldtea.verborum.core.designsystem.theme.Spacing
 import de.coldtea.verborum.core.designsystem.theme.scriptedText
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebQuestionCard
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebTestDirectionPicker
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.composables.WebTestResult
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.REQUIRED_WORDS_FOR_TEST
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestDirection
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 import de.coldtea.verborum.core.localization.strings
 
@@ -35,6 +37,7 @@ import de.coldtea.verborum.core.localization.strings
 @Composable
 internal actual fun MultipleChoiceContent(
     state: MultipleChoiceUiState,
+    onDirectionChosen: (TestDirection) -> Unit,
     onAnswerSelected: (String) -> Unit,
     onCheckAnswer: () -> Unit,
     onNextQuestion: () -> Unit,
@@ -67,6 +70,14 @@ internal actual fun MultipleChoiceContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
+            }
+        }
+
+        is TestState.ChoosingDirection -> {
+            RegisterTopBar(title = strings.test, showBackButton = true, backLabel = strings.exitTest)
+
+            TestPage(modifier = modifier) {
+                WebTestDirectionPicker(options = test.options, onChoose = onDirectionChosen)
             }
         }
 

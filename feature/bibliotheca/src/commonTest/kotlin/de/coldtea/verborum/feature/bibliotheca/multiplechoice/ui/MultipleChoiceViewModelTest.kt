@@ -12,9 +12,11 @@ import de.coldtea.verborum.feature.bibliotheca.common.domain.SyncUserDictionarie
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Dictionary
 import de.coldtea.verborum.feature.bibliotheca.common.domain.Word
 import de.coldtea.verborum.feature.bibliotheca.common.domain.WordService
+import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveDictionaryUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.domain.usecase.ObserveLanguagePairWordsUseCase
 import de.coldtea.verborum.feature.bibliotheca.common.unauthorized
 import de.coldtea.verborum.feature.bibliotheca.common.word
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestDirection
 import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -66,6 +68,7 @@ class MultipleChoiceViewModelTest {
             wordService = fakeWordService(wordRepository, imported),
             observeLanguagePairWords =
                 ObserveLanguagePairWordsUseCase(dictionaries, wordRepository, imported),
+            observeDictionary = ObserveDictionaryUseCase(dictionaries, imported),
             syncService = fakeSyncService(dictionaries, wordRepository, imported),
         )
 
@@ -73,6 +76,13 @@ class MultipleChoiceViewModelTest {
     }
 
     private fun MultipleChoiceViewModel.question() = state.value.test as TestState.Question
+
+    /**
+     * Picks the dictionary's own direction, which is the step every run now starts with. The tests
+     * below are about what the test does once it is under way, so they take it as read.
+     */
+    private fun MultipleChoiceViewModel.startInOwnDirection() =
+        onDirectionChosen(TestDirection.WORD_TO_TRANSLATION)
 
     private fun MultipleChoiceViewModel.answerCurrent(correctly: Boolean) {
         val current = question().choice
@@ -87,9 +97,67 @@ class MultipleChoiceViewModelTest {
     }
 
     @Test
+    fun `the first step offers both directions, the dictionary's own first`() =
+        runTest(mainDispatcher) {
+            val (viewModel, _) = viewModel()
+
+            advanceUntilIdle()
+
+            // The fake dictionary is en › de, so the two options read in that order and its reverse.
+            val choosing = viewModel.state.value.test as TestState.ChoosingDirection
+            assertEquals(
+                listOf(TestDirection.WORD_TO_TRANSLATION, TestDirection.TRANSLATION_TO_WORD),
+                choosing.options.map { it.direction },
+            )
+            assertEquals(listOf("English › German", "German › English"), choosing.options.map { it.label })
+        }
+
+    @Test
+    fun `the reverse direction asks the translation and answers with the word`() =
+        runTest(mainDispatcher) {
+            val (viewModel, _) = viewModel(
+                words = listOf(word("mine", dictionaryId, word = "der Apfel", translation = "apple")),
+                siblings = listOf(dictionary("sibling")),
+                siblingWords = (1..3).map { index ->
+                    word(
+                        "their-$index",
+                        dictionaryId = "sibling",
+                        word = "wort-$index",
+                        translation = "answer-$index",
+                    )
+                },
+            )
+            advanceUntilIdle()
+
+            viewModel.onDirectionChosen(TestDirection.TRANSLATION_TO_WORD)
+
+            val choice = viewModel.question().choice
+            assertEquals("apple", choice.question.prompt)
+            assertEquals("der Apfel", choice.question.answer)
+            // The wrong answers come from the same side as the right one.
+            assertEquals(
+                listOf("wort-1", "wort-2", "wort-3"),
+                choice.choices.filter { it != choice.question.answer }.sorted(),
+            )
+        }
+
+    @Test
+    fun `the direction cannot be changed once the run has started`() = runTest(mainDispatcher) {
+        val (viewModel, _) = viewModel()
+        advanceUntilIdle()
+        viewModel.startInOwnDirection()
+        val asked = viewModel.question().choice.question.prompt
+
+        viewModel.onDirectionChosen(TestDirection.TRANSLATION_TO_WORD)
+
+        assertEquals(asked, viewModel.question().choice.question.prompt)
+    }
+
+    @Test
     fun `a question offers the right answer among four`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel()
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
 
         val choice = viewModel.question().choice
         assertEquals(4, choice.choices.size)
@@ -103,6 +171,7 @@ class MultipleChoiceViewModelTest {
             // The verb has past and participle on both sides: base + 2 forms = 3 questions.
             val (viewModel, _) = viewModel(words = listOf(verb) + fourWords)
             advanceUntilIdle()
+            viewModel.startInOwnDirection()
 
             assertEquals(fourWords.size + 3, viewModel.question().total)
         }
@@ -120,6 +189,7 @@ class MultipleChoiceViewModelTest {
     fun `an answer is locked once checked`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel()
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
         viewModel.answerCurrent(correctly = true)
         val checked = viewModel.state.value.selectedAnswer
 
@@ -133,6 +203,7 @@ class MultipleChoiceViewModelTest {
         runTest(mainDispatcher) {
             val (viewModel, repository) = viewModel(words = listOf(verb) + fourWords)
             advanceUntilIdle()
+            viewModel.startInOwnDirection()
 
             // Answer every question about the verb correctly.
             repeat(viewModel.question().total) {
@@ -154,6 +225,7 @@ class MultipleChoiceViewModelTest {
     fun `a word answered both right and wrong ends where it started`() = runTest(mainDispatcher) {
         val (viewModel, repository) = viewModel(words = listOf(verb) + fourWords)
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
 
         var answeredRight = false
         repeat(viewModel.question().total) {
@@ -176,6 +248,7 @@ class MultipleChoiceViewModelTest {
     fun `the run ends with a score over every question`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel()
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
         val total = viewModel.question().total
 
         repeat(total) {
@@ -196,6 +269,7 @@ class MultipleChoiceViewModelTest {
     fun `answering everything wrong does not pass`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel()
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
         val total = viewModel.question().total
 
         repeat(total) {
@@ -215,6 +289,7 @@ class MultipleChoiceViewModelTest {
     fun `retaking starts a fresh run`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel()
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
         val total = viewModel.question().total
         repeat(total) {
             viewModel.answerCurrent(correctly = true)
@@ -236,6 +311,7 @@ class MultipleChoiceViewModelTest {
     fun `a failed level save does not stop the test`() = runTest(mainDispatcher) {
         val (viewModel, _) = viewModel(updateFails = true)
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
 
         viewModel.answerCurrent(correctly = true)
         advanceUntilIdle()
@@ -264,6 +340,7 @@ class MultipleChoiceViewModelTest {
             )
 
             advanceUntilIdle()
+            viewModel.startInOwnDirection()
 
             // One question: questions only ever come from the dictionary under test.
             val choice = viewModel.question().choice
@@ -298,6 +375,7 @@ class MultipleChoiceViewModelTest {
             )
 
             advanceUntilIdle()
+            viewModel.startInOwnDirection()
 
             val choice = viewModel.question().choice
             assertEquals(1, choice.choices.count { it == choice.question.answer })
@@ -308,6 +386,7 @@ class MultipleChoiceViewModelTest {
     fun `a pool that grows mid-test does not reshuffle the paper`() = runTest(mainDispatcher) {
         val (viewModel, words) = viewModel(siblings = listOf(dictionary("sibling")))
         advanceUntilIdle()
+        viewModel.startInOwnDirection()
         val asked = viewModel.question().choice.question.wordId
 
         words.saveWord(

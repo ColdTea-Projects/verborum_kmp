@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
+import de.coldtea.verborum.feature.bibliotheca.multiplechoice.ui.model.TestDirection
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -25,6 +26,7 @@ internal fun MultipleChoiceScreen(
 
     MultipleChoiceContent(
         state = state,
+        onDirectionChosen = viewModel::onDirectionChosen,
         onAnswerSelected = viewModel::onAnswerSelected,
         onCheckAnswer = viewModel::onCheckAnswer,
         onNextQuestion = viewModel::onNextQuestion,
@@ -41,10 +43,14 @@ internal fun MultipleChoiceScreen(
  * iOS: a question card over two stacked buttons in a phone-width column — the Android design. Web:
  * the same question inside a bordered card on a narrow desktop page, with the answers marking
  * themselves right or wrong once the answer is checked.
+ *
+ * The direction step differs by platform in the same way: a dialog on iOS, a dropdown on web.
  */
 @Composable
 internal expect fun MultipleChoiceContent(
     state: MultipleChoiceUiState,
+    /** Answers `ChoosingDirection` — the first step, and the only one before the test exists. */
+    onDirectionChosen: (TestDirection) -> Unit,
     onAnswerSelected: (String) -> Unit,
     onCheckAnswer: () -> Unit,
     onNextQuestion: () -> Unit,
