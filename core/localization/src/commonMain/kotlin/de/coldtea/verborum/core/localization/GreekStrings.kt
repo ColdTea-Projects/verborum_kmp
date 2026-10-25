@@ -190,8 +190,8 @@ internal object GreekStrings : Strings {
     override fun meaningNumber(index: Int) = "Σημασία $index"
     override fun backTo(name: String) = "Πίσω στο $name"
     override fun questionProgress(index: Int, total: Int) = "Ερώτηση $index από $total"
-    override fun askMeaning(word: String) = "Τι σημαίνει «$word»;"
-    override fun askForm(word: String) = "Τι είναι «$word»;"
+    override fun askMeaning(word: String) = "Τι σημαίνει ${word};"
+    override fun askForm(word: String) = "Τι είναι ${word};"
     override fun correctAnswerWas(answer: String) = "Παρά λίγο — η απάντηση είναι «$answer»."
     override fun notEnoughWords(required: Int) =
         "Ένα τεστ χρειάζεται τουλάχιστον ${required} λέξεις σε αυτό το ζεύγος γλωσσών"

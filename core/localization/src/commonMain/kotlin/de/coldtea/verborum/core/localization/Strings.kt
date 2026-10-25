@@ -188,8 +188,11 @@ interface Strings {
     val testDirectionSubtitle: String get() =
         "Pick the language the questions are asked in. The answers come from the other one."
     fun questionProgress(index: Int, total: Int): String = "Question $index of $total"
-    fun askMeaning(word: String): String = "What does “$word” mean?"
-    fun askForm(word: String): String = "What is “$word”?"
+    // No quotation marks around the word in either question: the test screen draws it in the accent
+    // colour instead, and marks as well would be setting it apart twice — in punctuation that every
+    // language writes differently.
+    fun askMeaning(word: String): String = "What does ${word} mean?"
+    fun askForm(word: String): String = "What is ${word}?"
     fun correctAnswerWas(answer: String): String = "Not quite — the answer is “$answer”."
     /** The pair, not the dictionary: the wrong answers may come from any dictionary of it. */
     fun notEnoughWords(required: Int): String =

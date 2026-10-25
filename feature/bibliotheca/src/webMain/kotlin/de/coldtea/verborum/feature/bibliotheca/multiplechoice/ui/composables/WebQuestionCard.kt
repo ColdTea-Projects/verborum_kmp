@@ -69,9 +69,12 @@ internal fun WebQuestionCard(
             }
 
             Text(
-                // The word is in the language being studied and the question around it is not, so
-                // the two halves are drawn in different faces.
-                text = scriptedText(strings.askMeaning(question.choice.question.prompt)),
+                // The word asked about is in the accent colour, which is what used to be quote
+                // marks, and in the face its own script needs.
+                text = askedWordText(
+                    sentence = strings.askMeaning(question.choice.question.prompt),
+                    word = question.choice.question.prompt,
+                ),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )

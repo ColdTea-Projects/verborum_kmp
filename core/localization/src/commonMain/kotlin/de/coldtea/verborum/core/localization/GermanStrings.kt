@@ -151,8 +151,8 @@ internal object GermanStrings : Strings {
     override val backToDictionary = "Zurück zum Wörterbuch"
     override val tryAgain = "Nochmal versuchen"
     override fun questionProgress(index: Int, total: Int) = "Frage $index von $total"
-    override fun askMeaning(word: String) = "Was bedeutet „${word}“?"
-    override fun askForm(word: String) = "Was ist „${word}“?"
+    override fun askMeaning(word: String) = "Was bedeutet ${word}?"
+    override fun askForm(word: String) = "Was ist ${word}?"
     override fun correctAnswerWas(answer: String) = "Nicht ganz — die Antwort ist „${answer}“."
     override fun notEnoughWords(required: Int) =
         "Ein Test braucht mindestens ${required} Wörter in diesem Sprachpaar"

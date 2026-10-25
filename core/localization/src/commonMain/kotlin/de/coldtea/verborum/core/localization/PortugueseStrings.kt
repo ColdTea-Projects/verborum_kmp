@@ -190,8 +190,8 @@ internal object PortugueseStrings : Strings {
     override fun meaningNumber(index: Int) = "Significado $index"
     override fun backTo(name: String) = "Voltar a $name"
     override fun questionProgress(index: Int, total: Int) = "Pergunta $index de $total"
-    override fun askMeaning(word: String) = "O que significa «$word»?"
-    override fun askForm(word: String) = "Qual é «$word»?"
+    override fun askMeaning(word: String) = "O que significa ${word}?"
+    override fun askForm(word: String) = "Qual é ${word}?"
     override fun correctAnswerWas(answer: String) = "Quase — a resposta é «$answer»."
     override fun notEnoughWords(required: Int) =
         "Um teste precisa de pelo menos ${required} palavras neste par de idiomas"

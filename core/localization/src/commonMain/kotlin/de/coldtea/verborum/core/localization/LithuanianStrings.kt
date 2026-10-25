@@ -190,8 +190,8 @@ internal object LithuanianStrings : Strings {
     override fun meaningNumber(index: Int) = "$index reikšmė"
     override fun backTo(name: String) = "Atgal į $name"
     override fun questionProgress(index: Int, total: Int) = "$index klausimas iš $total"
-    override fun askMeaning(word: String) = "Ką reiškia „${word}“?"
-    override fun askForm(word: String) = "Kas yra „${word}“?"
+    override fun askMeaning(word: String) = "Ką reiškia ${word}?"
+    override fun askForm(word: String) = "Kas yra ${word}?"
     override fun correctAnswerWas(answer: String) = "Beveik — teisingas atsakymas „${answer}“."
     override fun notEnoughWords(required: Int) =
         "Testui reikia bent ${required} žodžių šioje kalbų poroje"

@@ -190,8 +190,8 @@ internal object AzerbaijaniStrings : Strings {
     override fun meaningNumber(index: Int) = "$index. məna"
     override fun backTo(name: String) = "$name lüğətinə qayıt"
     override fun questionProgress(index: Int, total: Int) = "Sual $index / $total"
-    override fun askMeaning(word: String) = "“$word” nə deməkdir?"
-    override fun askForm(word: String) = "“$word” nədir?"
+    override fun askMeaning(word: String) = "${word} nə deməkdir?"
+    override fun askForm(word: String) = "${word} nədir?"
     override fun correctAnswerWas(answer: String) = "Tam deyil — doğru cavab “$answer”."
     override fun notEnoughWords(required: Int) =
         "Test üçün bu dil cütündə ən azı ${required} söz lazımdır"

@@ -64,7 +64,11 @@ internal fun QuestionCard(
             }
 
             Text(
-                text = strings.askForm(question.choice.question.prompt),
+                // The word asked about is in the accent colour, which is what used to be quote marks.
+                text = askedWordText(
+                    sentence = strings.askForm(question.choice.question.prompt),
+                    word = question.choice.question.prompt,
+                ),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )

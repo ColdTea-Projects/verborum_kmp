@@ -190,8 +190,8 @@ internal object PersianStrings : Strings {
     override fun meaningNumber(index: Int) = "معنای $index"
     override fun backTo(name: String) = "بازگشت به $name"
     override fun questionProgress(index: Int, total: Int) = "پرسش $index از $total"
-    override fun askMeaning(word: String) = "«$word» یعنی چه؟"
-    override fun askForm(word: String) = "«$word» چیست؟"
+    override fun askMeaning(word: String) = "${word} یعنی چه؟"
+    override fun askForm(word: String) = "${word} چیست؟"
     override fun correctAnswerWas(answer: String) = "نزدیک بود — پاسخ «$answer» است."
     override fun notEnoughWords(required: Int) =
         "آزمون به دست‌کم ${required} واژه در این جفت زبان نیاز دارد"

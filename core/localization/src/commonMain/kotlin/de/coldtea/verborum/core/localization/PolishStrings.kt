@@ -190,8 +190,8 @@ internal object PolishStrings : Strings {
     override fun meaningNumber(index: Int) = "Znaczenie $index"
     override fun backTo(name: String) = "Wróć do $name"
     override fun questionProgress(index: Int, total: Int) = "Pytanie $index z $total"
-    override fun askMeaning(word: String) = "Co znaczy „$word”?"
-    override fun askForm(word: String) = "Co to jest „$word”?"
+    override fun askMeaning(word: String) = "Co znaczy ${word}?"
+    override fun askForm(word: String) = "Co to jest ${word}?"
     override fun correctAnswerWas(answer: String) = "Prawie — poprawna odpowiedź to „$answer”."
     override fun notEnoughWords(required: Int) =
         "Test wymaga co najmniej ${required} słów w tej parze językowej"

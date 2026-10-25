@@ -190,8 +190,8 @@ internal object ArabicStrings : Strings {
     override fun meaningNumber(index: Int) = "المعنى $index"
     override fun backTo(name: String) = "العودة إلى $name"
     override fun questionProgress(index: Int, total: Int) = "السؤال $index من $total"
-    override fun askMeaning(word: String) = "ما معنى «$word»؟"
-    override fun askForm(word: String) = "ما هو «$word»؟"
+    override fun askMeaning(word: String) = "ما معنى ${word}؟"
+    override fun askForm(word: String) = "ما هو ${word}؟"
     override fun correctAnswerWas(answer: String) = "ليس تمامًا — الإجابة هي «$answer»."
     override fun notEnoughWords(required: Int) =
         "يحتاج الاختبار إلى ${required} كلمات على الأقل في زوج اللغات هذا"

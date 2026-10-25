@@ -190,8 +190,8 @@ internal object TurkishStrings : Strings {
     override fun meaningNumber(index: Int) = "$index. anlam"
     override fun backTo(name: String) = "$name sözlüğüne dön"
     override fun questionProgress(index: Int, total: Int) = "Soru $index / $total"
-    override fun askMeaning(word: String) = "“$word” ne demek?"
-    override fun askForm(word: String) = "“$word” nedir?"
+    override fun askMeaning(word: String) = "${word} ne demek?"
+    override fun askForm(word: String) = "${word} nedir?"
     override fun correctAnswerWas(answer: String) = "Tam değil — doğru cevap “$answer”."
     override fun notEnoughWords(required: Int) =
         "Test için bu dil çiftinde en az ${required} kelime gerekir"

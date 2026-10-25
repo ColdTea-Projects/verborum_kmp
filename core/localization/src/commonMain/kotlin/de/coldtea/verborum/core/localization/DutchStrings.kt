@@ -190,8 +190,8 @@ internal object DutchStrings : Strings {
     override fun meaningNumber(index: Int) = "Betekenis $index"
     override fun backTo(name: String) = "Terug naar $name"
     override fun questionProgress(index: Int, total: Int) = "Vraag $index van $total"
-    override fun askMeaning(word: String) = "Wat betekent “$word”?"
-    override fun askForm(word: String) = "Wat is “$word”?"
+    override fun askMeaning(word: String) = "Wat betekent ${word}?"
+    override fun askForm(word: String) = "Wat is ${word}?"
     override fun correctAnswerWas(answer: String) = "Net niet — het antwoord is “$answer”."
     override fun notEnoughWords(required: Int) =
         "Een test heeft minstens ${required} woorden in dit taalpaar nodig"

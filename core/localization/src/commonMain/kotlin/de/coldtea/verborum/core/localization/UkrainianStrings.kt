@@ -190,8 +190,8 @@ internal object UkrainianStrings : Strings {
     override fun meaningNumber(index: Int) = "Значення $index"
     override fun backTo(name: String) = "Назад до $name"
     override fun questionProgress(index: Int, total: Int) = "Питання $index з $total"
-    override fun askMeaning(word: String) = "Що означає «$word»?"
-    override fun askForm(word: String) = "Що таке «$word»?"
+    override fun askMeaning(word: String) = "Що означає ${word}?"
+    override fun askForm(word: String) = "Що таке ${word}?"
     override fun correctAnswerWas(answer: String) = "Майже — правильна відповідь «$answer»."
     override fun notEnoughWords(required: Int) =
         "Для тесту потрібно щонайменше ${required} слова в цій мовній парі"

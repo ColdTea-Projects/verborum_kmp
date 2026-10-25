@@ -190,8 +190,8 @@ internal object JapaneseStrings : Strings {
     override fun meaningNumber(index: Int) = "意味 $index"
     override fun backTo(name: String) = "$name に戻る"
     override fun questionProgress(index: Int, total: Int) = "問題 $index / $total"
-    override fun askMeaning(word: String) = "「${word}」の意味は？"
-    override fun askForm(word: String) = "「${word}」は？"
+    override fun askMeaning(word: String) = "${word}の意味は？"
+    override fun askForm(word: String) = "${word}は？"
     override fun correctAnswerWas(answer: String) = "惜しい — 正解は「${answer}」です。"
     override fun notEnoughWords(required: Int) =
         "テストにはこの言語ペアで少なくとも${required}語が必要です"

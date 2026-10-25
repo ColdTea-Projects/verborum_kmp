@@ -190,8 +190,8 @@ internal object RussianStrings : Strings {
     override fun meaningNumber(index: Int) = "Значение $index"
     override fun backTo(name: String) = "Назад к $name"
     override fun questionProgress(index: Int, total: Int) = "Вопрос $index из $total"
-    override fun askMeaning(word: String) = "Что значит «$word»?"
-    override fun askForm(word: String) = "Что такое «$word»?"
+    override fun askMeaning(word: String) = "Что значит ${word}?"
+    override fun askForm(word: String) = "Что такое ${word}?"
     override fun correctAnswerWas(answer: String) = "Почти — правильный ответ «$answer»."
     override fun notEnoughWords(required: Int) =
         "Для теста нужно минимум ${required} слова в этой языковой паре"

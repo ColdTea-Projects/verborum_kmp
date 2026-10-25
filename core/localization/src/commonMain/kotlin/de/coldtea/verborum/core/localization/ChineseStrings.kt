@@ -190,8 +190,8 @@ internal object ChineseStrings : Strings {
     override fun meaningNumber(index: Int) = "含义 $index"
     override fun backTo(name: String) = "返回 $name"
     override fun questionProgress(index: Int, total: Int) = "第 $index 题，共 $total 题"
-    override fun askMeaning(word: String) = "“$word”是什么意思？"
-    override fun askForm(word: String) = "“$word”是什么？"
+    override fun askMeaning(word: String) = "${word}是什么意思？"
+    override fun askForm(word: String) = "${word}是什么？"
     override fun correctAnswerWas(answer: String) = "差一点 — 答案是“$answer”。"
     override fun notEnoughWords(required: Int) =
         "测验需要该语言对中至少 ${required} 个单词"
