@@ -45,6 +45,7 @@ internal actual fun ProfileContent(
     onUpdate: () -> Unit,
     onConfirmLeave: () -> Unit,
     onDismissLeave: () -> Unit,
+    deleteAccountSection: @Composable () -> Unit,
     modifier: Modifier,
 ) {
     val strings = LocalStrings.current
@@ -110,6 +111,13 @@ internal actual fun ProfileContent(
                             modifier = Modifier.widthIn(max = ContentWidth.form),
                         )
                     }
+                }
+
+                WebPageSpacer()
+
+                // A panel of its own, below the form: deleting the account is not a step of editing it.
+                WebPanel {
+                    Column(modifier = Modifier.widthIn(max = ContentWidth.form)) { deleteAccountSection() }
                 }
 
                 WebPageSpacer(Spacing.extraLarge)

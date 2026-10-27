@@ -3,8 +3,12 @@ package de.coldtea.verborum.core.auth
 import io.ktor.http.URLBuilder
 import kotlinx.serialization.Serializable
 
-/** Login and account creation are the same flow pointed at different Keycloak endpoints. */
-enum class AuthEntry { SignIn, CreateAccount }
+/**
+ * Login and account creation are the same flow pointed at different Keycloak endpoints.
+ * [Reauthenticate] is the sign-in that account deletion asks for: the login page again, with
+ * `max_age=0`, so the person must enter the password or code once more (`docs/account-deletion-guide.md`).
+ */
+enum class AuthEntry { SignIn, CreateAccount, Reauthenticate }
 
 /**
  * The half of an authorization attempt that must never leave the client: the PKCE verifier and the
@@ -15,6 +19,13 @@ enum class AuthEntry { SignIn, CreateAccount }
 data class PendingAuthorization(
     val codeVerifier: String,
     val state: String,
+    /**
+     * The subject of the account that must sign in again, or null for an ordinary sign-in. Persisted
+     * with the verifier because on web the page is gone before the code comes back: this is how the
+     * redirect, at the next app start, still knows it must check "same account" before it replaces
+     * the stored tokens. Defaulted, so a pending authorization saved by an older build still decodes.
+     */
+    val reauthenticationFor: String? = null,
 )
 
 /** A browser URL to open, plus the secret the resulting redirect must be matched against. */
@@ -74,9 +85,10 @@ fun AuthConfig.buildAuthorizationRequest(
     entry: AuthEntry,
     pkce: PkceChallenge = Pkce.generate(),
     state: String = randomState(),
+    reauthenticationFor: String? = null,
 ): AuthorizationRequest {
     val endpoint = when (entry) {
-        AuthEntry.SignIn -> authorizationEndpoint
+        AuthEntry.SignIn, AuthEntry.Reauthenticate -> authorizationEndpoint
         AuthEntry.CreateAccount -> registrationEndpoint
     }
 
@@ -88,11 +100,18 @@ fun AuthConfig.buildAuthorizationRequest(
         parameters.append("state", state)
         parameters.append("code_challenge", pkce.codeChallenge)
         parameters.append("code_challenge_method", pkce.codeChallengeMethod)
+        // Only for the re-sign-in: a refresh never makes a login recent (SEC-13), and sending it on
+        // the ordinary login would ask everyone for their password every time.
+        if (entry == AuthEntry.Reauthenticate) parameters.append("max_age", "0")
     }.buildString()
 
     return AuthorizationRequest(
         url = url,
-        pending = PendingAuthorization(codeVerifier = pkce.codeVerifier, state = state),
+        pending = PendingAuthorization(
+            codeVerifier = pkce.codeVerifier,
+            state = state,
+            reauthenticationFor = reauthenticationFor,
+        ),
     )
 }
 

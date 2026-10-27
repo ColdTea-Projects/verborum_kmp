@@ -80,6 +80,22 @@ class LoginViewModelTest {
         assertTrue(viewModel.state.value.isAuthenticating)
         assertNull(viewModel.state.value.failure)
     }
+
+    @Test
+    fun `after an account was deleted the wall says so until the next sign-in starts`() = runTest(mainDispatcher) {
+        val service = serviceReturning(AuthorizationResult.Cancelled)
+        val viewModel = LoginViewModel(service)
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.accountDeleted)
+
+        service.completeAccountDeletion()
+        advanceUntilIdle()
+        assertTrue(viewModel.state.value.accountDeleted)
+
+        viewModel.signIn()
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.accountDeleted)
+    }
 }
 
 private fun serviceReturning(result: AuthorizationResult): AuthService {

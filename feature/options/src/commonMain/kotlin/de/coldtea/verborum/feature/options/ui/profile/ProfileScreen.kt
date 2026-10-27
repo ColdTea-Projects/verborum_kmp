@@ -14,6 +14,7 @@ import de.coldtea.verborum.core.designsystem.component.LocalIsOnline
 import de.coldtea.verborum.core.designsystem.component.RegisterTopBar
 import de.coldtea.verborum.core.designsystem.component.ShowSnackbarMessages
 import de.coldtea.verborum.core.localization.LocalStrings
+import de.coldtea.verborum.feature.options.ui.deleteaccount.composables.DeleteAccountSection
 import de.coldtea.verborum.feature.options.ui.profile.model.ProfileForm
 import de.coldtea.verborum.feature.options.ui.profile.model.ProfileState
 import kotlinx.coroutines.flow.map
@@ -69,6 +70,7 @@ internal fun ProfileScreen(
             onUpdate = viewModel::update,
             onConfirmLeave = viewModel::confirmLeaveForum,
             onDismissLeave = viewModel::dismissLeaveConfirmation,
+            deleteAccountSection = { DeleteAccountSection(isOnline = isOnline) },
             modifier = modifier,
         )
 
@@ -95,5 +97,7 @@ internal expect fun ProfileContent(
     onUpdate: () -> Unit,
     onConfirmLeave: () -> Unit,
     onDismissLeave: () -> Unit,
+    /** The destructive entry, last on the page. A slot so a preview or a test needs no Koin for it. */
+    deleteAccountSection: @Composable () -> Unit,
     modifier: Modifier,
 )

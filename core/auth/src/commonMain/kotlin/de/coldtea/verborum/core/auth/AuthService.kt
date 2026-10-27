@@ -24,6 +24,26 @@ sealed interface SignInFailure {
 }
 
 /**
+ * How the sign-in that account deletion asks for ended. Published rather than only returned, for the
+ * same reason as [AuthService.lastFailure]: on web the page is gone before the answer exists, so the
+ * screen that asked reads it at the next app start.
+ */
+sealed interface Reauthentication {
+
+    /** Nothing to report: no sign-in was asked for, or it was dismissed. */
+    data object None : Reauthentication
+
+    /** The same account signed in again, and the stored tokens now carry a fresh login. */
+    data object Done : Reauthentication
+
+    /** Someone else signed in. Nothing was stored, and nothing may be deleted. */
+    data object DifferentAccount : Reauthentication
+
+    /** The sign-in was refused or could not be completed. */
+    data object Failed : Reauthentication
+}
+
+/**
  * Orchestrates the login lifecycle — the only auth entry point the UI talks to.
  *
  * The flow is Authorization Code + PKCE against Keycloak, and it runs differently per platform
@@ -54,6 +74,16 @@ class AuthService(
      */
     val lastFailure: StateFlow<SignInFailure?> = _lastFailure.asStateFlow()
 
+    private val _reauthentication = MutableStateFlow<Reauthentication>(Reauthentication.None)
+
+    /** The result of the last [reauthenticate]; read it, then call [consumeReauthentication]. */
+    val reauthentication: StateFlow<Reauthentication> = _reauthentication.asStateFlow()
+
+    private val _accountDeleted = MutableStateFlow(false)
+
+    /** `true` from the deletion until the next sign-in starts; the login wall says so once. */
+    val accountDeleted: StateFlow<Boolean> = _accountDeleted.asStateFlow()
+
     val sessionState: StateFlow<SessionState> get() = session.sessionState
 
     /** Reads persisted tokens, then completes a redirect the app may have been started with. */
@@ -68,11 +98,48 @@ class AuthService(
      */
     suspend fun signIn(entry: AuthEntry): Outcome<Unit> {
         _lastFailure.value = null
+        _accountDeleted.value = false
 
         val request = config.buildAuthorizationRequest(entry)
         pendingStore.save(request.pending)
 
         return complete(launcher.authorize(request.url, config.redirectUri))
+    }
+
+    /**
+     * The sign-in before deleting the account: the login page with `max_age=0`. Only the same account
+     * replaces the stored tokens — see [Reauthentication]. On iOS this returns once the browser does;
+     * on web it never returns, and the answer is waiting in [reauthentication] at the next app start.
+     */
+    suspend fun reauthenticate(): Outcome<Unit> {
+        val subject = (session.sessionState.value as? SessionState.SignedIn)?.user?.subject
+            ?: return Outcome.Failure(VerborumError.Unauthorized)
+
+        _reauthentication.value = Reauthentication.None
+
+        val request = config.buildAuthorizationRequest(AuthEntry.Reauthenticate, reauthenticationFor = subject)
+        pendingStore.save(request.pending)
+
+        return complete(launcher.authorize(request.url, config.redirectUri))
+    }
+
+    /** Called by the screen once it has acted on [reauthentication], so the answer is acted on once. */
+    fun consumeReauthentication() {
+        _reauthentication.value = Reauthentication.None
+    }
+
+    /**
+     * Runs after the server confirmed the deletion: clears the tokens and lets every store forget the
+     * account. Unlike [signOut] it makes no back-channel call — the Keycloak identity and its sessions
+     * are already gone, so there is nothing left to end.
+     */
+    suspend fun completeAccountDeletion() {
+        _accountDeleted.value = true
+        session.signOut()
+        _lastFailure.value = null
+        _reauthentication.value = Reauthentication.None
+
+        postLogoutHooks().runAll()
     }
 
     /**
@@ -97,7 +164,12 @@ class AuthService(
         is AuthorizationResult.Cancelled -> Outcome.Success(Unit)
 
         is AuthorizationResult.Failed -> {
-            _lastFailure.value = SignInFailure.Refused(result.reason)
+            if (pendingStore.consume()?.reauthenticationFor != null) {
+                // Not a login failure: the person is still signed in, and the screen that asked says so.
+                _reauthentication.value = Reauthentication.Failed
+            } else {
+                _lastFailure.value = SignInFailure.Refused(result.reason)
+            }
             Outcome.Failure(VerborumError.Unauthorized)
         }
 
@@ -114,19 +186,48 @@ class AuthService(
             return Outcome.Failure(VerborumError.Unauthorized)
         }
 
+        val expectedSubject = pending.reauthenticationFor
+
         return when (val tokens = client.exchangeCode(result.code, pending.codeVerifier)) {
-            is Outcome.Success -> {
-                session.signIn(tokens.data)
-                _lastFailure.value = null
-                Outcome.Success(Unit)
-            }
+            is Outcome.Success ->
+                if (expectedSubject != null) {
+                    completeReauthentication(tokens.data, expectedSubject)
+                } else {
+                    session.signIn(tokens.data)
+                    _lastFailure.value = null
+                    Outcome.Success(Unit)
+                }
 
             is Outcome.Failure -> {
-                _lastFailure.value = SignInFailure.ExchangeFailed(tokens.error)
+                if (expectedSubject != null) {
+                    _reauthentication.value = Reauthentication.Failed
+                } else {
+                    _lastFailure.value = SignInFailure.ExchangeFailed(tokens.error)
+                }
                 tokens
             }
 
             Outcome.Loading -> Outcome.Loading
         }
+    }
+
+    /**
+     * Only the account that asked may replace the stored tokens. The claims are read without a
+     * signature check, like everywhere on the client, and that is enough here: the services validate
+     * the new token again, and a forged subject only makes this client delete nothing.
+     */
+    private suspend fun completeReauthentication(tokens: AuthTokens, expectedSubject: String): Outcome<Unit> {
+        val subject = JwtClaims.identityOf(tokens.accessToken, tokens.idToken)?.subject
+
+        if (subject != expectedSubject) {
+            // The browser now holds a Keycloak session of the other account; end it again.
+            client.endSession(tokens.refreshToken)
+            _reauthentication.value = Reauthentication.DifferentAccount
+            return Outcome.Failure(VerborumError.Unauthorized)
+        }
+
+        session.signIn(tokens)
+        _reauthentication.value = Reauthentication.Done
+        return Outcome.Success(Unit)
     }
 }

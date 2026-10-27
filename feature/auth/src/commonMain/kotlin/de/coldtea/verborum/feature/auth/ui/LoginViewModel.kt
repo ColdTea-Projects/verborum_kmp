@@ -22,6 +22,8 @@ data class LoginState(
      * message follows the app's language instead of whichever one was current when it was written.
      */
     val failure: SignInFailure? = null,
+    /** True after "Delete account", until the next sign-in starts: the wall says the account is gone. */
+    val accountDeleted: Boolean = false,
 )
 
 /**
@@ -46,6 +48,10 @@ class LoginViewModel(
 
                 setState { copy(failure = failure) }
             }
+        }
+
+        viewModelScope.launch {
+            authService.accountDeleted.collect { deleted -> setState { copy(accountDeleted = deleted) } }
         }
     }
 

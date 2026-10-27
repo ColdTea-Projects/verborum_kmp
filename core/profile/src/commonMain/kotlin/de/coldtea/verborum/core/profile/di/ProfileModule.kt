@@ -4,8 +4,10 @@ import de.coldtea.verborum.core.network.ApiConfig
 import de.coldtea.verborum.core.network.createHttpClient
 import de.coldtea.verborum.core.profile.data.UserApi
 import de.coldtea.verborum.core.profile.data.VaultApi
+import de.coldtea.verborum.core.profile.domain.AccountDeletionService
 import de.coldtea.verborum.core.profile.domain.MarketplaceMembershipHooks
 import de.coldtea.verborum.core.profile.domain.ProfileService
+import de.coldtea.verborum.core.profile.domain.SessionAccountDeletionService
 import de.coldtea.verborum.core.profile.domain.SessionProfileService
 import de.coldtea.verborum.core.profile.domain.usecase.EnsureUserProfileUseCase
 import de.coldtea.verborum.core.profile.domain.usecase.UpdateProfileInfoUseCase
@@ -57,5 +59,11 @@ val profileModule: Module = module {
             vaultApi = get(),
             membershipHooks = getOrNull<MarketplaceMembershipHooks>()?.hooks.orEmpty(),
         )
+    }
+
+    // `AuthService` runs its post-logout hooks lazily, so depending on it from here is not a cycle even
+    // though one of those hooks is the `ProfileService` above.
+    single<AccountDeletionService> {
+        SessionAccountDeletionService(profileService = get(), api = get(), authService = get())
     }
 }

@@ -4,6 +4,7 @@ import de.coldtea.verborum.core.common.Outcome
 import de.coldtea.verborum.core.network.plainApiCall
 import de.coldtea.verborum.core.network.statusApiCall
 import io.ktor.client.HttpClient
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
@@ -39,5 +40,14 @@ internal class UserApi(private val client: HttpClient) {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
+    }
+
+    /**
+     * Deletes the account and, through events, the data of every service
+     * (`docs/account-deletion-guide.md`). The answer is the status: **403 `ReauthenticationRequiredException`**
+     * means the login is older than 5 minutes — see `requiresReauthentication`. A repeat is also 200.
+     */
+    suspend fun deleteUser(userId: String): Outcome<Unit> = statusApiCall {
+        client.delete("users/$userId")
     }
 }

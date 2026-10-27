@@ -14,8 +14,11 @@ kotlin {
             implementation(project(":core:profile"))
         }
         commonTest.dependencies {
-            // Only to construct an AuthService; signing out never reaches the network here.
+            // To construct an AuthService: signing out never reaches the network here, and the
+            // delete-account tests answer the token exchange so the same-account check can run.
             implementation(libs.ktor.client.mock)
+            implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.serialization.kotlinxJson)
         }
     }
 }

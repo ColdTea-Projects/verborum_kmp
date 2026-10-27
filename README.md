@@ -71,6 +71,15 @@ there is no password field in the app.
 | Tokens | Keychain, `…AfterFirstUnlockThisDeviceOnly` | `localStorage` — the session lasts until sign-out |
 | Endpoints | `https://auth.verborum.coldtea.de/realms/verborum` | same-origin `/auth/realms/verborum` |
 
+**Delete account** (Options → Profile, `P5A-03`; contract in `docs/account-deletion-guide.md`). A warning with a checkbox,
+then the login page again with `max_age=0` (`AuthEntry.Reauthenticate`), a check that the **same account** signed in
+(`AuthService.reauthentication`), a final dialog, `DELETE /users/{id}`, and only after the server said 200 the local wipe
+(`AuthService.completeAccountDeletion()` plus `LocalCache.clear()`); the login wall then says the account was deleted.
+A 403 `ReauthenticationRequiredException` sends the person back to the warning and is never retried. On web the sign-in
+is a full page navigation, so the flow survives the reload: the pending authorization carries the expected subject
+(`PendingAuthorization.reauthenticationFor`), the redirect returns to the same `#profile` fragment, and the view model
+reads the answer when the screen is created.
+
 **Web: the login is same-origin, the API is the gateway.** Deployed, a reverse proxy serves `/auth` next to the
 app; in development the dev server does the same for Keycloak (`composeApp/webpack.config.d/devServerProxy.js`
 → `:8180`), so the token exchange stays same-origin: no CORS, no **Web origins** entry to keep in step with the

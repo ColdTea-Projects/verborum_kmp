@@ -116,6 +116,18 @@ internal fun LoginContent(
 
             Spacer(modifier = Modifier.height(Spacing.extraLarge))
 
+            // After "Delete account" (docs/account-deletion-guide.md §6): said once, until the next sign-in.
+            if (state.accountDeleted) {
+                Text(
+                    text = strings.deleteAccountDone,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center,
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.large))
+            }
+
             // Capped so the buttons stay a sensible size in a wide browser window instead of
             // stretching the full viewport.
             Column(

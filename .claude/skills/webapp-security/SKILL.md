@@ -44,7 +44,10 @@ logout-on-tab-close the change was made to remove. The one upgrade that actually
 
 Because the tokens outlive the tab, the surrounding defences carry more weight: the `js(...)`
 bridges stay data-only, the CSP keeps third-party script out, and `PendingAuthorizationStore` keeps
-the PKCE verifier in `sessionStorage` (per-attempt, short-lived — do not move that one).
+the PKCE verifier in `sessionStorage` (per-attempt, short-lived — do not move that one). It also holds
+`reauthenticationFor` — the subject that must sign in again before an account deletion. That is an id, not
+a credential, and it is removed with the verifier when the redirect is consumed. Only the account it names may
+replace the stored tokens (`AuthService.completeReauthentication`).
 
 ## XSS is the whole game
 

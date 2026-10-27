@@ -38,6 +38,7 @@ internal actual fun ProfileContent(
     onUpdate: () -> Unit,
     onConfirmLeave: () -> Unit,
     onDismissLeave: () -> Unit,
+    deleteAccountSection: @Composable () -> Unit,
     modifier: Modifier,
 ) {
     val strings = LocalStrings.current
@@ -94,6 +95,10 @@ internal actual fun ProfileContent(
                 onAcceptedChange = onAgreementChange,
                 isEnabled = form.isEditable,
             )
+
+            Spacer(Modifier.height(Spacing.extraLarge))
+
+            deleteAccountSection()
 
             Spacer(Modifier.height(Spacing.medium))
         }
