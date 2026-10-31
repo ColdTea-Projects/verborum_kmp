@@ -86,6 +86,7 @@ fun AuthConfig.buildAuthorizationRequest(
     pkce: PkceChallenge = Pkce.generate(),
     state: String = randomState(),
     reauthenticationFor: String? = null,
+    uiLocale: String? = null,
 ): AuthorizationRequest {
     val endpoint = when (entry) {
         AuthEntry.SignIn, AuthEntry.Reauthenticate -> authorizationEndpoint
@@ -103,6 +104,9 @@ fun AuthConfig.buildAuthorizationRequest(
         // Only for the re-sign-in: a refresh never makes a login recent (SEC-13), and sending it on
         // the ordinary login would ask everyone for their password every time.
         if (entry == AuthEntry.Reauthenticate) parameters.append("max_age", "0")
+        // The app's own language, so the hosted pages and the mails follow it (client-login-guide.md,
+        // "Login page language"). On every entry, the sign-up form and the re-sign-in included.
+        if (!uiLocale.isNullOrBlank()) parameters.append("ui_locales", uiLocale)
     }.buildString()
 
     return AuthorizationRequest(

@@ -63,4 +63,22 @@ class AuthorizationFlowTest {
         assertNotEquals(first.pending.codeVerifier, second.pending.codeVerifier)
         assertNotEquals(first.pending.state, second.pending.state)
     }
+
+    @Test
+    fun `every entry carries the app language as ui_locales`() {
+        AuthEntry.entries.forEach { entry ->
+            val request = testConfig.buildAuthorizationRequest(entry, pkce, "state-123", uiLocale = "de")
+
+            assertTrue(request.url.contains("ui_locales=de"), "$entry: ${request.url}")
+        }
+    }
+
+    @Test
+    fun `no language means no ui_locales parameter`() {
+        listOf(null, "", " ").forEach { locale ->
+            val request = testConfig.buildAuthorizationRequest(AuthEntry.SignIn, pkce, "state-123", uiLocale = locale)
+
+            assertTrue(!request.url.contains("ui_locales"), request.url)
+        }
+    }
 }

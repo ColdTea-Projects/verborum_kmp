@@ -63,6 +63,11 @@ class AuthService(
      * exactly how an eagerly resolved list turns into a dependency cycle.
      */
     private val postLogoutHooks: () -> List<PostLogoutHook> = ::emptyList,
+    /**
+     * The app's current language code, read per attempt so a language changed in Options applies to the
+     * next sign-in. A function, not a value: this service lives longer than any one choice.
+     */
+    private val uiLocale: () -> String? = { null },
 ) {
 
     private val _lastFailure = MutableStateFlow<SignInFailure?>(null)
@@ -100,7 +105,7 @@ class AuthService(
         _lastFailure.value = null
         _accountDeleted.value = false
 
-        val request = config.buildAuthorizationRequest(entry)
+        val request = config.buildAuthorizationRequest(entry, uiLocale = uiLocale())
         pendingStore.save(request.pending)
 
         return complete(launcher.authorize(request.url, config.redirectUri))
@@ -117,7 +122,7 @@ class AuthService(
 
         _reauthentication.value = Reauthentication.None
 
-        val request = config.buildAuthorizationRequest(AuthEntry.Reauthenticate, reauthenticationFor = subject)
+        val request = config.buildAuthorizationRequest(AuthEntry.Reauthenticate, reauthenticationFor = subject, uiLocale = uiLocale())
         pendingStore.save(request.pending)
 
         return complete(launcher.authorize(request.url, config.redirectUri))

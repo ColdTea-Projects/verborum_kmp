@@ -87,6 +87,7 @@ val coreModule: Module = module {
             launcher = get(),
             pendingStore = get(),
             postLogoutHooks = { get<PostLogoutHooks>().hooks },
+            uiLocale = { get<LanguageSettings>().language.value.code },
         )
     }
 
