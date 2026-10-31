@@ -82,8 +82,11 @@ reads the answer when the screen is created.
 
 **Web: the login is same-origin, the API is the gateway.** Deployed, a reverse proxy serves `/auth` next to the
 app; in development the dev server does the same for Keycloak (`composeApp/webpack.config.d/devServerProxy.js`
-→ `:8180`), so the token exchange stays same-origin: no CORS, no **Web origins** entry to keep in step with the
-dev port. The **API** is different (roadmap P5-10): in development the app calls the local `ms_gateway` on
+→ `:8180`; it forwards `/auth`, and also `/resources` and `/realms`, because Keycloak links the login page's CSS, its Register and
+Forgot-password links and the Google and Facebook buttons from the root of the page's origin), so the token exchange stays same-origin and needs no CORS preflight. A browser still sends an `Origin` header with a
+same-origin POST, and Keycloak 25+ answers it with 403 `Invalid origin` unless the client's **Web origins** lists it: the
+realm import and `keycloak/bootstrap/configure.sh` (backend repo) list `http://localhost:8280`, so change the dev port in
+both places or not at all. The **API** is different (roadmap P5-10): in development the app calls the local `ms_gateway` on
 `:8080` directly — a different origin from the dev server — and the gateway answers CORS for it
 (`CORS_ALLOWED_ORIGINS`, default `http://localhost:8280`). A deployed web build keeps `<origin>/api` until the
 release decides how it reaches the gateway (Phase 5R). `core:network` `ApiConfig.web.kt` has the rule.
